@@ -1,6 +1,11 @@
 package de.orat.math.cgacasadi;
 
+import static de.orat.math.cgacasadi.CGACayleyTable.CGABasisBladeNames;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
   * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -12,7 +17,66 @@ import de.orat.math.sparsematrix.MatrixSparsity;
   * an Basisvektoren formuliert werden
   * --> SparsityKVector
   */
-public class CGAKVectorSparsity extends MatrixSparsity {
+public class CGAKVectorSparsity extends CGAMultivectorSparsity {
+    
+    public static Map<Integer, CGAKVectorSparsity> map = new HashMap<>();
+    private int grade = -1;
+    
+    public static CGAKVectorSparsity instance(int grade){
+        CGAKVectorSparsity result = map.get(grade);
+        if (result == null){
+            result = new CGAKVectorSparsity(grade);
+            map.put(grade, result);
+        }
+        return result;
+    }
+    
+    public int getGrade(){
+        return grade;
+    }
+    /**
+     * Creates a sparse definition for a basis blade
+     * 
+      * @param index column index of the base blade
+     */
+    public static CGAKVectorSparsity createBasisBladeSparsity(int index){
+        // so hats mal funktioniert mit extends MatrixSparsity
+        // int n_row, int n_col, int[] colind, int[] row
+        //super(basisBladeNames.length, 1, new int[]{0,1}, new int[]{index});
+        
+        //super(basisBladeNames.length,  new int[]{index});
+        
+        return new CGAKVectorSparsity(CGABasisBladeNames.length, new int[]{index});
+    }
+    
+    
+    /**
+     * Get the grade corresponding to the given indizes.
+     * 
+     * @param indizes
+     * @return -1 if the given indizes do not correspond to a single grade, elese the grade
+     */
+    private static int getGrade(int[] indizes){
+        int result = CGACayleyTable.getGrade(indizes[0]);
+        for (int i=1;i<indizes.length;i++){
+            if (CGACayleyTable.getGrade(indizes[i]) != result){
+                return -1;
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * 
+     * @param n_row
+     * @param row 
+     * @throws IllegalArgumentException if the given row-indizes does not correspond all to the same grade.
+     */
+    CGAKVectorSparsity(int n_row, int[] row){
+        super(n_row, row);
+        grade = getGrade(row);
+        if (grade <0) throw new IllegalArgumentException("The given indizes correspond to different grades!");
+    }
     
     /**
      * Creates a sparse definition for a colum k-vector.
@@ -20,10 +84,15 @@ public class CGAKVectorSparsity extends MatrixSparsity {
      * @param basisBladeNames 
      * @param grade grade of the k-vector
      */
-    public CGAKVectorSparsity(String[] basisBladeNames, int grade){
+    CGAKVectorSparsity(int grade){
+        // so hats mal funktioniert:
         // int n_row, int n_col, int[] colind, int[] row
-        super(basisBladeNames.length, 1, new int[]{0,colind(grade)}, rows(basisBladeNames, 
+        //super(CGABasisBladeNames.length, 1, new int[]{0,colind(grade)}, rows(CGABasisBladeNames, 
+        //      grade, colind(grade)));
+        
+        super(CGABasisBladeNames.length,  rows(CGABasisBladeNames, 
               grade, colind(grade)));
+        this.grade = grade;
     }
     
     /**
@@ -32,7 +101,7 @@ public class CGAKVectorSparsity extends MatrixSparsity {
      * 
      * Das ist CGA spezifisch - müsste es aber nicht sein. Aus der Zahl der 
      * basisBladeNames könnte die Zahl der basisvektoren bestimmt werden und daraus
-     * die Zahl der Baisvektoren eines bestimmten Grades.
+     * die Zahl der Basisvektoren eines bestimmten Grades.
      * TODO
      * 
      * @param grade

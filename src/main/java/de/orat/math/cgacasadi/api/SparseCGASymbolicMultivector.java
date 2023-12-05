@@ -23,7 +23,7 @@ public class SparseCGASymbolicMultivector {
      * @param grade 
      */
     public SparseCGASymbolicMultivector(String name, int grade){
-        sparsity = new CGAKVectorSparsity(CGABasisBladeNames, grade);
+        sparsity = CGAKVectorSparsity.instance(grade);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
     SparseCGASymbolicMultivector(MX mx){

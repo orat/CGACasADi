@@ -24,7 +24,7 @@ public class NewEmptyJUnitTest {
         CGACayleyTableGeometricProduct table = CGACayleyTableGeometricProduct.instance();
         String[] basisBladeNames = table.getBasisBladeNames();
         int size = basisBladeNames.length;
-        CGAKVectorSparsity sparsity = new CGAKVectorSparsity(basisBladeNames, 1);
+        CGAKVectorSparsity sparsity = CGAKVectorSparsity.instance(1);
         
         
         String[][] m = new String[size][size];

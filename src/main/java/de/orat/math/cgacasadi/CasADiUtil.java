@@ -1,12 +1,15 @@
 package de.orat.math.cgacasadi;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.orat.math.cgacasadi.api.SparseCGASymbolicMultivector;
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.orat.math.ga.matrix.utils.CayleyTable;
 import de.orat.math.ga.matrix.utils.CayleyTable.Cell;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 
@@ -107,5 +110,15 @@ public class CasADiUtil {
         Sparsity result = new Sparsity(sparsity.getn_row(), sparsity.getn_col(), colind, row);
         result.spy();
         return result;
+    }
+    
+    public static DM toDM(ColumnVectorSparsity sparsity, double[] values){
+        //TODO
+        // Achtung: Hier gehe ich davon aus, dass einfach nur die non-zeros zu übergeben sind
+        // das habe ich aber noch nicht verifiziert
+        StdVectorDouble stdVectorDoubles = new StdVectorDouble();
+        stdVectorDoubles.add(values[0]);
+        stdVectorDoubles.add(values[1]);
+        return new DM(toCasADiSparsity(sparsity),stdVectorDoubles, false);
     }
 }
