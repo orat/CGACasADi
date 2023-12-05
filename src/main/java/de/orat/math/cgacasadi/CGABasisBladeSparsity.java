@@ -17,6 +17,6 @@ public class CGABasisBladeSparsity extends CGAKVectorSparsity {
         // so hats mal funktioniert mit extends MatrixSparsity
         // int n_row, int n_col, int[] colind, int[] row
         //super(basisBladeNames.length, 1, new int[]{0,1}, new int[]{index});
-        super(basisBladeNames.length,  new int[]{index});
+        super(new int[]{index});
     }
 }

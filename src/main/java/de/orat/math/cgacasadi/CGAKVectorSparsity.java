@@ -9,13 +9,6 @@ import java.util.Map;
 
 /**
   * @author Oliver Rettig (Oliver.Rettig@orat.de)
-  * 
-  * TODO
-  * vielleicht läßt sich eine generische class
-  * SparsityKVector implementieren von ich hier dann erben kann
-  * vermutlich kann die ganze Klasse genenerisch für GAs mit beliebiger Anzahl
-  * an Basisvektoren formuliert werden
-  * --> SparsityKVector
   */
 public class CGAKVectorSparsity extends CGAMultivectorSparsity {
     
@@ -46,7 +39,7 @@ public class CGAKVectorSparsity extends CGAMultivectorSparsity {
         
         //super(basisBladeNames.length,  new int[]{index});
         
-        return new CGAKVectorSparsity(CGABasisBladeNames.length, new int[]{index});
+        return new CGAKVectorSparsity(new int[]{index});
     }
     
     
@@ -72,8 +65,8 @@ public class CGAKVectorSparsity extends CGAMultivectorSparsity {
      * @param row 
      * @throws IllegalArgumentException if the given row-indizes does not correspond all to the same grade.
      */
-    CGAKVectorSparsity(int n_row, int[] row){
-        super(n_row, row);
+    CGAKVectorSparsity(int[] row){
+        super(row);
         grade = getGrade(row);
         if (grade <0) throw new IllegalArgumentException("The given indizes correspond to different grades!");
     }
@@ -90,7 +83,7 @@ public class CGAKVectorSparsity extends CGAMultivectorSparsity {
         //super(CGABasisBladeNames.length, 1, new int[]{0,colind(grade)}, rows(CGABasisBladeNames, 
         //      grade, colind(grade)));
         
-        super(CGABasisBladeNames.length,  rows(CGABasisBladeNames, 
+        super(rows(CGABasisBladeNames, 
               grade, colind(grade)));
         this.grade = grade;
     }

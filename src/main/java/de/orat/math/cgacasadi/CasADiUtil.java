@@ -112,13 +112,19 @@ public class CasADiUtil {
         return result;
     }
     
+    /**
+     * @param sparsity
+     * @param values only nonzeros
+     * @return 
+     */
     public static DM toDM(ColumnVectorSparsity sparsity, double[] values){
         //TODO
         // Achtung: Hier gehe ich davon aus, dass einfach nur die non-zeros zu übergeben sind
         // das habe ich aber noch nicht verifiziert
         StdVectorDouble stdVectorDoubles = new StdVectorDouble();
-        stdVectorDoubles.add(values[0]);
-        stdVectorDoubles.add(values[1]);
+        for (int i=0;i<values.length;i++){
+            stdVectorDoubles.add(values[i]);
+        }
         return new DM(toCasADiSparsity(sparsity),stdVectorDoubles, false);
     }
 }
