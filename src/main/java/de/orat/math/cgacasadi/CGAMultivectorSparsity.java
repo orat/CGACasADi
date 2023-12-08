@@ -10,13 +10,17 @@ import java.util.List;
  */
 public class CGAMultivectorSparsity extends ColumnVectorSparsity {
     
+    public static CGAMultivectorSparsity dense(){
+        return new CGAMultivectorSparsity(createDenseRows(CGABasisBladeNames.length));
+    }
+    
     /**
-     * It is allowed to have row indizes corresponding to different grades.
+     * It is allowed to have nonzeros indizes corresponding to different grades.
      * 
-     * @param row row indizes of the nonzeros
+     * @param nonzeros nonzeros indizes of the nonzeros
      */
-    public CGAMultivectorSparsity(int[] row) {
-        super(CGABasisBladeNames.length, row);
+    public CGAMultivectorSparsity(int[] nonzeros) {
+        super(CGABasisBladeNames.length, nonzeros);
     }
     
     public CGAMultivectorSparsity(double[] values) {

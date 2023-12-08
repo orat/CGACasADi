@@ -1,12 +1,13 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.cgacasadi.api.SparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorMX;
+import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +45,7 @@ public class NewEmptyJUnitTest {
         System.out.println("a (sparsity): "+mva.getSparsity().toString());
         System.out.println("a: "+mva.toString());
         SparseCGASymbolicMultivector mvb = new SparseCGASymbolicMultivector("b", 1);
-        SparseCGASymbolicMultivector result = mva.binop_Mul(mvb);
+        iMultivectorSymbolic result = mva.gp(mvb);
         System.out.println("result (sym): "+result.toString());
         StdVectorMX args = new StdVectorMX(new MX[]{mva.getMX(), mvb.getMX()});
         StdVectorMX res = new StdVectorMX(new MX[]{mvb.getMX()});

@@ -1,7 +1,7 @@
 package de.orat.math.cgacasadi;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.orat.math.cgacasadi.api.SparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
@@ -84,7 +84,18 @@ public class CasADiUtil {
         MX result = new MX(CasADiUtil.toCasADiSparsity(new MatrixSparsity(zeros)), denseResult);
         return result;
     }
-    
+    public static double[] nonzeros(DM dm){
+        StdVectorDouble res = dm.nonzeros();
+        double[] result = new double[res.size()];
+        for (int i=0;i<result.length;i++){
+            result[i] = res.get(i);
+        }
+        return result;
+    }
+    public static DenseCGAColumnVector toDenseDoubleMatrix(DM dm, CGAMultivectorSparsity sparsity){
+        double[] nonzeros = nonzeros(dm);
+        return new DenseCGAColumnVector(nonzeros, sparsity.getrow());
+    }
     public static SparseStringMatrix toStringMatrix(MX m){
         String[][] stringArr = new String[(int) m.rows()][(int) m.columns()];
         for (int i=0;i<m.rows();i++){
