@@ -47,6 +47,17 @@ public class CGAMultivectorSparsity extends ColumnVectorSparsity {
         return grades.stream().mapToInt(d -> d).toArray();
     }
     
+    public int[] getIndizes(int grade){
+        List<Integer> result = new ArrayList<>();
+        int[] rows = getrow();
+        for (int i=0;i<rows.length;i++){
+            if (CGACayleyTable.getGrade(i) == grade){
+                result.add(i);
+            }
+        }
+        return result.stream().mapToInt(d -> d).toArray();
+    }
+    
     public static CGAKVectorSparsity createSparsity(int[] nonzeros){
         return new CGAKVectorSparsity(nonzeros);
     }

@@ -1,6 +1,8 @@
 package de.orat.math.cgacasadi;
 
 import de.orat.math.ga.matrix.utils.CayleyTable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * https://discourse.bivector.net/t/matrix-representation/232/4
@@ -33,6 +35,16 @@ public abstract class CGACayleyTable extends CayleyTable {
     
     public static int getGrade(int index){
         return CGABasisBladeNames[index].length()-1;
+    }
+    
+    public static int[] getIndizes(int grade){
+        List<Integer> result = new ArrayList<>();
+        for (int i=0;i<CGABasisBladeNames.length;i++){
+            if (CGABasisBladeNames[i].length()-1 == grade){
+                result.add(i);
+            }
+        }
+        return result.stream().mapToInt(d -> d).toArray();
     }
     
     public static String getBasisBladeName(int index){
