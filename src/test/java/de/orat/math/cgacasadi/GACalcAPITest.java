@@ -9,10 +9,8 @@ import de.orat.math.gacalc.api.MultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
- *
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class GACalcAPITest {
@@ -22,9 +20,6 @@ public class GACalcAPITest {
 
     @Test
     public void test() {
-        //MultivectorSymbolic mvsa = MultivectorSymbolic.get(new SparseCGASymbolicMultivector("a"));
-        //MultivectorSymbolic mvsb = MultivectorSymbolic.get(new SparseCGASymbolicMultivector("b"));
-        
         MultivectorSymbolic mvsa = ExprGraphFactory.createMultivectorSymbolic("a");
         MultivectorSymbolic mvsb = ExprGraphFactory.createMultivectorSymbolic("b");
         
@@ -36,25 +31,29 @@ public class GACalcAPITest {
         List<MultivectorSymbolic> returns = new ArrayList<>();
         returns.add(mvsc);
         
-        FunctionSymbolic f =  ExprGraphFactory.createFunctionSymbolic("c", parameters, returns);
+        FunctionSymbolic f = ExprGraphFactory.createFunctionSymbolic("c", parameters, returns);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
-        MultivectorNumeric argument = ExprGraphFactory.createMultivectorNumeric();
-        //TODO
-        // Werte setzen
+        double[] values_A = new double[CGACayleyTable.CGABasisBladeNames.length];
+        //Werte setzen
+        values_A[1] = 1;
+        values_A[2] = 2;
+        values_A[3] = 3;
+        MultivectorNumeric arg_a = ExprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
         
-        arguments.add(argument);
+        double[] values_B = new double[CGACayleyTable.CGABasisBladeNames.length];
+        values_B[1] = 1;
+        values_B[3] = 1;
+        values_B[4] = 1;
+        MultivectorNumeric arg_b = ExprGraphFactory.createMultivectorNumeric(values_B);
+        arguments.add(arg_b);
+        
         try {
             List<MultivectorNumeric> result = f.callNumeric(arguments);
-
-            //TODO
-            // ergebnis rausholen
-        
+            System.out.println(result.iterator().next().toString());
         } catch (Exception e){
         
         }
-        //FunctionSymbolic f = FunctionSymbolic.get(new CGASymbolicFunction());
-        //f.set("c=a+b", parameters, returns);
-        //MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
     }
 }

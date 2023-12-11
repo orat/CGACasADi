@@ -15,8 +15,9 @@ public class ExprGraphFactory {
          return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
     }
      
-    public static MultivectorNumeric createMultivectorNumeric(){
-         return MultivectorNumeric.get(new SparseCGANumericMultivector());
+    public static MultivectorNumeric createMultivectorNumeric(double[] values){
+        SparseCGANumericMultivector impl = new SparseCGANumericMultivector(values);
+        return MultivectorNumeric.get(impl);
     }
     
     public static FunctionSymbolic createFunctionSymbolic(String name, List<MultivectorSymbolic> parameters,

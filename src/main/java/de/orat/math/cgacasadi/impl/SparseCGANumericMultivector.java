@@ -1,7 +1,9 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
+import de.orat.math.cgacasadi.CGACayleyTable;
 import de.orat.math.cgacasadi.CGACayleyTableGeometricProduct;
+import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 
@@ -18,6 +20,13 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
 
     public SparseCGANumericMultivector(){
         this.dm = new DM(baseCayleyTable.getBladesCount(),1);
+    }
+    
+    public SparseCGANumericMultivector(double[] values){
+        if (CGACayleyTable.CGABasisBladeNames.length != values.length) throw
+                new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "+
+                        String.valueOf(values.length));
+        this.dm = CasADiUtil.toDM(values);
     }
     
     public DM getDM(){
