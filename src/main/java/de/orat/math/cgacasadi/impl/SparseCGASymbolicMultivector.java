@@ -4,6 +4,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.MX;
 import de.orat.math.cgacasadi.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CGACayleyTableOuterProduct;
 import de.orat.math.cgacasadi.CGAKVectorSparsity;
+import de.orat.math.cgacasadi.CGAMultivectorSparsity;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
@@ -28,6 +29,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      */
     public SparseCGASymbolicMultivector(String name, int grade){
         sparsity = CGAKVectorSparsity.instance(grade);
+        mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
+    }
+    public SparseCGASymbolicMultivector(String name, CGAMultivectorSparsity sparsity){
+        this.sparsity = sparsity;
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
     public SparseCGASymbolicMultivector(String name){
@@ -429,8 +434,13 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @param b
      * @return a + b
      */
-    public iMultivectorSymbolic add (iMultivectorSymbolic b){
+    public iMultivectorSymbolic add(iMultivectorSymbolic b){
+        System.out.println("sparsity(a)="+this.mx.sparsity().toString(true));
+        System.out.println("sparsity(b)="+((SparseCGASymbolicMultivector) b).getMX().sparsity().toString(true));
         MX result = MX.plus(mx, ((SparseCGASymbolicMultivector) b).getMX());
+        // testweise
+        System.out.println("sparsity(add)="+result.sparsity().toString(true));
+        //--> das result hat nicht die korrekte sparsity, es ergibt sich dense sparsity
         return new SparseCGASymbolicMultivector(result);
     }
 

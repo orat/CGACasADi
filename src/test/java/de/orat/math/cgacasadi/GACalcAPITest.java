@@ -1,8 +1,6 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.cgacasadi.impl.CGASymbolicFunction;
 import de.orat.math.cgacasadi.impl.ExprGraphFactory;
-import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
@@ -19,9 +17,14 @@ public class GACalcAPITest {
     }
 
     @Test
-    public void test() {
-        MultivectorSymbolic mvsa = ExprGraphFactory.createMultivectorSymbolic("a");
-        MultivectorSymbolic mvsb = ExprGraphFactory.createMultivectorSymbolic("b");
+    public void add() {
+        //TODO
+        // vermutlich muss ich hier die sparsity mit angeben, damit der result auch
+        // die korrekte sparsity hat. 
+        CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
+        MultivectorSymbolic mvsa = ExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
+        CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
+        MultivectorSymbolic mvsb = ExprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
         
         MultivectorSymbolic mvsc = mvsa.add(mvsb);
         
@@ -40,6 +43,7 @@ public class GACalcAPITest {
         values_A[2] = 2;
         values_A[3] = 3;
         MultivectorNumeric arg_a = ExprGraphFactory.createMultivectorNumeric(values_A);
+        System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
         double[] values_B = new double[CGACayleyTable.CGABasisBladeNames.length];
@@ -47,11 +51,15 @@ public class GACalcAPITest {
         values_B[3] = 1;
         values_B[4] = 1;
         MultivectorNumeric arg_b = ExprGraphFactory.createMultivectorNumeric(values_B);
+        System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
         
         try {
             List<MultivectorNumeric> result = f.callNumeric(arguments);
-            System.out.println(result.iterator().next().toString());
+            //TODO
+            // sparsity stimmt nicht mehr oder wird nur nicht richtig angezeigt
+            // toString() ruft intern dm.toString() auf
+            System.out.println("c=a+b="+result.iterator().next().toString());
         } catch (Exception e){
         
         }
