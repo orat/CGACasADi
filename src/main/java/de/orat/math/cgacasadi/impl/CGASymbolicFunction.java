@@ -57,7 +57,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
     }
 
     @Override
-    public void init(FunctionSymbolic.Callback callback) throws Exception {
+    public void init(FunctionSymbolic.Callback callback) {
         this.callback = callback;
     }
 }

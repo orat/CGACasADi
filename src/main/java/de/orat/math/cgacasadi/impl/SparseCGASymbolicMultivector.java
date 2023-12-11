@@ -30,6 +30,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         sparsity = CGAKVectorSparsity.instance(grade);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
+    public SparseCGASymbolicMultivector(String name){
+        sparsity = CGAKVectorSparsity.dense();
+        mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
+    }
     SparseCGASymbolicMultivector(MX mx){
         sparsity = CasADiUtil.toMatrixSparsity(mx.sparsity());
         this.mx = mx;
