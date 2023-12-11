@@ -1,6 +1,7 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.orat.math.gacalc.api.FunctionSymbolic;
+import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,10 @@ public class ExprGraphFactory {
          return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
     }
      
+    public static MultivectorNumeric createMultivectorNumeric(){
+         return MultivectorNumeric.get(new SparseCGANumericMultivector());
+    }
+    
     public static FunctionSymbolic createFunctionSymbolic(String name, List<MultivectorSymbolic> parameters,
                                            List<MultivectorSymbolic> returns){
         FunctionSymbolic f = FunctionSymbolic.get(new CGASymbolicFunction());
