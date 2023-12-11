@@ -4,6 +4,7 @@ import de.orat.math.cgacasadi.impl.CGASymbolicFunction;
 import de.orat.math.cgacasadi.impl.ExprGraphFactory;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.FunctionSymbolic;
+import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +38,21 @@ public class GACalcAPITest {
         
         FunctionSymbolic f =  ExprGraphFactory.createFunctionSymbolic("c", parameters, returns);
         
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        MultivectorNumeric argument = ExprGraphFactory.createMultivectorNumeric();
         //TODO
+        // Werte setzen
         
+        arguments.add(argument);
+        try {
+            List<MultivectorNumeric> result = f.callNumeric(arguments);
+
+            //TODO
+            // ergebnis rausholen
+        
+        } catch (Exception e){
+        
+        }
         //FunctionSymbolic f = FunctionSymbolic.get(new CGASymbolicFunction());
         //f.set("c=a+b", parameters, returns);
         //MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));

@@ -22,7 +22,14 @@ public class ExprGraphFactory {
     public static FunctionSymbolic createFunctionSymbolic(String name, List<MultivectorSymbolic> parameters,
                                            List<MultivectorSymbolic> returns){
         FunctionSymbolic f = FunctionSymbolic.get(new CGASymbolicFunction());
-        f.set(name, parameters, returns);
+        f.setSymbolic(name, parameters, returns);
+        return f;
+    }
+    
+    public static FunctionSymbolic createFunctionNumeric(String name, List<MultivectorSymbolic> parameters,
+                                           List<MultivectorNumeric> returns){
+        FunctionSymbolic f = FunctionSymbolic.get(new CGASymbolicFunction());
+        f.setNumeric(name, parameters, returns);
         return f;
     }
 }

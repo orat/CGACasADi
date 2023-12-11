@@ -20,6 +20,9 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
         this.dm = new DM(baseCayleyTable.getBladesCount(),1);
     }
     
+    public DM getDM(){
+        return dm;
+    }
     SparseCGANumericMultivector(DM dm){
         this.dm = dm;
     }

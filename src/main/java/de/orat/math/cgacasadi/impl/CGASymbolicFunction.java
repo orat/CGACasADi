@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
@@ -35,7 +36,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
         List<MX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getMX()).toList();
         return new StdVectorMX(mxs);
     }
-    
+   
     public List<iMultivectorSymbolic> callSymbolic(List<iMultivectorSymbolic> arguments) {
         var f_sym_in = transform(arguments);
         var f_sym_out = new StdVectorMX();
