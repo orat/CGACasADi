@@ -1,14 +1,17 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
 import de.orat.math.cgacasadi.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CGACayleyTableOuterProduct;
 import de.orat.math.cgacasadi.CGAKVectorSparsity;
 import de.orat.math.cgacasadi.CGAMultivectorSparsity;
+import de.orat.math.cgacasadi.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
-import de.orat.math.sparsematrix.MatrixSparsity;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 
 public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
@@ -16,9 +19,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     private MultivectorSymbolic.Callback callback;
     
     final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+    final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils = new CGAOperatorMatrixUtils(baseCayleyTable);
     
     // a multivector is represented by a sparse column vector
-    final MatrixSparsity sparsity;
+    final /*ColumnVectorSparsity*/ CGAMultivectorSparsity /*MatrixSparsity*/ sparsity;
     private final MX mx;
     
     /**
@@ -31,8 +35,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         sparsity = CGAKVectorSparsity.instance(grade);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
-    public SparseCGASymbolicMultivector(String name, CGAMultivectorSparsity sparsity){
-        this.sparsity = sparsity;
+    public SparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity){
+        this.sparsity = new CGAMultivectorSparsity(sparsity);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
     public SparseCGASymbolicMultivector(String name){
@@ -40,7 +44,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
     SparseCGASymbolicMultivector(MX mx){
-        sparsity = CasADiUtil.toMatrixSparsity(mx.sparsity());
+        sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
         this.mx = mx;
     }
     
@@ -51,7 +55,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(mx);
         return stringMatrix.toString(true);
     }
-    public MatrixSparsity getSparsity(){
+    
+    @Override
+    public ColumnVectorSparsity getSparsity(){
         return sparsity;
     }
     public MX getMX(){
@@ -76,6 +82,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return baseCayleyTable.getBladesCount();
     }
     
+    
+    // operators
+    
     public iMultivectorSymbolic gp(iMultivectorSymbolic b){
         MX gpm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableGeometricProduct.instance());
         System.out.println("product matrix:");
@@ -84,44 +93,17 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(result);
     }
     
+    //TODO das ließe sich auch ohne Matrizen sehr leicht implementieren, indem
+    // einfach nur die Vorzeichen des Multivektors entsprechend geändert werden
+    // vermutlich wäre das dann auch effizienter
     public iMultivectorSymbolic reverse(){
-        
-        /*res[0]=a[0];
-	res[1]=a[1];
-	res[2]=a[2];
-	res[3]=a[3];
-	res[4]=a[4];
-	res[5]=a[5];
-	res[6]=-a[6];
-	res[7]=-a[7];
-	res[8]=-a[8];
-	res[9]=-a[9];
-	res[10]=-a[10];
-	res[11]=-a[11];
-	res[12]=-a[12];
-	res[13]=-a[13];
-	res[14]=-a[14];
-	res[15]=-a[15];
-	res[16]=-a[16];
-	res[17]=-a[17];
-	res[18]=-a[18];
-	res[19]=-a[19];
-	res[20]=-a[20];
-	res[21]=-a[21];
-	res[22]=-a[22];
-	res[23]=-a[23];
-	res[24]=-a[24];
-	res[25]=-a[25];
-	res[26]=a[26];
-	res[27]=a[27];
-	res[28]=a[28];
-	res[29]=a[29];
-	res[30]=a[30];
-	res[31]=a[31];*/
-        //TODO
-        return null;
+        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
+        System.out.println("Reverse matrix = "+m.toString(false));
+        System.out.println(m.toString(true));
+        MX rev  = CasADiUtil.toMX(m);
+        MX result = MX.mtimes(rev, this.mx);
+        return new SparseCGASymbolicMultivector(result);
     }
-
 
     /**
      * Dual.
@@ -185,7 +167,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return null;
     }
 
-
     /**
      * Conjugate.
      *
@@ -233,7 +214,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         //TODO
         return null;
     }
-
 
     /**
      * Involute.
@@ -324,7 +304,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         */
     }
 
-
     /**
      * Vee.
      *
@@ -372,7 +351,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
        //TODO
        return null;
     }
-
 
     /**
      * Dot.
@@ -423,7 +401,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         //TODO
         return null;
     }
-
 
     /**
      * Add.
@@ -489,6 +466,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return null;
     }
 
+    public iMultivectorSymbolic gradeInversion(){
+        return null;
+    }
+    
     /**
      * normalized.
      *
@@ -500,6 +481,45 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return null;
     }
 
+    public iMultivectorSymbolic generalInverse(){
+        iMultivectorSymbolic conjugate = conjugate();
+        iMultivectorSymbolic gradeInversion = gradeInversion();
+        iMultivectorSymbolic reversion = reverse();
+        iMultivectorSymbolic part1 = conjugate.gp(gradeInversion).gp(reversion); 
+        iMultivectorSymbolic part2 = gp(part1); 
+        //iMultivectorSymbolic part3 = negate14(part2);
+        //double scalar = part2.gp(part3).scalarPart(); 
+        //return part1.gp(part3).gp(1d/scalar);
+        //TODO
+        return null;
+    }
+    
+    /**
+     * Negates only the signs of the vector and 4-vector parts of an multivector. 
+     * 
+     * @return multivector with changed signs for vector and 4-vector parts
+     */
+    /*private iMultivectorSymbolic negate14(iMultivectorSymbolic m){
+        
+        DM result = new DM(CasADiUtil.toCasADiSparsity(sparsity),dm);
+        //StdVectorDouble result = dm.get_nonzeros();
+        
+        int[] grade1Indizes = sparsity.getIndizes(1);
+        for (int i=0;i<grade1Indizes.length;i++){
+           result.at(grade1Indizes[i]).assign(new DM(-dm.at(grade1Indizes[i]).scalar()));
+        }
+        int[] grade4Indizes = sparsity.getIndizes(4);
+        for (int i=0;i<grade4Indizes.length;i++){
+           result.at(grade4Indizes[i]).assign(new DM(-dm.at(grade4Indizes[i]).scalar()));
+        }
+        
+        return new CGA5Multivector(result, sparsity);
+    }*/
+    
+    
+    //------------
+    
+    
     @Override
     public void init(MultivectorSymbolic.Callback callback) {
         this.callback = callback;

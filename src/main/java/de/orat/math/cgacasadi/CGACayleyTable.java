@@ -29,13 +29,14 @@ public abstract class CGACayleyTable extends CayleyTable {
         "e245",  "e345",  "e1234", "e1235",
         "e1245", "e1345", "e2345", "e12345" };
 
+    public static int getCGAGrade(int index){
+        return CGABasisBladeNames[index].length()-1;
+    }
+     
     CGACayleyTable(String[][] cgaTable){
         super(cgaTable, CGABasisBladeNames);
     }
     
-    public static int getGrade(int index){
-        return CGABasisBladeNames[index].length()-1;
-    }
     
     public static int[] getIndizes(int grade){
         List<Integer> result = new ArrayList<>();

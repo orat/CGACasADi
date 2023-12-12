@@ -42,7 +42,6 @@ public class CGAKVectorSparsity extends CGAMultivectorSparsity {
         return new CGAKVectorSparsity(new int[]{index});
     }
     
-    
     /**
      * Get the grade corresponding to the given indizes.
      * 
@@ -50,9 +49,9 @@ public class CGAKVectorSparsity extends CGAMultivectorSparsity {
      * @return -1 if the given indizes do not correspond to a single grade, elese the grade
      */
     private static int getGrade(int[] indizes){
-        int result = CGACayleyTable.getGrade(indizes[0]);
+        int result = CGACayleyTable.getCGAGrade(indizes[0]);
         for (int i=1;i<indizes.length;i++){
-            if (CGACayleyTable.getGrade(indizes[i]) != result){
+            if (CGACayleyTable.getCGAGrade(indizes[i]) != result){
                 return -1;
             }
         }

@@ -27,7 +27,7 @@ public class CGAMultivectorSparsity extends ColumnVectorSparsity {
         super(values);
     }
     
-    CGAMultivectorSparsity(ColumnVectorSparsity sparsity){
+    public CGAMultivectorSparsity(ColumnVectorSparsity sparsity){
         super(CGABasisBladeNames.length, sparsity.getrow());
         if (sparsity.getn_row() != CGACayleyTable.CGABasisBladeNames.length){
             throw new IllegalArgumentException("The column vector sparsity argument has not the needed length to reprsent a CGA multivector!");
@@ -41,7 +41,7 @@ public class CGAMultivectorSparsity extends ColumnVectorSparsity {
         List<Integer> grades = new ArrayList<>();
         int[] rows = getrow();
         for (int i=0;i<rows.length;i++){
-            int grade = CGACayleyTable.getGrade(rows[i]);
+            int grade = CGACayleyTable.getCGAGrade(rows[i]);
             if (!grades.contains(grade)) grades.add(grade);
         }
         return grades.stream().mapToInt(d -> d).toArray();
@@ -51,7 +51,7 @@ public class CGAMultivectorSparsity extends ColumnVectorSparsity {
         List<Integer> result = new ArrayList<>();
         int[] rows = getrow();
         for (int i=0;i<rows.length;i++){
-            if (CGACayleyTable.getGrade(i) == grade){
+            if (CGACayleyTable.getCGAGrade(i) == grade){
                 result.add(i);
             }
         }

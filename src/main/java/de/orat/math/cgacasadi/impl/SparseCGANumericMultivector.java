@@ -1,6 +1,8 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
+import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.orat.math.cgacasadi.CGACayleyTable;
 import de.orat.math.cgacasadi.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
@@ -28,6 +30,13 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
                         String.valueOf(values.length));
         this.dm = CasADiUtil.toDM(values);
     }
+    public SparseCGANumericMultivector(double[] nonzeros, int[] rows){
+        if (CGACayleyTable.CGABasisBladeNames.length < nonzeros.length) throw
+                new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "+
+                        String.valueOf(nonzeros.length));
+        if (nonzeros.length != rows.length) throw new IllegalArgumentException("Construction of CGA multivector failed because nonzeros.length != rows.length!");
+        this.dm = CasADiUtil.toDM(CGACayleyTable.CGABasisBladeNames.length, nonzeros, rows);
+    }
     
     public DM getDM(){
         return dm;
@@ -44,5 +53,9 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
     @Override
     public String toString(){
         return dm.toString();
+    }
+    
+    public double[] elements(){
+        return CasADiUtil.elements(dm);
     }
 }
