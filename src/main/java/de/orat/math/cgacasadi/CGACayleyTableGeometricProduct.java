@@ -1,7 +1,5 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.ga.matrix.utils.CayleyTable;
-
 /**
  * Cayley-Table for the geometric product in matrix form.
  * 

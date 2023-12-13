@@ -1,12 +1,10 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.orat.math.cgacasadi.CGACayleyTable;
-import de.orat.math.cgacasadi.CGAMultivectorSparsity;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -43,16 +41,7 @@ public class ExprGraphFactory {
     
     public static FunctionSymbolic createFunctionSymbolic(String name, List<MultivectorSymbolic> parameters,
                                            List<MultivectorSymbolic> returns){
-        FunctionSymbolic f = FunctionSymbolic.get(new CGASymbolicFunction());
-        f.setSymbolic(name, parameters, returns);
-        return f;
-    }
-    
-    public static FunctionSymbolic createFunctionNumeric(String name, List<MultivectorSymbolic> parameters,
-                                           List<MultivectorNumeric> returns){
-        FunctionSymbolic f = FunctionSymbolic.get(new CGASymbolicFunction());
-        f.setNumeric(name, parameters, returns);
-        return f;
+        return FunctionSymbolic.get(new CGASymbolicFunction(), name, parameters, returns);
     }
     
     

@@ -262,7 +262,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     public iMultivectorSymbolic op(iMultivectorSymbolic b){
-        
         MX opm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableOuterProduct.instance());
         System.out.println("product matrix:");
         System.out.println(opm.toString(true));

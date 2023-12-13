@@ -5,6 +5,7 @@ import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.dhbw.rahmlab.casadi.impl.std.Dict;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.orat.math.ga.matrix.utils.CayleyTable;
@@ -71,9 +72,17 @@ public class CasADiUtil {
      * Create a corresponding matrix for geometric product calculation.
      */
     public static MX toMXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable){
-        MX denseResult = MX.sym(mv.getMX().name(), mv.getBladesCount(), mv.getBladesCount());
+       
+        System.out.println("toMXproductMatrix(0)"+mv.getSparsity().toString());
+        MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
+        System.out.println("toMXproductMatrix(1): "+matrixSparsity.toString());
+        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
+        //System.out.println("toMXProductMatrix(2): "+sp.toString(true));
+        
+        //MX denseResult = MX.sym(mv.getMX().name(), mv.getBladesCount(), mv.getBladesCount());
+        MX result = MX.sym(mv.getMX().name(), sp);
+        
         MatrixSparsity sparsity = mv.getSparsity();
-        double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
         for (int i=0;i<cgaCayleyTable.getRows();i++){
             for (int j=0;j<cgaCayleyTable.getCols();j++){
                 Cell cell = cgaCayleyTable.getCell(i, j); 
@@ -81,26 +90,71 @@ public class CasADiUtil {
                 if (cell.bladeIndex() >=0){
                     if (sparsity.isNonZero(cell.bladeIndex(), 0)){
                         if (cell.Value() == 1d){
-                            denseResult.at(i, j).assign(mv.getMX().at(cell.bladeIndex()));
+                            result.at(i, j).assign(mv.getMX().at(cell.bladeIndex()));    
                         // -1, oder -xxxx multipliziert mit dem basis-blade
                         } else {
-                            denseResult.at(i, j).assign(MX.dot(new MX(cell.Value()), new MX(cell.Value())));
+                            // Das ist ja eine Skalarmultiplikation
+                            // Wie kann ohne dot() hier arbeiten? ein mix mit SX geht ja vermutlich nicht
+                            // aber vielleicht kann hier ja ein Function Objekt erzeugt und eingefügt werden?
+                            //TODO
+                            result.at(i, j).assign(MX.dot(new MX(cell.Value()), 
+                                    new MX(mv.getMX().at(cell.bladeIndex()))));
                         }
-                        values[i][j] = 1d;
+                        //values[i][j] = 1d;
                     // wegen sparsity 0 setzen
                     } else {
-                        denseResult.at(i, j).assign(new MX(0d));
+                        //FIXME
+                        // muss ich dann überhaupt einen Wert setzen?
+                        //denseResult.at(i, j).assign(new MX(0d));
                     }
-                // cell enthält nur eine Zahl
+                // cell enthält eine 0 als Koeffizient
                 } else {
-                    denseResult.at(i, j).assign(new MX(cell.Value()));
-                    values[i][j] = 1d;
+                    //FIXME
+                    // muss ich dann überhaupt einen Wert setzen?
+                    //denseResult.at(i, j).assign(new MX(0d));
                 }
             }
         }
-        // Matrix noch in eine Sparse Matrix umwandeln
-        MX result = new MX(CasADiUtil.toCasADiSparsity(new MatrixSparsity(values)), denseResult);
+        
+        // testweise
+        // Ausgabe taugt nichts, also die toStringMatrix() method taugt nichts
+        //System.out.println(CasADiUtil.toStringMatrix(denseResult).toString(true));
+        
+        //TODO
+        // nachfolgende schlägt was fehl!!!
+        // Das zweite Argument soll nur die nonzeros enthalten, ich gehe aber davon
+        // aus, dass es die dense matrix enthält
+        //MX result = new MX(sp, denseResult);
+        //MX result = MX.project(denseResult, sp);
+        //MX result = MX.reshape(denseResult, sp);
+        //MX result = new MX(sp, denseResult);
+        //MX.setSparse(sp); //FIXME method setSparse scheint zu fehlen
         return result;
+    }
+    
+    /**
+     * Create a sparsity object for the given cayleyTable based on the sparsity
+     * of the given sparse multivector.
+     * 
+     * @param cayleyTable
+     * @param mv sparse multivector
+     * @return matrix sparsity for the given cayley table
+     */
+    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, SparseCGASymbolicMultivector mv){
+        double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
+        ColumnVectorSparsity sparsity = mv.getSparsity();
+        for (int i=0;i<cayleyTable.getRows();i++){
+            for (int j=0;j<cayleyTable.getCols();j++){
+                Cell cell = cayleyTable.getCell(i, j); 
+                // Cell enthält einen basis-blade
+                if (cell.bladeIndex() >=0){
+                    if (sparsity.isNonZero(cell.bladeIndex(), 0)){
+                        values[i][j] = 1d;
+                    } 
+                } 
+            }
+        }
+        return new MatrixSparsity(values);
     }
     public static double[] nonzeros(DM dm){
         StdVectorDouble res = dm.nonzeros();
@@ -134,14 +188,18 @@ public class CasADiUtil {
                 // {[1,1]},
                 // {[1,1]},
                 //stringArr[i][j] = "["+String.valueOf(cell.rows())+","+String.valueOf(cell.columns())+"]";
-                stringArr[i][j] = cell.toString(true);
+                
+                //stringArr[i][j] = cell.toString(true);
+                //Dict dict = cell.info();
+                
+                //stringArr[i][j] = dict.toString();
+                stringArr[i][j] = cell.toString(false);
             }
         }
         return new SparseStringMatrix(stringArr);
     }
      
     public static Sparsity toCasADiSparsity(de.orat.math.sparsematrix.MatrixSparsity sparsity){
-        System.out.println(sparsity.toString());
         StdVectorCasadiInt row = new StdVectorCasadiInt(toLongArr(sparsity.getrow()));
         StdVectorCasadiInt colind = new StdVectorCasadiInt(toLongArr(sparsity.getcolind()));
         Sparsity result = new Sparsity(sparsity.getn_row(), sparsity.getn_col(), colind, row);
