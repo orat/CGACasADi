@@ -31,6 +31,7 @@ public class ExprGraphFactory implements iExprGraphFactory {
     public double[] createRandomCGAMultivector(){
         return createRandomMultivector(CGACayleyTable.CGABasisBladeNames.length);
     }
+    
     /**
      * Create a numeric multivector. Sparsity is created from zero values. 
      * 
