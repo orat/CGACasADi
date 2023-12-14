@@ -30,10 +30,11 @@ public class APICGAImplTest {
 
     @Test
     public void testAdd() {
+        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
-        MultivectorSymbolic mvsa = ExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
+        MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
-        MultivectorSymbolic mvsb = ExprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
+        MultivectorSymbolic mvsb = exprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
         
         MultivectorSymbolic mvsc = mvsa.add(mvsb);
         
@@ -43,7 +44,7 @@ public class APICGAImplTest {
         List<MultivectorSymbolic> returns = new ArrayList<>();
         returns.add(mvsc);
         
-        FunctionSymbolic f = ExprGraphFactory.createFunctionSymbolic("c", parameters, returns);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("c", parameters, returns);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
@@ -51,7 +52,7 @@ public class APICGAImplTest {
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
-        MultivectorNumeric arg_a = ExprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
@@ -59,7 +60,7 @@ public class APICGAImplTest {
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
-        MultivectorNumeric arg_b = ExprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
         System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
         
@@ -71,10 +72,11 @@ public class APICGAImplTest {
     
     //@Test
     public void testOP() {
+        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
-        MultivectorSymbolic mvsa = ExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
+        MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
-        MultivectorSymbolic mvsb = ExprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
+        MultivectorSymbolic mvsb = exprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
         
         MultivectorSymbolic mvsc = mvsa.op(mvsb);
         
@@ -84,7 +86,7 @@ public class APICGAImplTest {
         List<MultivectorSymbolic> returns = new ArrayList<>();
         returns.add(mvsc);
         
-        FunctionSymbolic f = ExprGraphFactory.createFunctionSymbolic("c", parameters, returns);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("c", parameters, returns);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
@@ -92,7 +94,7 @@ public class APICGAImplTest {
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
-        MultivectorNumeric arg_a = ExprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
@@ -100,7 +102,7 @@ public class APICGAImplTest {
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
-        MultivectorNumeric arg_b = ExprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
         System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
         
@@ -113,15 +115,16 @@ public class APICGAImplTest {
     
     @Test
     public void testGP() {
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         //MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         
         // mit grade statt sparsity gibts einen anderen Fehler
-        MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", 1);
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
         System.out.println("a (sparsity): "+mva.getSparsity().toString());
         System.out.println("a: "+mva.toString());
         
-        MultivectorSymbolic mvb = CGAExprGraphFactory.createMultivectorSymbolic("b", 1); 
+        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b", 1); 
         System.out.println("b (sparsity): "+mvb.getSparsity().toString());
         System.out.println("b: "+mvb.toString());
         
@@ -136,7 +139,7 @@ public class APICGAImplTest {
         result.add(res);
         // variable a fehlt bei den input parameters, warum?
         //FIXME
-        FunctionSymbolic f = ExprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
@@ -144,7 +147,7 @@ public class APICGAImplTest {
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
-        MultivectorNumeric arg_a = ExprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
@@ -152,7 +155,7 @@ public class APICGAImplTest {
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
-        MultivectorNumeric arg_b = ExprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
         System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
        
@@ -164,7 +167,8 @@ public class APICGAImplTest {
     
     @Test
     public void testReverse(){
-        MultivectorSymbolic mv = CGAExprGraphFactory.createMultivectorSymbolic("mv", 1);
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
         System.out.println("mv: "+mv.toString());
         MultivectorSymbolic result = mv.reverse();
@@ -175,11 +179,11 @@ public class APICGAImplTest {
         
         List<MultivectorSymbolic> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = ExprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
-        double[] randomValues = CGAExprGraphFactory.createRandomCGAMultivector();
-        MultivectorNumeric arg = CGAExprGraphFactory.createMultivectorNumeric(randomValues);
+        double[] randomValues = exprGraphFactory.createRandomCGAMultivector();
+        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
         arguments.add(arg);
         
         try {

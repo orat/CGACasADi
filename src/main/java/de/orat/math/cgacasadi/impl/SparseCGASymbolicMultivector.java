@@ -25,27 +25,40 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     final /*ColumnVectorSparsity*/ CGAMultivectorSparsity /*MatrixSparsity*/ sparsity;
     private final MX mx;
     
+    public SparseCGASymbolicMultivector instance(String name, int grade){
+        return new SparseCGASymbolicMultivector(name, grade);
+    }
     /**
      * Creates a k-Vector.
      * 
      * @param name
      * @param grade 
      */
-    public SparseCGASymbolicMultivector(String name, int grade){
+    protected SparseCGASymbolicMultivector(String name, int grade){
         sparsity = CGAKVectorSparsity.instance(grade);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
-    public SparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity){
+    public SparseCGASymbolicMultivector instance(String name, ColumnVectorSparsity sparsity){
+        return new SparseCGASymbolicMultivector(name, sparsity);
+    }
+    protected SparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity){
         this.sparsity = new CGAMultivectorSparsity(sparsity);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
-    public SparseCGASymbolicMultivector(String name){
+    public SparseCGASymbolicMultivector instance(String name){
+        return new SparseCGASymbolicMultivector(name);
+    }
+    protected SparseCGASymbolicMultivector(String name){
         sparsity = CGAKVectorSparsity.dense();
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
     }
     SparseCGASymbolicMultivector(MX mx){
         sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
         this.mx = mx;
+    }
+    public SparseCGASymbolicMultivector(){
+        sparsity = null;
+        mx = null;
     }
     
     @Override

@@ -21,16 +21,22 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
     private MultivectorNumeric.Callback callback;
 
     public SparseCGANumericMultivector(){
-        this.dm = new DM(baseCayleyTable.getBladesCount(),1);
+        //this.dm = new DM(baseCayleyTable.getBladesCount(),1);
+        dm = null;
     }
-    
-    public SparseCGANumericMultivector(double[] values){
+    public SparseCGANumericMultivector instance(double[] values){
+        return new SparseCGANumericMultivector(values);
+    }
+    protected SparseCGANumericMultivector(double[] values){
         if (CGACayleyTable.CGABasisBladeNames.length != values.length) throw
                 new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "+
                         String.valueOf(values.length));
         this.dm = CasADiUtil.toDM(values);
     }
-    public SparseCGANumericMultivector(double[] nonzeros, int[] rows){
+    public SparseCGANumericMultivector instance(double[] nonzeros, int[] rows){
+        return new SparseCGANumericMultivector(nonzeros, rows);
+    }
+    protected SparseCGANumericMultivector(double[] nonzeros, int[] rows){
         if (CGACayleyTable.CGABasisBladeNames.length < nonzeros.length) throw
                 new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "+
                         String.valueOf(nonzeros.length));

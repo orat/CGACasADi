@@ -4,6 +4,7 @@ import de.orat.math.cgacasadi.CGACayleyTable;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import java.util.List;
 import java.util.Random;
@@ -11,13 +12,13 @@ import java.util.Random;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class ExprGraphFactory {
+public class ExprGraphFactory implements iExprGraphFactory {
     
-    public static MultivectorSymbolic createMultivectorSymbolic(String name, ColumnVectorSparsity sparsity){
+    public MultivectorSymbolic createMultivectorSymbolic(String name, ColumnVectorSparsity sparsity){
          return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
     }
      
-    public static MultivectorSymbolic createMultivectorSymbolic(String name){
+    public MultivectorSymbolic createMultivectorSymbolic(String name){
          return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
     }
     
@@ -27,19 +28,19 @@ public class ExprGraphFactory {
      * @param values
      * @return 
      */
-    public static MultivectorNumeric createMultivectorNumeric(double[] values){
+    public MultivectorNumeric createMultivectorNumeric(double[] values){
         SparseCGANumericMultivector impl = new SparseCGANumericMultivector(values);
         return MultivectorNumeric.get(impl);
     }
-    public static MultivectorNumeric createMultivectorNumeric(double[] nonzeros, int[] rows){
+    public MultivectorNumeric createMultivectorNumeric(double[] nonzeros, int[] rows){
         SparseCGANumericMultivector impl = new SparseCGANumericMultivector(nonzeros, rows);
         return MultivectorNumeric.get(impl);
     }
-    public static MultivectorNumeric createRandomMultivectorNumeric(){
+    public MultivectorNumeric createRandomMultivectorNumeric(){
         return createMultivectorNumeric(createRandomMultivector(CGACayleyTable.CGABasisBladeNames.length));
     }
     
-    public static FunctionSymbolic createFunctionSymbolic(String name, List<MultivectorSymbolic> parameters,
+    public FunctionSymbolic createFunctionSymbolic(String name, List<MultivectorSymbolic> parameters,
                                            List<MultivectorSymbolic> returns){
         return FunctionSymbolic.get(new CGASymbolicFunction(), name, parameters, returns);
     }

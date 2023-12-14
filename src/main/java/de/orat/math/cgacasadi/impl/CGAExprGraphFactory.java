@@ -9,12 +9,12 @@ import de.orat.math.gacalc.api.MultivectorSymbolic;
  */
 public class CGAExprGraphFactory extends ExprGraphFactory {
     
-    public static MultivectorSymbolic createMultivectorSymbolic(String name, int grade){
+    public MultivectorSymbolic createMultivectorSymbolic(String name, int grade){
         CGAKVectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
         return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
     }
     
-    public static double[] createRandomCGAMultivector(){
+    public double[] createRandomCGAMultivector(){
         return createRandomMultivector(CGACayleyTable.CGABasisBladeNames.length);
     }
 }

@@ -52,10 +52,11 @@ public class NewEmptyJUnitTest {
     
     @Test
     public void test() {
-        SparseCGASymbolicMultivector mva = new SparseCGASymbolicMultivector("a", 1);
+        SparseCGASymbolicMultivector fac = new SparseCGASymbolicMultivector();
+        SparseCGASymbolicMultivector mva = fac.instance("a", 1);
         System.out.println("a (sparsity): "+mva.getSparsity().toString());
         System.out.println("a: "+mva.toString());
-        SparseCGASymbolicMultivector mvb = new SparseCGASymbolicMultivector("b", 1);
+        SparseCGASymbolicMultivector mvb = fac.instance("b", 1);
         iMultivectorSymbolic result = mva.gp(mvb);
         System.out.println("result (sym): "+result.toString());
         StdVectorMX args = new StdVectorMX(new MX[]{mva.getMX(), mvb.getMX()});
