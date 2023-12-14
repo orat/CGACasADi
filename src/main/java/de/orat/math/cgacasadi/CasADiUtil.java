@@ -8,6 +8,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.Dict;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorStdString;
 import de.orat.math.ga.matrix.utils.CayleyTable;
 import de.orat.math.ga.matrix.utils.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -73,11 +74,11 @@ public class CasADiUtil {
      */
     public static MX toMXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable){
        
-        System.out.println("toMXproductMatrix(0)"+mv.getSparsity().toString());
+        System.out.println("toMXproductMatrix(cv):  "+mv.getSparsity().toString());
         MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
-        System.out.println("toMXproductMatrix(1): "+matrixSparsity.toString());
+        System.out.println("toMXproductMatrix(ct):  "+matrixSparsity.toString());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
-        //System.out.println("toMXProductMatrix(2): "+sp.toString(true));
+        //System.out.println("toMXProductMatrix(ct2): "+sp.toString(true));
         
         //MX denseResult = MX.sym(mv.getMX().name(), mv.getBladesCount(), mv.getBladesCount());
         MX result = MX.sym(mv.getMX().name(), sp);
@@ -90,15 +91,34 @@ public class CasADiUtil {
                 if (cell.bladeIndex() >=0){
                     if (sparsity.isNonZero(cell.bladeIndex(), 0)){
                         if (cell.Value() == 1d){
-                            result.at(i, j).assign(mv.getMX().at(cell.bladeIndex()));    
+                            // FIXME unklar ob ich das new MX() überhaupt brauche
+                            // result.at(i, j).assign(new MX(mv.getMX().at(cell.bladeIndex())));  
+                            // Angabe der Spalte == 0 hat auch nichts gebracht
+                            result.at(i, j).assign(mv.getMX().at(cell.bladeIndex(),0)); 
+                             System.out.println("to(sym)["+String.valueOf(i)+"]["+String.valueOf(j)+"]:"+
+                                    result.at(i, j).toString(true)+", dim="+result.at(i, j).dim_());
                         // -1, oder -xxxx multipliziert mit dem basis-blade
                         } else {
                             // Das ist ja eine Skalarmultiplikation
                             // Wie kann ohne dot() hier arbeiten? ein mix mit SX geht ja vermutlich nicht
                             // aber vielleicht kann hier ja ein Function Objekt erzeugt und eingefügt werden?
                             //TODO
-                            result.at(i, j).assign(MX.dot(new MX(cell.Value()), 
+                            // mit Funktion ist unklar, ob ich dann nicht notwendigerweise den
+                            // Multivektor als SX speichern muss
+                            // dann wiederum ist unklar, ob SX alle Operatoren hat im Vergleich mit MX 
+                            // die ich brauche
+                            // wie kann ich eine Funktion in die Cell einer Matrix hängen?
+                            
+                            // vorher hatte ich hier dot
+                            // cell.Value enthält den Zahlenwert der in der entsprechenden
+                            // Zelle der Cayleytable steht. Dieser muss multipliziert werden
+                            // mit dem Wert der Zelle des korrespondierenden Multivektors. Das
+                            // Zell-Objekt enthält dazu den index im Column-Vector.
+                            // new MX() im assign wieder entfernt 
+                            result.at(i, j).assign(MX.times(new MX(cell.Value()), 
                                     new MX(mv.getMX().at(cell.bladeIndex()))));
+                            System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]:"+
+                                    result.at(i, j).toString(false)+" dim="+result.at(i, j).dim_());
                         }
                         //values[i][j] = 1d;
                     // wegen sparsity 0 setzen
@@ -194,6 +214,8 @@ public class CasADiUtil {
                 
                 //stringArr[i][j] = dict.toString();
                 stringArr[i][j] = cell.toString(false);
+                
+                //stringArr[i][j] = MX.print_operator(cell, new StdVectorStdString());
             }
         }
         return new SparseStringMatrix(stringArr);

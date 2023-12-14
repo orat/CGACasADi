@@ -414,25 +414,18 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         System.out.println("sparsity(a)="+this.mx.sparsity().toString(true));
         System.out.println("sparsity(b)="+((SparseCGASymbolicMultivector) b).getMX().sparsity().toString(true));
         MX result = MX.plus(mx, ((SparseCGASymbolicMultivector) b).getMX());
-        // testweise
         System.out.println("sparsity(add)="+result.sparsity().toString(true));
-        //--> das result hat nicht die korrekte sparsity, es ergibt sich dense sparsity
         return new SparseCGASymbolicMultivector(result);
     }
 
     /**
-     * Sub.
-     *
-     * Multivector subtraction
+     * Multivector subtraction.
      *
      * @param a
      * @param b
      * @return a - b
      */
     public iMultivectorSymbolic sub (iMultivectorSymbolic b){
-        
-        //TODO
-        // was passiert bei Addition von Scalars? Da muss mit der sparsity herumgebastelt werden!!!
         MX result = MX.minus(mx, ((SparseCGASymbolicMultivector) b).getMX());
         return new SparseCGASymbolicMultivector(result);
     }

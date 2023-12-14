@@ -20,6 +20,17 @@ public class NewEmptyJUnitTest {
     
     public NewEmptyJUnitTest() {
     }
+    
+    @Test
+    public void testMatrixExpr(){
+        MX x = MX.sym("x", 2);
+	MX A = new MX(2, 2);
+	A.at(0, 0).assign(x.at(0));
+	A.at(1, 1).assign(MX.mtimes(x.at(0), new MX(3)));
+                
+                // A:(project((zeros(2x2,1nz)[0] = x[0]))[1] = (x[0]+x[1]))
+	System.out.println("A:" + A);
+    }
 
     public void testCGAKSparsity(){
         CGACayleyTableGeometricProduct table = CGACayleyTableGeometricProduct.instance();
