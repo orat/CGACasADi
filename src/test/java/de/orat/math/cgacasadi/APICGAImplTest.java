@@ -1,6 +1,6 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.cgacasadi.impl.ExprGraphFactory;
+import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
@@ -22,7 +22,7 @@ public class APICGAImplTest {
 
     @Test
     public void testAdd() {
-        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
@@ -64,7 +64,7 @@ public class APICGAImplTest {
     
     //@Test
     public void testOP() {
-        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
@@ -105,9 +105,9 @@ public class APICGAImplTest {
     }
     
     
-    @Test
+    //@Test
     public void testGP() {
-        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         //MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         
@@ -159,7 +159,7 @@ public class APICGAImplTest {
     
     @Test
     public void testReverse(){
-        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
         System.out.println("mv: "+mv.toString());

@@ -13,7 +13,7 @@ import java.util.Random;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class ExprGraphFactory implements iExprGraphFactory {
+public class CGAExprGraphFactory implements iExprGraphFactory {
     
     public MultivectorSymbolic createMultivectorSymbolic(String name, ColumnVectorSparsity sparsity){
          return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
