@@ -1,6 +1,7 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.orat.math.cgacasadi.CGACayleyTable;
+import de.orat.math.cgacasadi.CGAKVectorSparsity;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
@@ -22,6 +23,14 @@ public class ExprGraphFactory implements iExprGraphFactory {
          return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
     }
     
+    public MultivectorSymbolic createMultivectorSymbolic(String name, int grade){
+        CGAKVectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
+        return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
+    }
+    
+    public double[] createRandomCGAMultivector(){
+        return createRandomMultivector(CGACayleyTable.CGABasisBladeNames.length);
+    }
     /**
      * Create a numeric multivector. Sparsity is created from zero values. 
      * 

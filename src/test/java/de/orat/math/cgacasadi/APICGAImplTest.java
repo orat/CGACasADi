@@ -1,12 +1,5 @@
 package de.orat.math.cgacasadi;
 
-import de.dhbw.rahmlab.casadi.impl.casadi.Function;
-import de.dhbw.rahmlab.casadi.impl.casadi.MX;
-import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorMX;
-import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
 import de.orat.math.cgacasadi.impl.ExprGraphFactory;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.FunctionSymbolic;
@@ -16,7 +9,6 @@ import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -115,7 +107,7 @@ public class APICGAImplTest {
     
     @Test
     public void testGP() {
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         //MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         
@@ -167,7 +159,7 @@ public class APICGAImplTest {
     
     @Test
     public void testReverse(){
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = new ExprGraphFactory();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
         System.out.println("mv: "+mv.toString());
