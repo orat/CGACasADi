@@ -1,7 +1,7 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.orat.math.cgacasadi.CGACayleyTable;
-import de.orat.math.cgacasadi.CGAKVectorSparsity;
+import util.cga.CGACayleyTable;
+import util.cga.CGAKVectorSparsity;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;

@@ -1,11 +1,11 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
-import de.orat.math.cgacasadi.CGACayleyTableGeometricProduct;
-import de.orat.math.cgacasadi.CGACayleyTableOuterProduct;
-import de.orat.math.cgacasadi.CGAKVectorSparsity;
-import de.orat.math.cgacasadi.CGAMultivectorSparsity;
-import de.orat.math.cgacasadi.CGAOperatorMatrixUtils;
+import util.cga.CGACayleyTableGeometricProduct;
+import util.cga.CGACayleyTableOuterProduct;
+import util.cga.CGAKVectorSparsity;
+import util.cga.CGAMultivectorSparsity;
+import util.cga.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;

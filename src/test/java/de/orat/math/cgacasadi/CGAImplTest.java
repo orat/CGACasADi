@@ -1,5 +1,7 @@
 package de.orat.math.cgacasadi;
 
+import util.cga.CGACayleyTable;
+import util.cga.CGAMultivectorSparsity;
 import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.FunctionSymbolic;

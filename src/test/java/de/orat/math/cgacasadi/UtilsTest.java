@@ -1,5 +1,7 @@
 package de.orat.math.cgacasadi;
 
+import util.cga.CGACayleyTableGeometricProduct;
+import util.cga.CGAKVectorSparsity;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
