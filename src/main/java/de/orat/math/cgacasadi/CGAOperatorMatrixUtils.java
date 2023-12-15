@@ -1,8 +1,9 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.ga.matrix.utils.CayleyTable;
+//import util.CayleyTable;
 import de.orat.math.sparsematrix.DenseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import util.CayleyTable;
 import util.LinearOperators;
 
 /**

@@ -1,8 +1,10 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.ga.matrix.utils.CayleyTable;
+//import util.CayleyTable;
 import java.util.ArrayList;
 import java.util.List;
+import util.CayleyTable;
+//import util.CayleyTable;
 
 /**
  * https://discourse.bivector.net/t/matrix-representation/232/4

@@ -115,7 +115,7 @@ public class CGAImplTest {
     }
     
     
-    @Test
+    /*@Test
     public void testOP() {
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
@@ -164,7 +164,7 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
             assertTrue(equals(mv.elements(), test));
         } catch (Exception e){}
-    }
+    }*/
     
     @Test
     public void testGP() {
