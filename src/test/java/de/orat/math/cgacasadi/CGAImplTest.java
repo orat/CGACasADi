@@ -5,8 +5,8 @@ import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
-import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import de.orat.math.sparsematrix.DenseDoubleColumnVector;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class APICGAImplTest {
+public class CGAImplTest {
     
-    public APICGAImplTest() {
+    public CGAImplTest() {
     }
 
     @Test
@@ -56,13 +56,66 @@ public class APICGAImplTest {
         System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
         
+        double[] test = add(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+       
         try {
-            List<MultivectorNumeric> result = f.callNumeric(arguments);
-            System.out.println("c=a+b="+result.iterator().next().toString());
+            List<MultivectorNumeric> mv = f.callNumeric(arguments);
+            System.out.println("c=a+b="+mv.iterator().next().toString());
+            System.out.println("test="+testMatrix.toString());
+            assertTrue(equals(mv.iterator().next().elements(), test));
         } catch (Exception e){}
     }
     
-    //@Test
+    @Test
+    public void testSub() {
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
+        MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
+        CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
+        MultivectorSymbolic mvsb = exprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
+        
+        MultivectorSymbolic mvsc = mvsa.sub(mvsb);
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mvsa);
+        parameters.add(mvsb);
+        List<MultivectorSymbolic> returns = new ArrayList<>();
+        returns.add(mvsc);
+        
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("c", parameters, returns);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = new double[CGACayleyTable.CGABasisBladeNames.length];
+        values_A[1] = 1;
+        values_A[2] = 2;
+        values_A[3] = 3;
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        System.out.println("a="+arg_a.toString());
+        arguments.add(arg_a);
+        
+        double[] values_B = new double[CGACayleyTable.CGABasisBladeNames.length];
+        values_B[1] = 1;
+        values_B[3] = 1;
+        values_B[4] = 1;
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        System.out.println("b="+arg_b.toString());
+        arguments.add(arg_b);
+        
+        double[] test = sub(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+       
+        try {
+            List<MultivectorNumeric> mv = f.callNumeric(arguments);
+            System.out.println("c=a-b="+mv.iterator().next().toString());
+            System.out.println("test="+testMatrix.toString());
+            assertTrue(equals(mv.iterator().next().elements(), test));
+        } catch (Exception e){}
+    }
+    
+    
+    @Test
     public void testOP() {
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
@@ -98,14 +151,22 @@ public class APICGAImplTest {
         System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
         
+        
+        double[] test = op(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        
         try {
-            List<MultivectorNumeric> result = f.callNumeric(arguments);
-            System.out.println("c=a+b="+result.iterator().next().toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("c=a^b="+mv.toString());
+            // alle Vorzeichen sind falsch
+            //FIXME
+            System.out.println("test="+testMatrix.toString());
+            assertTrue(equals(mv.elements(), test));
         } catch (Exception e){}
     }
     
-    
-    //@Test
+    @Test
     public void testGP() {
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
@@ -113,15 +174,15 @@ public class APICGAImplTest {
         
         // mit grade statt sparsity gibts einen anderen Fehler
         MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
-        System.out.println("a (sparsity): "+mva.getSparsity().toString());
-        System.out.println("a: "+mva.toString());
+        //System.out.println("a (sparsity): "+mva.getSparsity().toString());
+        //System.out.println("a: "+mva.toString());
         
         MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b", 1); 
-        System.out.println("b (sparsity): "+mvb.getSparsity().toString());
-        System.out.println("b: "+mvb.toString());
+        //System.out.println("b (sparsity): "+mvb.getSparsity().toString());
+        //System.out.println("b: "+mvb.toString());
         
         MultivectorSymbolic res = mva.gp(mvb);
-        System.out.println("result (sym): "+res.toString());
+        //System.out.println("result (sym): "+res.toString());
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -129,8 +190,6 @@ public class APICGAImplTest {
         
         List<MultivectorSymbolic> result = new ArrayList<>();
         result.add(res);
-        // variable a fehlt bei den input parameters, warum?
-        //FIXME
         FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
@@ -140,7 +199,7 @@ public class APICGAImplTest {
         values_A[2] = 2;
         values_A[3] = 3;
         MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
-        System.out.println("a="+arg_a.toString());
+        //System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
         double[] values_B = new double[CGACayleyTable.CGABasisBladeNames.length];
@@ -148,12 +207,19 @@ public class APICGAImplTest {
         values_B[3] = 1;
         values_B[4] = 1;
         MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
-        System.out.println("b="+arg_b.toString());
+        //System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
        
+        double[] test = gp(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+        
         try {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            System.out.println("c=a b="+result2.iterator().next().toString());
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("c=a b="+mv.toString());
+            System.out.println("test="+testMatrix.toString());
+            assertTrue(equals(mv.elements(), test));
         } catch (Exception e){}
     }
     
@@ -330,7 +396,142 @@ public class APICGAImplTest {
 	res[31]=b[31]*a[0]+b[30]*a[1]-b[29]*a[2]+b[28]*a[3]-b[27]*a[4]+b[26]*a[5]+b[25]*a[6]-b[24]*a[7]+b[23]*a[8]-b[22]*a[9]+b[21]*a[10]-b[20]*a[11]+b[19]*a[12]+b[18]*a[13]-b[17]*a[14]+b[16]*a[15]+b[15]*a[16]-b[14]*a[17]+b[13]*a[18]+b[12]*a[19]-b[11]*a[20]+b[10]*a[21]-b[9]*a[22]+b[8]*a[23]-b[7]*a[24]+b[6]*a[25]+b[5]*a[26]-b[4]*a[27]+b[3]*a[28]-b[2]*a[29]+b[1]*a[30]+b[0]*a[31];
         return res;
     }
-    
+    /**
+     * Wedge.
+     *
+     * The outer product. (MEET)
+     *
+     * @param a
+     * @param b
+     * @return a ^ b
+     */
+    public static double[] op(double[] a, double[] b){
+        double[] res = new double[a.length];
+        res[0]=b[0]*a[0];
+	res[1]=b[1]*a[0]+b[0]*a[1];
+	res[2]=b[2]*a[0]+b[0]*a[2];
+	res[3]=b[3]*a[0]+b[0]*a[3];
+	res[4]=b[4]*a[0]+b[0]*a[4];
+	res[5]=b[5]*a[0]+b[0]*a[5];
+	res[6]=b[6]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[6];
+	res[7]=b[7]*a[0]+b[3]*a[1]-b[1]*a[3]+b[0]*a[7];
+	res[8]=b[8]*a[0]+b[4]*a[1]-b[1]*a[4]+b[0]*a[8];
+	res[9]=b[9]*a[0]+b[5]*a[1]-b[1]*a[5]+b[0]*a[9];
+	res[10]=b[10]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[10];
+	res[11]=b[11]*a[0]+b[4]*a[2]-b[2]*a[4]+b[0]*a[11];
+	res[12]=b[12]*a[0]+b[5]*a[2]-b[2]*a[5]+b[0]*a[12];
+	res[13]=b[13]*a[0]+b[4]*a[3]-b[3]*a[4]+b[0]*a[13];
+	res[14]=b[14]*a[0]+b[5]*a[3]-b[3]*a[5]+b[0]*a[14];
+	res[15]=b[15]*a[0]+b[5]*a[4]-b[4]*a[5]+b[0]*a[15];
+	res[16]=b[16]*a[0]+b[10]*a[1]-b[7]*a[2]+b[6]*a[3]+b[3]*a[6]-b[2]*a[7]+b[1]*a[10]+b[0]*a[16];
+	res[17]=b[17]*a[0]+b[11]*a[1]-b[8]*a[2]+b[6]*a[4]+b[4]*a[6]-b[2]*a[8]+b[1]*a[11]+b[0]*a[17];
+	res[18]=b[18]*a[0]+b[12]*a[1]-b[9]*a[2]+b[6]*a[5]+b[5]*a[6]-b[2]*a[9]+b[1]*a[12]+b[0]*a[18];
+	res[19]=b[19]*a[0]+b[13]*a[1]-b[8]*a[3]+b[7]*a[4]+b[4]*a[7]-b[3]*a[8]+b[1]*a[13]+b[0]*a[19];
+	res[20]=b[20]*a[0]+b[14]*a[1]-b[9]*a[3]+b[7]*a[5]+b[5]*a[7]-b[3]*a[9]+b[1]*a[14]+b[0]*a[20];
+	res[21]=b[21]*a[0]+b[15]*a[1]-b[9]*a[4]+b[8]*a[5]+b[5]*a[8]-b[4]*a[9]+b[1]*a[15]+b[0]*a[21];
+	res[22]=b[22]*a[0]+b[13]*a[2]-b[11]*a[3]+b[10]*a[4]+b[4]*a[10]-b[3]*a[11]+b[2]*a[13]+b[0]*a[22];
+	res[23]=b[23]*a[0]+b[14]*a[2]-b[12]*a[3]+b[10]*a[5]+b[5]*a[10]-b[3]*a[12]+b[2]*a[14]+b[0]*a[23];
+	res[24]=b[24]*a[0]+b[15]*a[2]-b[12]*a[4]+b[11]*a[5]+b[5]*a[11]-b[4]*a[12]+b[2]*a[15]+b[0]*a[24];
+	res[25]=b[25]*a[0]+b[15]*a[3]-b[14]*a[4]+b[13]*a[5]+b[5]*a[13]-b[4]*a[14]+b[3]*a[15]+b[0]*a[25];
+	res[26]=b[26]*a[0]+b[22]*a[1]-b[19]*a[2]+b[17]*a[3]-b[16]*a[4]+b[13]*a[6]-b[11]*a[7]+b[10]*a[8]+b[8]*a[10]-b[7]*a[11]+b[6]*a[13]+b[4]*a[16]-b[3]*a[17]+b[2]*a[19]-b[1]*a[22]+b[0]*a[26];
+	res[27]=b[27]*a[0]+b[23]*a[1]-b[20]*a[2]+b[18]*a[3]-b[16]*a[5]+b[14]*a[6]-b[12]*a[7]+b[10]*a[9]+b[9]*a[10]-b[7]*a[12]+b[6]*a[14]+b[5]*a[16]-b[3]*a[18]+b[2]*a[20]-b[1]*a[23]+b[0]*a[27];
+	res[28]=b[28]*a[0]+b[24]*a[1]-b[21]*a[2]+b[18]*a[4]-b[17]*a[5]+b[15]*a[6]-b[12]*a[8]+b[11]*a[9]+b[9]*a[11]-b[8]*a[12]+b[6]*a[15]+b[5]*a[17]-b[4]*a[18]+b[2]*a[21]-b[1]*a[24]+b[0]*a[28];
+	res[29]=b[29]*a[0]+b[25]*a[1]-b[21]*a[3]+b[20]*a[4]-b[19]*a[5]+b[15]*a[7]-b[14]*a[8]+b[13]*a[9]+b[9]*a[13]-b[8]*a[14]+b[7]*a[15]+b[5]*a[19]-b[4]*a[20]+b[3]*a[21]-b[1]*a[25]+b[0]*a[29];
+	res[30]=b[30]*a[0]+b[25]*a[2]-b[24]*a[3]+b[23]*a[4]-b[22]*a[5]+b[15]*a[10]-b[14]*a[11]+b[13]*a[12]+b[12]*a[13]-b[11]*a[14]+b[10]*a[15]+b[5]*a[22]-b[4]*a[23]+b[3]*a[24]-b[2]*a[25]+b[0]*a[30];
+	res[31]=b[31]*a[0]+b[30]*a[1]-b[29]*a[2]+b[28]*a[3]-b[27]*a[4]+b[26]*a[5]+b[25]*a[6]-b[24]*a[7]+b[23]*a[8]-b[22]*a[9]+b[21]*a[10]-b[20]*a[11]+b[19]*a[12]+b[18]*a[13]-b[17]*a[14]+b[16]*a[15]+b[15]*a[16]-b[14]*a[17]+b[13]*a[18]+b[12]*a[19]-b[11]*a[20]+b[10]*a[21]-b[9]*a[22]+b[8]*a[23]-b[7]*a[24]+b[6]*a[25]+b[5]*a[26]-b[4]*a[27]+b[3]*a[28]-b[2]*a[29]+b[1]*a[30]+b[0]*a[31];
+        return res;
+    }
+    /**
+     * Add.
+     *
+     * Multivector addition
+     *
+     * @param a
+     * @param b
+     * @return a + b
+     */
+    public static double[] add (double[] a, double[] b){
+        double[] res = new double[a.length];
+	res[0] = a[0]+b[0];
+	res[1] = a[1]+b[1];
+	res[2] = a[2]+b[2];
+	res[3] = a[3]+b[3];
+	res[4] = a[4]+b[4];
+	res[5] = a[5]+b[5];
+	res[6] = a[6]+b[6];
+	res[7] = a[7]+b[7];
+	res[8] = a[8]+b[8];
+	res[9] = a[9]+b[9];
+	res[10] = a[10]+b[10];
+	res[11] = a[11]+b[11];
+	res[12] = a[12]+b[12];
+	res[13] = a[13]+b[13];
+	res[14] = a[14]+b[14];
+	res[15] = a[15]+b[15];
+	res[16] = a[16]+b[16];
+	res[17] = a[17]+b[17];
+	res[18] = a[18]+b[18];
+	res[19] = a[19]+b[19];
+	res[20] = a[20]+b[20];
+	res[21] = a[21]+b[21];
+	res[22] = a[22]+b[22];
+	res[23] = a[23]+b[23];
+	res[24] = a[24]+b[24];
+	res[25] = a[25]+b[25];
+	res[26] = a[26]+b[26];
+	res[27] = a[27]+b[27];
+	res[28] = a[28]+b[28];
+	res[29] = a[29]+b[29];
+	res[30] = a[30]+b[30];
+	res[31] = a[31]+b[31];
+        return res;
+    }
+    /**
+     * Sub.
+     *
+     * Multivector subtraction
+     *
+     * @param a
+     * @param b
+     * @return a - b
+     */
+    public static double[] sub (double[] a, double[] b){
+        double[] res = new double[a.length];
+        res[0] = a[0]-b[0];
+	res[1] = a[1]-b[1];
+	res[2] = a[2]-b[2];
+	res[3] = a[3]-b[3];
+	res[4] = a[4]-b[4];
+	res[5] = a[5]-b[5];
+	res[6] = a[6]-b[6];
+	res[7] = a[7]-b[7];
+	res[8] = a[8]-b[8];
+	res[9] = a[9]-b[9];
+	res[10] = a[10]-b[10];
+	res[11] = a[11]-b[11];
+	res[12] = a[12]-b[12];
+	res[13] = a[13]-b[13];
+	res[14] = a[14]-b[14];
+	res[15] = a[15]-b[15];
+	res[16] = a[16]-b[16];
+	res[17] = a[17]-b[17];
+	res[18] = a[18]-b[18];
+	res[19] = a[19]-b[19];
+	res[20] = a[20]-b[20];
+	res[21] = a[21]-b[21];
+	res[22] = a[22]-b[22];
+	res[23] = a[23]-b[23];
+	res[24] = a[24]-b[24];
+	res[25] = a[25]-b[25];
+	res[26] = a[26]-b[26];
+	res[27] = a[27]-b[27];
+	res[28] = a[28]-b[28];
+	res[29] = a[29]-b[29];
+	res[30] = a[30]-b[30];
+	res[31] = a[31]-b[31];
+        return res;
+    }
+
     private boolean equals(double[] a, double[] b){
         if (a.length != b.length) throw new IllegalArgumentException("a.length != b.length");
         for (int i=0;i<a.length;i++){
@@ -347,5 +548,4 @@ public class APICGAImplTest {
         }
         return true;
     }
-    
 }

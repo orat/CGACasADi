@@ -78,10 +78,13 @@ public class CasADiUtil {
         MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
         System.out.println("toMXproductMatrix(ct):  "+matrixSparsity.toString());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
+        // testweise dense --> hat keinen Unterschied gemacht
+        //de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(MatrixSparsity.dense(32, 32));
         //System.out.println("toMXProductMatrix(ct2): "+sp.toString(true));
         
         //MX denseResult = MX.sym(mv.getMX().name(), mv.getBladesCount(), mv.getBladesCount());
-        MX result = MX.sym(mv.getMX().name(), sp);
+        //MX result = MX.sym(mv.getMX().name(), sp);
+        MX result = new MX(sp);
         
         MatrixSparsity sparsity = mv.getSparsity();
         for (int i=0;i<cgaCayleyTable.getRows();i++){
@@ -91,12 +94,9 @@ public class CasADiUtil {
                 if (cell.bladeIndex() >=0){
                     if (sparsity.isNonZero(cell.bladeIndex(), 0)){
                         if (cell.Value() == 1d){
-                            // FIXME unklar ob ich das new MX() überhaupt brauche
-                            // result.at(i, j).assign(new MX(mv.getMX().at(cell.bladeIndex())));  
-                            // Angabe der Spalte == 0 hat auch nichts gebracht
                             result.at(i, j).assign(mv.getMX().at(cell.bladeIndex(),0)); 
-                             System.out.println("to(sym)["+String.valueOf(i)+"]["+String.valueOf(j)+"]:"+
-                                    result.at(i, j).toString(true)+", dim="+result.at(i, j).dim_());
+                            System.out.println("to(sym)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
+                                    mv.getMX().at(cell.bladeIndex(),0));
                         // -1, oder -xxxx multipliziert mit dem basis-blade
                         } else {
                             // Das ist ja eine Skalarmultiplikation
@@ -108,19 +108,19 @@ public class CasADiUtil {
                             // dann wiederum ist unklar, ob SX alle Operatoren hat im Vergleich mit MX 
                             // die ich brauche
                             // wie kann ich eine Funktion in die Cell einer Matrix hängen?
+                            //TODO
                             
                             // vorher hatte ich hier dot
                             // cell.Value enthält den Zahlenwert der in der entsprechenden
                             // Zelle der Cayleytable steht. Dieser muss multipliziert werden
                             // mit dem Wert der Zelle des korrespondierenden Multivektors. Das
                             // Zell-Objekt enthält dazu den index im Column-Vector.
-                            // new MX() im assign wieder entfernt 
                             result.at(i, j).assign(MX.times(new MX(cell.Value()), 
-                                    new MX(mv.getMX().at(cell.bladeIndex()))));
-                            System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]:"+
-                                    result.at(i, j).toString(false)+" dim="+result.at(i, j).dim_());
+                                    mv.getMX().at(cell.bladeIndex())));
+                            System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
+                                   MX.times(new MX(cell.Value()), 
+                                    new MX(mv.getMX().at(cell.bladeIndex())) ));
                         }
-                        //values[i][j] = 1d;
                     // wegen sparsity 0 setzen
                     } else {
                         //FIXME
