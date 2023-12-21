@@ -23,14 +23,14 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils = new CGAOperatorMatrixUtils(baseCayleyTable);
     
     // a multivector is represented by a sparse column vector
-    final CGAMultivectorSparsity sparsity;
+    //final CGAMultivectorSparsity sparsity;
     private final MX mx;
     
     public static SparseCGASymbolicMultivector instance(String name, SparseDoubleColumnVector vector){
         return new SparseCGASymbolicMultivector(name, vector);
     }
     private SparseCGASymbolicMultivector(String name, SparseDoubleColumnVector vector){
-        sparsity = new CGAMultivectorSparsity(vector.getSparsity());
+        //sparsity = new CGAMultivectorSparsity(vector.getSparsity());
         mx = new MX(CasADiUtil.toCasADiSparsity(vector.getSparsity()), new MX(vector.nonzeros()[0]));
         this.name = name;
     }
@@ -44,7 +44,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @param grade 
      */
     protected SparseCGASymbolicMultivector(String name, int grade){
-        sparsity = CGAKVectorSparsity.instance(grade);
+        CGAMultivectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         this.name = null;
     }
@@ -52,7 +52,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(name, sparsity);
     }
     protected SparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity){
-        this.sparsity = new CGAMultivectorSparsity(sparsity);
+        //this.sparsity = new CGAMultivectorSparsity(sparsity);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         this.name = null;
     }
@@ -60,17 +60,17 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(name);
     }
     protected SparseCGASymbolicMultivector(String name){
-        sparsity = CGAKVectorSparsity.dense();
+        CGAMultivectorSparsity sparsity = CGAKVectorSparsity.dense();
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         this.name = name;
     }
     SparseCGASymbolicMultivector(MX mx){
-        sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
+        //sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
         this.mx = mx;
         this.name = null;
     }
     public SparseCGASymbolicMultivector(){
-        sparsity = null;
+        //sparsity = null;
         mx = null;
         this.name = null;
     }
@@ -85,7 +85,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     
     @Override
     public ColumnVectorSparsity getSparsity(){
-        return sparsity;
+        return CasADiUtil.toColumnVectorSparsity(mx.sparsity());
+        //return sparsity;
     }
     public MX getMX(){
         return mx;
@@ -105,8 +106,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      */
     MX getMX(String bladeName){
         int row = baseCayleyTable.getBasisBladeRow(bladeName);
-        if (row == -1) throw new IllegalArgumentException("The given bladeName ="+bladeName+" does not exist in the cayley table!");
-        if (sparsity.isNonZero(row,0)) return mx.at(row, 0);
+        if (row == -1) throw new IllegalArgumentException("The given bladeName ="+
+                bladeName+" does not exist in the cayley table!");
+        //if (sparsity.isNonZero(row,0)) return mx.at(row, 0);
+        if (mx.sparsity().has_nz(row, 0)) return mx.at(row, 0);
         return null;
     }
     

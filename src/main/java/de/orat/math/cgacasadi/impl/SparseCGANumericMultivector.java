@@ -28,7 +28,7 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
         return new SparseCGANumericMultivector(values);
     }
     protected SparseCGANumericMultivector(double[] values){
-        if (CGACayleyTable.CGABasisBladeNames.length != values.length) throw
+        if (baseCayleyTable.getBladesCount() != values.length) throw
                 new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "+
                         String.valueOf(values.length));
         this.dm = CasADiUtil.toDM(values);
@@ -37,11 +37,11 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
         return new SparseCGANumericMultivector(nonzeros, rows);
     }
     protected SparseCGANumericMultivector(double[] nonzeros, int[] rows){
-        if (CGACayleyTable.CGABasisBladeNames.length < nonzeros.length) throw
+        if (baseCayleyTable.getBladesCount() < nonzeros.length) throw
                 new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "+
                         String.valueOf(nonzeros.length));
         if (nonzeros.length != rows.length) throw new IllegalArgumentException("Construction of CGA multivector failed because nonzeros.length != rows.length!");
-        this.dm = CasADiUtil.toDM(CGACayleyTable.CGABasisBladeNames.length, nonzeros, rows);
+        this.dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
     }
     
     public DM getDM(){

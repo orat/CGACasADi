@@ -11,11 +11,14 @@ import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.List;
 import java.util.Random;
 import util.Algebra;
+import util.cga.CGACayleyTableGeometricProduct;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class CGAExprGraphFactory implements iExprGraphFactory {
+    
+    final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
     
     // create symbolic multivectors
     
@@ -57,7 +60,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         return MultivectorNumeric.get(impl);
     }
     public MultivectorNumeric createRandomMultivectorNumeric(){
-        return createMultivectorNumeric(createRandomMultivector(CGACayleyTable.CGABasisBladeNames.length));
+        return createMultivectorNumeric(createRandomMultivector(baseCayleyTable.getBladesCount()));
     }
     
     @Override
@@ -96,6 +99,6 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     }
 
     public double[] createRandomCGAMultivector(){
-        return createRandomMultivector(CGACayleyTable.CGABasisBladeNames.length);
+        return createRandomMultivector(baseCayleyTable.getBladesCount());
     }
 }

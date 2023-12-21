@@ -13,12 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+import util.cga.CGACayleyTableGeometricProduct;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class CGAImplTest {
     
+    final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+   
     public CGAImplTest() {
     }
 
@@ -42,7 +45,7 @@ public class CGAImplTest {
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
-        double[] values_A = new double[CGACayleyTable.CGABasisBladeNames.length];
+        double[] values_A = new double[baseCayleyTable.getBladesCount()];
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
@@ -50,7 +53,7 @@ public class CGAImplTest {
         System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
-        double[] values_B = new double[CGACayleyTable.CGABasisBladeNames.length];
+        double[] values_B = new double[baseCayleyTable.getBladesCount()];
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
@@ -89,7 +92,7 @@ public class CGAImplTest {
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
-        double[] values_A = new double[CGACayleyTable.CGABasisBladeNames.length];
+        double[] values_A = new double[baseCayleyTable.getBladesCount()];
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
@@ -97,7 +100,7 @@ public class CGAImplTest {
         System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
-        double[] values_B = new double[CGACayleyTable.CGABasisBladeNames.length];
+        double[] values_B = new double[baseCayleyTable.getBladesCount()];
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
@@ -196,7 +199,7 @@ public class CGAImplTest {
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
-        double[] values_A = new double[CGACayleyTable.CGABasisBladeNames.length];
+        double[] values_A = new double[baseCayleyTable.getBladesCount()];
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
@@ -204,7 +207,7 @@ public class CGAImplTest {
         //System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
         
-        double[] values_B = new double[CGACayleyTable.CGABasisBladeNames.length];
+        double[] values_B = new double[baseCayleyTable.getBladesCount()];
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;

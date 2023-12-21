@@ -36,6 +36,38 @@ public class UtilsTest {
         // A[0][0]=(project((zeros(2x2,1nz)[0] = x[0]))[1] = (3*x[0]))[0]
         // statt den Ausdruck für die Zelle bekomme ich den Inhalt der gesamten Matrix
         System.out.println("A[0][0]="+A.at(0, 0));
+        /**
+         * bei MX wird nach Zuweisung eines Elementes und anschließendem Anschauen 
+         * des Elementes alles geprinted.
+         * TODO Test unter Python/Matlab
+         * In der Dokumentation ist die Ausgabe des Beispiels mit MX, wo dies 
+         * gemacht wird, auch so: https://web.casadi.org/docs/#the-mx-symbolics
+         * (siehe letzter Code Block).
+         * 
+         * Dass beim Printen eines Elementes einer Matrix nur dieses angezeigt wird, 
+         * funktioniert hingegen mit SX ohne Weiteres.
+         * 
+         * Trick gefunden... Und zwar, wenn ich die MxSubMatrix, welche von dem at() 
+         * von MX zurück gegeben wird, einer neuen Funktion als Output-Parameter 
+         * spezifiziere und diese MX-Funktion dann symbolisch mit SX Output-Argument 
+         * calle und den Output printe, dann sehe ich auch genau nur das Element.
+         * Das funktioniert für normale MX gut, für MX aus MX.sym gibt es 
+         * nachvollziehbarerweise eine Exception, weil die als Inputs gedacht sind, 
+         * so wie ich das verstehe.
+         * 
+         * Ich könnte eine Methode schreiben und in MxSubMatrix injizieren, die 
+         * den Trick umsetzt.
+         * Oder soll ich lieber die toString() Methode von MxSubMatrix dafür 
+         * entsprechend anpassen? Gerade ist es so, dass MxSubMatrix die toString 
+         * Methode von MX erbt. Man könnte also zur Not immernoch explizit die 
+         * toString Methode der Basisklasse aufrufen.
+         * Sollte ich in der toString() Methode vielleicht überprüfen, ob die 
+         * MxSubMatrix 1x1 ist und nur dann den Trick durchführen?
+         * Oder sollte ich gleich ganz MX generell die toString Methode den Trick 
+         * benutzen lassen?
+         * Womöglich kann man auch dem MX irgendwo ansehen, ob es mit MX.sym 
+         * gebaut wurde und dann die normale toString() Methode nehmen automatisch...
+         */
     }
 
     public void testCGAKSparsity(){
