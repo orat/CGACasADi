@@ -14,7 +14,7 @@ import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 
-public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
+public class SparseCGASymbolicMultivector implements iMultivectorSymbolic{
    
     private MultivectorSymbolic.Callback callback;
     private String name;
@@ -48,6 +48,25 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         this.name = null;
     }
+    
+    
+    private static SparseCGASymbolicMultivector pseudoscalar;
+    public /*static*/ SparseCGASymbolicMultivector pseudoscalar(){
+        if (pseudoscalar == null){
+            String name = baseCayleyTable.getPseudoscalarName();
+            int grade = baseCayleyTable.getGrade(baseCayleyTable.getBasisBladeNames().length-1);
+            pseudoscalar = instance(name, grade);
+        }
+        return pseudoscalar;
+    }
+    private static SparseCGASymbolicMultivector inversePseudoscalar;
+    public /*static*/ SparseCGASymbolicMultivector inversePseudoscalar(){
+        if (inversePseudoscalar == null){
+            inversePseudoscalar = (SparseCGASymbolicMultivector) pseudoscalar().reverse();
+        }
+        return inversePseudoscalar;
+    }
+    
     public static SparseCGASymbolicMultivector instance(String name, ColumnVectorSparsity sparsity){
         return new SparseCGASymbolicMultivector(name, sparsity);
     }
@@ -62,6 +81,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     protected SparseCGASymbolicMultivector(String name){
         CGAMultivectorSparsity sparsity = CGAKVectorSparsity.dense();
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
+        //TODO gleich in casadi eine dense sparsity erzeugen
         this.name = name;
     }
     SparseCGASymbolicMultivector(MX mx){
@@ -120,31 +140,18 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     
     // operators
     
-    public iMultivectorSymbolic gp(iMultivectorSymbolic b){
-        MX gpm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableGeometricProduct.instance());
-        System.out.println("product matrix:");
-        System.out.println(gpm.toString(true));
-        MX result = MX.mtimes(gpm/*.T()*/, ((SparseCGASymbolicMultivector) b).getMX());
-        return new SparseCGASymbolicMultivector(result);
-    }
-    
-    //TODO das ließe sich auch ohne Matrizen sehr leicht implementieren, indem
-    // einfach nur die Vorzeichen des Multivektors entsprechend geändert werden
-    // vermutlich wäre das dann auch effizienter
     public iMultivectorSymbolic reverse(){
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
         //System.out.println("Reverse matrix = "+m.toString(false));
         //System.out.println(m.toString(true));
-        MX rev  = CasADiUtil.toMX(m);
-        MX result = MX.mtimes(rev, mx);
+        MX result = MX.mtimes(CasADiUtil.toMX(m), mx);
         return new SparseCGASymbolicMultivector(result);
     }
     
     public iMultivectorSymbolic gradeSelection(int grade){
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
         MX gradeSelection  = CasADiUtil.toMX(m);
-        MX result = MX.mtimes(gradeSelection, mx);
-        return new SparseCGASymbolicMultivector(result);
+        return new SparseCGASymbolicMultivector(MX.mtimes(gradeSelection, mx));
     }
 
     /**
@@ -155,59 +162,12 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @param a
      * @return !a
      */
-    public iMultivectorSymbolic dual(){
-        /*res[0]=-a[31];
-	res[1]=-a[30];
-        
-	res[2]=a[29];
-        
-	res[3]=-a[28];
-        
-	res[4]=a[27];
-	res[5]=a[26];
-	res[6]=a[25];
-        
-	res[7]=-a[24];
-        
-	res[8]=a[23];
-	res[9]=a[22];
-	res[10]=a[21];
-        
-	res[11]=-a[20];
-	res[12]=-a[19];
-        
-	res[13]=a[18];
-	res[14]=a[17];
-        
-	res[15]=-a[16];
-        
-	res[16]=a[15];
-        
-	res[17]=-a[14];
-	res[18]=-a[13];
-        
-	res[19]=a[12];
-	res[20]=a[11];
-        
-	res[21]=-a[10];
-	res[22]=-a[9];
-	res[23]=-a[8];
-        
-	res[24]=a[7];
-        
-	res[25]=-a[6];
-	res[26]=-a[5];
-	res[27]=-a[4];
-        
-	res[28]=a[3];
-        
-	res[29]=-a[2];
-        
-	res[30]=a[1];
-	res[31]=a[0];*/
-        //TODO
-        return null;
-    }
+    /*public iMultivectorSymbolic dual(){
+        MX lcm = CasADiUtil.toMXProductMatrix(this,
+                CGACayleyTableLeftContractionProduct.instance());
+        return new SparseCGASymbolicMultivector(MX.mtimes(lcm, 
+                ((SparseCGASymbolicMultivector) inversePseudoscalar()).getMX()));
+    }*/
 
     /**
      * Conjugate.
@@ -218,99 +178,48 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @return a.Conjugate()
      */
     public iMultivectorSymbolic conjugate(){
-        /*res[0]=this._mVec[0];
-        
-	res[1]=-this._mVec[1];
-	res[2]=-this._mVec[2];
-	res[3]=-this._mVec[3];
-	res[4]=-this._mVec[4];
-	res[5]=-this._mVec[5];
-	res[6]=-this._mVec[6];
-	res[7]=-this._mVec[7];
-	res[8]=-this._mVec[8];
-	res[9]=-this._mVec[9];
-	res[10]=-this._mVec[10];
-	res[11]=-this._mVec[11];
-	res[12]=-this._mVec[12];
-	res[13]=-this._mVec[13];
-	res[14]=-this._mVec[14];
-	res[15]=-this._mVec[15];
-        
-	res[16]=this._mVec[16];
-	res[17]=this._mVec[17];
-	res[18]=this._mVec[18];
-	res[19]=this._mVec[19];
-	res[20]=this._mVec[20];
-	res[21]=this._mVec[21];
-	res[22]=this._mVec[22];
-	res[23]=this._mVec[23];
-	res[24]=this._mVec[24];
-	res[25]=this._mVec[25];
-	res[26]=this._mVec[26];
-	res[27]=this._mVec[27];
-	res[28]=this._mVec[28];
-	res[29]=this._mVec[29];
-	res[30]=this._mVec[30];
-        
-	res[31]=-this._mVec[31];*/
-        //TODO
-        return null;
+        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
+        MX result = MX.mtimes(CasADiUtil.toMX(m), mx);
+        return new SparseCGASymbolicMultivector(result);
     }
 
     /**
      * Involute.
      *
-     * Main involution
-     *
+     * Main involution - grade inversion
+     * 
+     * swapping the parity of each grade
+     * 
+     * Das kann leicht für beliebige GAs formuliert werden
+     * 
      * @param a
      * @return a.Involute()
      */
-    public iMultivectorSymbolic involute (){
-        
-	/*res[0]=this._mVec[0];
-	res[1]=-this._mVec[1];
-	res[2]=-this._mVec[2];
-	res[3]=-this._mVec[3];
-	res[4]=-this._mVec[4];
-	res[5]=-this._mVec[5];
-	res[6]=this._mVec[6];
-	res[7]=this._mVec[7];
-	res[8]=this._mVec[8];
-	res[9]=this._mVec[9];
-	res[10]=this._mVec[10];
-	res[11]=this._mVec[11];
-	res[12]=this._mVec[12];
-	res[13]=this._mVec[13];
-	res[14]=this._mVec[14];
-	res[15]=this._mVec[15];
-	res[16]=-this._mVec[16];
-	res[17]=-this._mVec[17];
-	res[18]=-this._mVec[18];
-	res[19]=-this._mVec[19];
-	res[20]=-this._mVec[20];
-	res[21]=-this._mVec[21];
-	res[22]=-this._mVec[22];
-	res[23]=-this._mVec[23];
-	res[24]=-this._mVec[24];
-	res[25]=-this._mVec[25];
-	res[26]=this._mVec[26];
-	res[27]=this._mVec[27];
-	res[28]=this._mVec[28];
-	res[29]=this._mVec[29];
-	res[30]=this._mVec[30];
-	res[31]=-this._mVec[31];*/
-        //TODO
-        return null;
+    public iMultivectorSymbolic gradeInversion (){
+        // involute (Ak) = (-1) hoch k * Ak
+        SparseDoubleMatrix m = CGAOperatorMatrixUtils.createInvolutionOperatorMatrix(baseCayleyTable);
+        return new SparseCGASymbolicMultivector(MX.mtimes(CasADiUtil.toMX(m), mx));
     }
     
-    public iMultivectorSymbolic op(iMultivectorSymbolic b){
+    // implementation based on cayley table for the outer product
+    // test failed
+    /*public iMultivectorSymbolic op_(iMultivectorSymbolic b){
         MX opm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableOuterProduct.instance());
         //System.out.println("product matrix:");
         //System.out.println(opm.toString(true));
-        MX result = MX.mtimes(opm, ((SparseCGASymbolicMultivector) b).getMX());
+        return new SparseCGASymbolicMultivector(MX.mtimes(opm, ((SparseCGASymbolicMultivector) b).getMX()));
+    }*/
+
+    public iMultivectorSymbolic gp(iMultivectorSymbolic b){
+        MX gpm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableGeometricProduct.instance());
+        System.out.println("product matrix:");
+        System.out.println(gpm.toString(true));
+        MX result = MX.mtimes(gpm/*.T()*/, ((SparseCGASymbolicMultivector) b).getMX());
         return new SparseCGASymbolicMultivector(result);
     }
-
+    
+    
+    
     /**
      * Vee.
      *
@@ -357,56 +266,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
        */
        //TODO
        return null;
-    }
-
-    /**
-     * Dot.
-     *
-     * The inner product.
-     *
-     * @param a
-     * @param b
-     * @return a | b
-     */
-    public iMultivectorSymbolic dot (iMultivectorSymbolic b){
-        
-	/*res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31];
-	res[1]=b[1]*a[0]+b[0]*a[1]-b[6]*a[2]-b[7]*a[3]-b[8]*a[4]+b[9]*a[5]+b[2]*a[6]+b[3]*a[7]+b[4]*a[8]-b[5]*a[9]-b[16]*a[10]-b[17]*a[11]+b[18]*a[12]-b[19]*a[13]+b[20]*a[14]+b[21]*a[15]-b[10]*a[16]-b[11]*a[17]+b[12]*a[18]-b[13]*a[19]+b[14]*a[20]+b[15]*a[21]+b[26]*a[22]-b[27]*a[23]-b[28]*a[24]-b[29]*a[25]-b[22]*a[26]+b[23]*a[27]+b[24]*a[28]+b[25]*a[29]-b[31]*a[30]-b[30]*a[31];
-	res[2]=b[2]*a[0]+b[6]*a[1]+b[0]*a[2]-b[10]*a[3]-b[11]*a[4]+b[12]*a[5]-b[1]*a[6]+b[16]*a[7]+b[17]*a[8]-b[18]*a[9]+b[3]*a[10]+b[4]*a[11]-b[5]*a[12]-b[22]*a[13]+b[23]*a[14]+b[24]*a[15]+b[7]*a[16]+b[8]*a[17]-b[9]*a[18]-b[26]*a[19]+b[27]*a[20]+b[28]*a[21]-b[13]*a[22]+b[14]*a[23]+b[15]*a[24]-b[30]*a[25]+b[19]*a[26]-b[20]*a[27]-b[21]*a[28]+b[31]*a[29]+b[25]*a[30]+b[29]*a[31];
-	res[3]=b[3]*a[0]+b[7]*a[1]+b[10]*a[2]+b[0]*a[3]-b[13]*a[4]+b[14]*a[5]-b[16]*a[6]-b[1]*a[7]+b[19]*a[8]-b[20]*a[9]-b[2]*a[10]+b[22]*a[11]-b[23]*a[12]+b[4]*a[13]-b[5]*a[14]+b[25]*a[15]-b[6]*a[16]+b[26]*a[17]-b[27]*a[18]+b[8]*a[19]-b[9]*a[20]+b[29]*a[21]+b[11]*a[22]-b[12]*a[23]+b[30]*a[24]+b[15]*a[25]-b[17]*a[26]+b[18]*a[27]-b[31]*a[28]-b[21]*a[29]-b[24]*a[30]-b[28]*a[31];
-	res[4]=b[4]*a[0]+b[8]*a[1]+b[11]*a[2]+b[13]*a[3]+b[0]*a[4]+b[15]*a[5]-b[17]*a[6]-b[19]*a[7]-b[1]*a[8]-b[21]*a[9]-b[22]*a[10]-b[2]*a[11]-b[24]*a[12]-b[3]*a[13]-b[25]*a[14]-b[5]*a[15]-b[26]*a[16]-b[6]*a[17]-b[28]*a[18]-b[7]*a[19]-b[29]*a[20]-b[9]*a[21]-b[10]*a[22]-b[30]*a[23]-b[12]*a[24]-b[14]*a[25]+b[16]*a[26]+b[31]*a[27]+b[18]*a[28]+b[20]*a[29]+b[23]*a[30]+b[27]*a[31];
-	res[5]=b[5]*a[0]+b[9]*a[1]+b[12]*a[2]+b[14]*a[3]+b[15]*a[4]+b[0]*a[5]-b[18]*a[6]-b[20]*a[7]-b[21]*a[8]-b[1]*a[9]-b[23]*a[10]-b[24]*a[11]-b[2]*a[12]-b[25]*a[13]-b[3]*a[14]-b[4]*a[15]-b[27]*a[16]-b[28]*a[17]-b[6]*a[18]-b[29]*a[19]-b[7]*a[20]-b[8]*a[21]-b[30]*a[22]-b[10]*a[23]-b[11]*a[24]-b[13]*a[25]+b[31]*a[26]+b[16]*a[27]+b[17]*a[28]+b[19]*a[29]+b[22]*a[30]+b[26]*a[31];
-	res[6]=b[6]*a[0]+b[16]*a[3]+b[17]*a[4]-b[18]*a[5]+b[0]*a[6]-b[26]*a[13]+b[27]*a[14]+b[28]*a[15]+b[3]*a[16]+b[4]*a[17]-b[5]*a[18]+b[31]*a[25]-b[13]*a[26]+b[14]*a[27]+b[15]*a[28]+b[25]*a[31];
-	res[7]=b[7]*a[0]-b[16]*a[2]+b[19]*a[4]-b[20]*a[5]+b[0]*a[7]+b[26]*a[11]-b[27]*a[12]+b[29]*a[15]-b[2]*a[16]+b[4]*a[19]-b[5]*a[20]-b[31]*a[24]+b[11]*a[26]-b[12]*a[27]+b[15]*a[29]-b[24]*a[31];
-	res[8]=b[8]*a[0]-b[17]*a[2]-b[19]*a[3]-b[21]*a[5]+b[0]*a[8]-b[26]*a[10]-b[28]*a[12]-b[29]*a[14]-b[2]*a[17]-b[3]*a[19]-b[5]*a[21]+b[31]*a[23]-b[10]*a[26]-b[12]*a[28]-b[14]*a[29]+b[23]*a[31];
-	res[9]=b[9]*a[0]-b[18]*a[2]-b[20]*a[3]-b[21]*a[4]+b[0]*a[9]-b[27]*a[10]-b[28]*a[11]-b[29]*a[13]-b[2]*a[18]-b[3]*a[20]-b[4]*a[21]+b[31]*a[22]-b[10]*a[27]-b[11]*a[28]-b[13]*a[29]+b[22]*a[31];
-	res[10]=b[10]*a[0]+b[16]*a[1]+b[22]*a[4]-b[23]*a[5]-b[26]*a[8]+b[27]*a[9]+b[0]*a[10]+b[30]*a[15]+b[1]*a[16]+b[31]*a[21]+b[4]*a[22]-b[5]*a[23]-b[8]*a[26]+b[9]*a[27]+b[15]*a[30]+b[21]*a[31];
-	res[11]=b[11]*a[0]+b[17]*a[1]-b[22]*a[3]-b[24]*a[5]+b[26]*a[7]+b[28]*a[9]+b[0]*a[11]-b[30]*a[14]+b[1]*a[17]-b[31]*a[20]-b[3]*a[22]-b[5]*a[24]+b[7]*a[26]+b[9]*a[28]-b[14]*a[30]-b[20]*a[31];
-	res[12]=b[12]*a[0]+b[18]*a[1]-b[23]*a[3]-b[24]*a[4]+b[27]*a[7]+b[28]*a[8]+b[0]*a[12]-b[30]*a[13]+b[1]*a[18]-b[31]*a[19]-b[3]*a[23]-b[4]*a[24]+b[7]*a[27]+b[8]*a[28]-b[13]*a[30]-b[19]*a[31];
-	res[13]=b[13]*a[0]+b[19]*a[1]+b[22]*a[2]-b[25]*a[5]-b[26]*a[6]+b[29]*a[9]+b[30]*a[12]+b[0]*a[13]+b[31]*a[18]+b[1]*a[19]+b[2]*a[22]-b[5]*a[25]-b[6]*a[26]+b[9]*a[29]+b[12]*a[30]+b[18]*a[31];
-	res[14]=b[14]*a[0]+b[20]*a[1]+b[23]*a[2]-b[25]*a[4]-b[27]*a[6]+b[29]*a[8]+b[30]*a[11]+b[0]*a[14]+b[31]*a[17]+b[1]*a[20]+b[2]*a[23]-b[4]*a[25]-b[6]*a[27]+b[8]*a[29]+b[11]*a[30]+b[17]*a[31];
-	res[15]=b[15]*a[0]+b[21]*a[1]+b[24]*a[2]+b[25]*a[3]-b[28]*a[6]-b[29]*a[7]-b[30]*a[10]+b[0]*a[15]-b[31]*a[16]+b[1]*a[21]+b[2]*a[24]+b[3]*a[25]-b[6]*a[28]-b[7]*a[29]-b[10]*a[30]-b[16]*a[31];
-	res[16]=b[16]*a[0]-b[26]*a[4]+b[27]*a[5]+b[31]*a[15]+b[0]*a[16]+b[4]*a[26]-b[5]*a[27]+b[15]*a[31];
-	res[17]=b[17]*a[0]+b[26]*a[3]+b[28]*a[5]-b[31]*a[14]+b[0]*a[17]-b[3]*a[26]-b[5]*a[28]-b[14]*a[31];
-	res[18]=b[18]*a[0]+b[27]*a[3]+b[28]*a[4]-b[31]*a[13]+b[0]*a[18]-b[3]*a[27]-b[4]*a[28]-b[13]*a[31];
-	res[19]=b[19]*a[0]-b[26]*a[2]+b[29]*a[5]+b[31]*a[12]+b[0]*a[19]+b[2]*a[26]-b[5]*a[29]+b[12]*a[31];
-	res[20]=b[20]*a[0]-b[27]*a[2]+b[29]*a[4]+b[31]*a[11]+b[0]*a[20]+b[2]*a[27]-b[4]*a[29]+b[11]*a[31];
-	res[21]=b[21]*a[0]-b[28]*a[2]-b[29]*a[3]-b[31]*a[10]+b[0]*a[21]+b[2]*a[28]+b[3]*a[29]-b[10]*a[31];
-	res[22]=b[22]*a[0]+b[26]*a[1]+b[30]*a[5]-b[31]*a[9]+b[0]*a[22]-b[1]*a[26]-b[5]*a[30]-b[9]*a[31];
-	res[23]=b[23]*a[0]+b[27]*a[1]+b[30]*a[4]-b[31]*a[8]+b[0]*a[23]-b[1]*a[27]-b[4]*a[30]-b[8]*a[31];
-	res[24]=b[24]*a[0]+b[28]*a[1]-b[30]*a[3]+b[31]*a[7]+b[0]*a[24]-b[1]*a[28]+b[3]*a[30]+b[7]*a[31];
-	res[25]=b[25]*a[0]+b[29]*a[1]+b[30]*a[2]-b[31]*a[6]+b[0]*a[25]-b[1]*a[29]-b[2]*a[30]-b[6]*a[31];
-	res[26]=b[26]*a[0]-b[31]*a[5]+b[0]*a[26]-b[5]*a[31];
-	res[27]=b[27]*a[0]-b[31]*a[4]+b[0]*a[27]-b[4]*a[31];
-	res[28]=b[28]*a[0]+b[31]*a[3]+b[0]*a[28]+b[3]*a[31];
-	res[29]=b[29]*a[0]-b[31]*a[2]+b[0]*a[29]-b[2]*a[31];
-	res[30]=b[30]*a[0]+b[31]*a[1]+b[0]*a[30]+b[1]*a[31];
-	res[31]=b[31]*a[0]+b[0]*a[31];
-        CGA res_ret = new CGA(CGA.Empty);
-        res_ret._mVec = res;
-        return res_ret;*/
-        //TODO
-        return null;
     }
 
     /**
@@ -466,11 +325,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return null;
     }
 
-    public iMultivectorSymbolic gradeInversion(){
-        return null;
-    }
-    
-    
     
     /**
      * normalized.
@@ -526,5 +380,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     public void init(MultivectorSymbolic.Callback callback) {
         this.callback = callback;
     }
-}
 
+    @Override
+    public int grade() {
+        CGAMultivectorSparsity sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
+        return sparsity.getGrade();
+    }
+}

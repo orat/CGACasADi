@@ -72,6 +72,7 @@ public class CasADiUtil {
         return new MX(toStdVectorDouble(values));
     }
     
+    
     /**
      * Create a corresponding matrix for geometric product calculation.
      */
