@@ -7,6 +7,7 @@ import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseDoubleColumnVector;
 import java.util.ArrayList;
@@ -136,14 +137,16 @@ public class CGAImplTest {
         List<MultivectorSymbolic> returns = new ArrayList<>();
         returns.add(mvsc);
         
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("c", parameters, returns);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, returns);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
-       double[] values_A = new double[baseCayleyTable.getBladesCount()];
+        double[] values_A = new double[baseCayleyTable.getBladesCount()]; 
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
+        //values_A = exprGraphFactory.createRandomCGAKVector(1);
+        
         MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
@@ -152,6 +155,8 @@ public class CGAImplTest {
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
+        //values_B = exprGraphFactory.createRandomCGAKVector(1);
+        
         MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
         System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
@@ -163,9 +168,53 @@ public class CGAImplTest {
         try {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric mv = result2.iterator().next();
-            System.out.println("c=a^b="+mv.toString());
-            // alle Vorzeichen sind falsch
-            //FIXME
+            System.out.println("a^b="+mv.toString());
+            //FIXME alle Werte sind 0
+            
+            // a=[00, 1, 2, 3, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+            // b=[00, 1, 00, 1, 1, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+            // c=a^b=[00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+            // test=={0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, -2.0, 1.0, 0.0, 2.0, 2.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+
+            System.out.println("test=="+testMatrix.toString());
+            assertTrue(equals(mv.elements(), test));
+        } catch (Exception e){}
+    }
+    
+    @Test
+    public void testGradeSelectionRandom(){
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        CGAMultivectorSparsity sparsity_a = CGAMultivectorSparsity.dense();
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
+        //MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
+       
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = exprGraphFactory.createRandomCGAMultivector();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+        
+        //TODO
+        // alle grades durchspielen bzw. random auswählen
+        int grade = 3; // für 0, 1,2, 4,5 funktioniert es, für 3 funktioniert es nicht
+        MultivectorSymbolic res = mva.gradeSelection(grade);
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        
+        
+        double[] test = gradeSelection(values_A, grade);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+        
+        try {
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("gradeSelection()="+mv.toString());
             System.out.println("test="+testMatrix.toString());
             assertTrue(equals(mv.elements(), test));
         } catch (Exception e){}
@@ -181,7 +230,6 @@ public class CGAImplTest {
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         //MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         
-        // mit grade statt sparsity gibts einen anderen Fehler
         MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
         //System.out.println("a (sparsity): "+mva.getSparsity().toString());
         //System.out.println("a: "+mva.toString());
@@ -226,12 +274,61 @@ public class CGAImplTest {
         try {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric mv = result2.iterator().next();
-            System.out.println("c=a b="+mv.toString());
+            System.out.println("a b="+mv.toString());
             System.out.println("test="+testMatrix.toString());
             assertTrue(equals(mv.elements(), test));
         } catch (Exception e){}
     }
    
+    @Test
+    public void testGPRandom() {
+       
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
+        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b", 1); 
+        
+        // funktioniert das mit beliebigen multivectoren oder braucht es einen kVector?
+        //FIXME
+        MultivectorSymbolic res = mva.gp(mvb);
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        parameters.add(mvb); 
+        
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = exprGraphFactory.createRandomCGAMultivector();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+        
+        double[] values_B = exprGraphFactory.createRandomCGAMultivector();
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        arguments.add(arg_b);
+       
+        double[] test = gp(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+        
+        try {
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("random: a b="+mv.toString());
+            System.out.println("test="+testMatrix.toString());
+            //FIXME
+            // die 0en scheinen für 1-vectoren zu sein, deutet das auf einen Indexfehler hin?
+            // oder 
+            // eventuell tests mit k-Vektoren zuerst
+            //c=a b=[-0.159798, 00, 00, 00, 00, 00, 0.272527, 0.418648, -0.480159, 0.400053, -0.350173, 0.303446, 0.125849, -0.150816, 0.707357, -0.66717, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+            //test={-2.276794206920033, -1.032620236830744, 2.69084382150554, 3.353691988261922, 0.882396573082978, 3.369672119249031, 1.4152267703490762, -1.8653415778412712, -0.979477734183597, 0.251652254068629, 5.161704302990638, -0.6044961492305002, 1.7730770341161313, 0.31453180211861925, -3.0724102072291166, 0.27525383129202036, -3.7686046899571597, -1.0206637615520324, -1.9051909939180764, -2.4638801640068455, 1.6851430206098486, -0.24170620849251645, -3.471208711169055, 0.37302808284456446, -0.3156249120793141, -2.230116737562306, 0.7822737158152478, 2.481193682184664, -1.8658943674493844, 0.4112872231633338, -2.614420091161781, 1.44645585880776}
+            double eps = 0.00001;
+            assertTrue(equals(mv.elements(), test, eps));
+        } catch (Exception e){}
+    }
+    
     /**
      * Mul.
      *
@@ -279,7 +376,7 @@ public class CGAImplTest {
     }
     
     @Test
-    public void testInvolute(){
+    public void testInvoluteRandom(){
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
@@ -354,7 +451,7 @@ public class CGAImplTest {
     }
     
     @Test
-    public void testReverse(){
+    public void testReverseRandom(){
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
@@ -418,9 +515,50 @@ public class CGAImplTest {
 	res[31]=a[31];
         return res;
     }
-   
+   /**
+     * Grade projection/extraction.
+     * 
+     * Retrives the k-grade part of the multivector.
+     * 
+     * @param grade
+     * @return k-grade part of the multivector
+     * @throws IllegalArgumentException if grade <0 or grade > 5
+     */
+    public static double[] gradeSelection(double[] _mVec, int grade){
+        if (grade > 5 || grade < 0) 
+            throw new IllegalArgumentException ("Grade "+String.valueOf(grade)+" not allowed!");
+        
+        double[] arr = new double[32];
+        switch (grade){
+            case 0 -> arr[0] = _mVec[0];
+            case 1 -> {
+                for (int i=1;i<=5;i++){
+                    arr[i] = _mVec[i];
+                }
+            }
+            case 2 -> {
+                for (int i=6;i<=15;i++){
+                    arr[i] = _mVec[i];
+                }
+            }
+            case 3 -> {
+                for (int i=16;i<=25;i++){
+                    arr[i] = _mVec[i];
+                }
+            }
+            case 4 -> {
+                for (int i=26;i<=30;i++){
+                    arr[i] = _mVec[i];
+                }
+            }
+            case 5 -> arr[31] = _mVec[31];
+        }
+        return arr;
+    }
+    
+    
     @Test
-    public void testConjugate(){
+    public void testConjugateRandom(){
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
@@ -743,6 +881,13 @@ public class CGAImplTest {
         return res;
     }
 
+    private boolean equals(double[] a, double[] b, double eps){
+        if (a.length != b.length) throw new IllegalArgumentException("a.length != b.length");
+        for (int i=0;i<a.length;i++){
+            if (Math.abs(a[i] - b[i]) > eps) return false;
+        }
+        return true;
+    }
     private boolean equals(double[] a, double[] b){
         if (a.length != b.length) throw new IllegalArgumentException("a.length != b.length");
         for (int i=0;i<a.length;i++){

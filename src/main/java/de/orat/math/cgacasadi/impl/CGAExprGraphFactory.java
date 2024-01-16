@@ -97,8 +97,27 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         return random.doubles(-1, 1).
                 limit(basisBladesCount).toArray();
     }
+    public double[] createRandomCGAKVector(int basisBladesCount, int grade){
+        double[] result = new double[baseCayleyTable.getRows()];
+        Random random = new Random();
+        int[] indizes = baseCayleyTable.getIndizes(grade);
+        double[] values = random.doubles(-1, 1).
+                limit(indizes.length).toArray();
+        for (int i=0;i<indizes.length;i++){
+            result[indizes[i]] = values[i];
+        }
+        return result;
+    }
 
     public double[] createRandomCGAMultivector(){
         return createRandomMultivector(baseCayleyTable.getBladesCount());
+    }
+    
+    public double[] createRandomCGAKVector(){
+        Random random = new Random();
+        return createRandomCGAKVector(random.nextInt(0, baseCayleyTable.getPseudoscalarGrade()+1));
+    }
+    public double[] createRandomCGAKVector(int grade){
+        return createRandomCGAKVector(baseCayleyTable.getBladesCount(), grade);
     }
 }
