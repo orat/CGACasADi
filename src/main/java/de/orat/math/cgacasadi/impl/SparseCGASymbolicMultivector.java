@@ -223,10 +223,16 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic{
     }*/
 
     public iMultivectorSymbolic gp(iMultivectorSymbolic b){
+        System.out.println("---gp---");
         MX gpm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableGeometricProduct.instance());
+        // Der Output entspricht meiner Erwartung
+        System.out.println("--- end of gp matrix creation ---");
         // Die Darstellung ist praktisch nicht leserlich
         //System.out.println("product matrix gp:");
         //System.out.println(gpm.toString(true));
+        // mit .T sind nur noch alle Vorzeichen falsch bis auf das für das Skalar bei 1-vector
+        // bei random ist alles falsch bis auf das Skalar
+        // ohne .T ist bei random gp alles falsch
         MX result = MX.mtimes(gpm/*.T()*/, ((SparseCGASymbolicMultivector) b).getMX());
         return new SparseCGASymbolicMultivector(result);
     }

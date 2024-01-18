@@ -221,10 +221,7 @@ public class CGAImplTest {
     }
     
     @Test
-    public void testGP() {
-        
-        //TODO
-        // Umstellung auf Random
+    public void testGPVec1Fix() {
         
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
@@ -276,6 +273,12 @@ public class CGAImplTest {
             MultivectorNumeric mv = result2.iterator().next();
             System.out.println("a b="+mv.toString());
             System.out.println("test="+testMatrix.toString());
+            //FIXME
+            // Vorzeichenfehler aller Komponentn ausser für den scalar
+            // a b=[4, 00, 00, 00, 00, 00, 2, 2, -1, 0, -2, -2, 0, -3, 0, 0, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+            // test={4.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, -2.0, 1.0, 0.0, 2.0, 2.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+            // ganja: 4-2e12-2e13+e14+2e23+2e24+3e34
+            // test function ist damit überprüft, der Vorzeichenfehler muss also an der symbolic-gp method liegen
             assertTrue(equals(mv.elements(), test));
         } catch (Exception e){}
     }
@@ -284,16 +287,14 @@ public class CGAImplTest {
     public void testGPRandom() {
        
         CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
-        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
-        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b", 1); 
-        
-        // funktioniert das mit beliebigen multivectoren oder braucht es einen kVector?
-        //FIXME
-        MultivectorSymbolic res = mva.gp(mvb);
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a"/*, 1*/);
+        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b"/*, 1*/); 
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb); 
+        
+        MultivectorSymbolic res = mva.gp(mvb);
         
         List<MultivectorSymbolic> result = new ArrayList<>();
         result.add(res);
@@ -314,16 +315,77 @@ public class CGAImplTest {
         //System.out.println(testMatrix.toString());
         
         try {
+            System.out.println("a="+arg_a.toString());
+            System.out.println("b="+arg_b.toString());
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric mv = result2.iterator().next();
             System.out.println("random: a b="+mv.toString());
             System.out.println("test="+testMatrix.toString());
             //FIXME
-            // die 0en scheinen für 1-vectoren zu sein, deutet das auf einen Indexfehler hin?
-            // oder 
-            // eventuell tests mit k-Vektoren zuerst
-            //c=a b=[-0.159798, 00, 00, 00, 00, 00, 0.272527, 0.418648, -0.480159, 0.400053, -0.350173, 0.303446, 0.125849, -0.150816, 0.707357, -0.66717, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
-            //test={-2.276794206920033, -1.032620236830744, 2.69084382150554, 3.353691988261922, 0.882396573082978, 3.369672119249031, 1.4152267703490762, -1.8653415778412712, -0.979477734183597, 0.251652254068629, 5.161704302990638, -0.6044961492305002, 1.7730770341161313, 0.31453180211861925, -3.0724102072291166, 0.27525383129202036, -3.7686046899571597, -1.0206637615520324, -1.9051909939180764, -2.4638801640068455, 1.6851430206098486, -0.24170620849251645, -3.471208711169055, 0.37302808284456446, -0.3156249120793141, -2.230116737562306, 0.7822737158152478, 2.481193682184664, -1.8658943674493844, 0.4112872231633338, -2.614420091161781, 1.44645585880776}
+            //a=[0.788533, 0.230104, 0.617871, -0.928288, -0.105082, -0.769252, -0.0912453, -0.338095, -0.603159, 0.426324, 0.353887, 0.830786, -0.266535, 0.933946, 0.974447, 0.381749, -0.52536, -0.275709, -0.163835, -0.387657, 0.0793199, 0.184763, -0.746645, -0.56926, 0.684507, 0.0170876, -0.754337, -0.0343847, 0.791464, -0.614593, 0.591833, 0.227089]
+            //b=[0.0436466, -0.832396, 0.283982, -0.337702, 0.527104, 0.277705, 0.693611, 0.12766, 0.866075, -0.093915, 0.399915, 0.718882, 0.615126, 0.293259, 0.270382, -0.299662, -0.13652, 0.681146, -0.0903113, -0.464942, -0.939624, -0.208155, 0.482373, -0.821425, 0.974287, -0.998317, 0.406073, 0.439755, -0.804543, -0.51233, -0.451544, 0.667235]
+            //random: a b=[0.355931, -1.78226, -0.541808, -1.09884, 0.994596, -0.73997, 2.64298, 1.71158, 0.512802, -2.05135, 3.60021, 0.5254, -2.22526, 2.67642, -0.582524, 0.625841, 0.900617, 0.896198, -0.0642288, 1.61451, -2.17924, 3.58869, -0.560492, 1.50894, 3.1433, -2.80302, -1.77937, 0.127167, -3.52281, -1.53133, -1.24064, -0.667185]
+            //test={1.5129998566656144, 0.18279855321983673, -1.5486842481574314, -1.0307638838007547, 1.7355424748572692, 0.6963847626010777, 1.9340365152238923, -1.0463436077043107, -1.061457856849736, -1.6177672782510588, 0.19108293787230862, 1.0730930365434563, 1.2005647669797161, 0.8094238573650144, -3.3604704289582132, -0.840300135953945, 0.342225499220247, -0.506030354827997, -2.379276486840147, 0.7498230502220242, -1.466120946386584, -2.104513282014597, 0.18580517101020536, 1.7646581748137726, 2.463900023143224, -2.7117845454550986, -2.2909198246697, -1.3522817204400508, 2.1899067681117153, -1.5587260627620478, -0.2283382415197428, 0.5172856161891328}
+
+            double eps = 0.00001;
+            assertTrue(equals(mv.elements(), test, eps));
+        } catch (Exception e){}
+    }
+    
+    @Test
+    public void testGPRandom1Vec() {
+       
+        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
+        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b", 1); 
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        parameters.add(mvb); 
+        
+        MultivectorSymbolic res = mva.gp(mvb);
+        
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = exprGraphFactory.createRandomCGAKVector(1);
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+        
+        double[] values_B = exprGraphFactory.createRandomCGAKVector(1);
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        arguments.add(arg_b);
+       
+        double[] test = gp(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+        
+        try {
+            System.out.println("a="+arg_a.toString());
+            System.out.println("b="+arg_b.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("random 1-vec: a b="+mv.toString());
+            System.out.println("test="+testMatrix.toString());
+            //FIXME
+            //random 1-vec: a b=[0.321973, 00, 00, 00, 00, 00, 0.378457, -0.177341, -0.126853, (r)
+            // 0.177544, (f)
+            // -0.43196, -0.608462, (r)
+            // 0.66326, (f)
+            // 0.140333, (r)
+            // -0.108153, 0.0631305, (f) 
+            // 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+            //test={0.11216005820801957, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3784567994893423, -0.1773408889254089, -0.1268527623710874, 
+            // 0.03246793089164196, 
+            // -0.43196015989458275, -0.6084620730108591, 
+            // 0.568534557924607, 
+            // 0.14033270233199763, 
+            // -0.22935133252958934, -0.13836367773049948, 
+            // 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+
             double eps = 0.00001;
             assertTrue(equals(mv.elements(), test, eps));
         } catch (Exception e){}
