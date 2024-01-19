@@ -20,37 +20,16 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
 	private FunctionSymbolic.Callback callback;
 
 	private /*final*/ Function f_sym_casadi;
-	private /*final*/ String name;
-	private /*final*/ int arity;
-	private /*final*/ int resultCount;
-
-        // kann das wieder weg?
-        //FIXME
-        // vermutlich ja, da 
-	/*public CGASymbolicFunction(String name, List<MultivectorSymbolic> parameters, 
-                                                List<MultivectorSymbolic> returns) {
-		this.name = name;
-		this.arity = parameters.size();
-		this.resultCount = returns.size();
-		var f_sym_in =  transform(parameters);
-		var f_sym_out = transform(returns);
-		this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
-	}*/
-
-        public void set(String name, List<iMultivectorSymbolic> parameters, 
+	
+        @Override
+        public void set(List<iMultivectorSymbolic> parameters, 
                                          List<iMultivectorSymbolic> returns){
-            this.name = name;
-            this.arity = parameters.size();
-            this.resultCount = returns.size();
             var f_sym_in = transformImpl(parameters);
 	    var f_sym_out = transformImpl(returns);
+            String name = callback.getName();
 	    this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
         }
     
-	protected static StdVectorMX transform(List<MultivectorSymbolic> mvs) {
-		List<MX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv.impl).getMX()).toList();
-		return new StdVectorMX(mxs);
-	}
         protected static StdVectorMX transformImpl(List<iMultivectorSymbolic> mvs) {
 		List<MX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getMX()).toList();
 		return new StdVectorMX(mxs);
@@ -81,17 +60,5 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
 	@Override
 	public void init(FunctionSymbolic.Callback callback) {
 		this.callback = callback;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public int getArity() {
-		return this.arity;
-	}
-
-	public int getResultCount() {
-		return this.resultCount;
 	}
 }
