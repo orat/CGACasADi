@@ -15,7 +15,7 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import util.CayleyTable;
 
-public class SparseCGASymbolicMultivector implements iMultivectorSymbolic{
+public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
    
     private MultivectorSymbolic.Callback callback;
     private String name;
