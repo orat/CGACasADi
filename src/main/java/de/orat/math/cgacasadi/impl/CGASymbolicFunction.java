@@ -16,49 +16,68 @@ import java.util.List;
  */
 public class CGASymbolicFunction implements iFunctionSymbolic {
 
-	// available after plugging the impl into the api object
-	private FunctionSymbolic.Callback callback;
-
-	private /*final*/ Function f_sym_casadi;
-	
-        @Override
-        public void set(List<iMultivectorSymbolic> parameters, 
-                                         List<iMultivectorSymbolic> returns){
-            var f_sym_in = transformImpl(parameters);
-	    var f_sym_out = transformImpl(returns);
-            String name = callback.getName();
-	    this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
-        }
+    private final String name;
+    private final int arity;
+    private final int resultCount;
     
-        protected static StdVectorMX transformImpl(List<iMultivectorSymbolic> mvs) {
-		List<MX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getMX()).toList();
-		return new StdVectorMX(mxs);
-	}
+    // available after plugging the impl into the api object
+    private FunctionSymbolic.Callback callback;
 
-	@Override
-	public List<iMultivectorSymbolic> callSymbolic(List<iMultivectorSymbolic> arguments) {
-		var f_sym_in = transformImpl(arguments);
-		var f_sym_out = new StdVectorMX();
-		this.f_sym_casadi.call(f_sym_in, f_sym_out);
-		return f_sym_out.stream().map(mx -> ((iMultivectorSymbolic) new SparseCGASymbolicMultivector(mx))).toList();
-	}
+    private final Function f_sym_casadi;
 
-	@Override
-	public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
-		var f_num_in = new StdVectorDM(arguments.stream().map(
-			imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
-		var f_num_out = new StdVectorDM();
-		this.f_sym_casadi.call(f_num_in, f_num_out);
-		return f_num_out.stream().map(dm -> ((iMultivectorNumeric) new SparseCGANumericMultivector(dm))).toList();
-	}
+    public CGASymbolicFunction(String name, List<iMultivectorSymbolic> parameters, 
+                                     List<iMultivectorSymbolic> returns){
+        var f_sym_in = transformImpl(parameters);
+        var f_sym_out = transformImpl(returns);
+        //String name = callback.getName();
+        this.name = name;
+        arity = parameters.size();
+        resultCount = returns.size();
+        this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
+    }
+    
+    protected static StdVectorMX transformImpl(List<iMultivectorSymbolic> mvs) {
+            List<MX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getMX()).toList();
+            return new StdVectorMX(mxs);
+    }
 
-	@Override
-	public String toString() {
-		return f_sym_casadi.toString();
-	}
+    @Override
+    public List<iMultivectorSymbolic> callSymbolic(List<iMultivectorSymbolic> arguments) {
+            var f_sym_in = transformImpl(arguments);
+            var f_sym_out = new StdVectorMX();
+            this.f_sym_casadi.call(f_sym_in, f_sym_out);
+            return f_sym_out.stream().map(mx -> ((iMultivectorSymbolic) new SparseCGASymbolicMultivector(mx))).toList();
+    }
 
-	@Override
-	public void init(FunctionSymbolic.Callback callback) {
-		this.callback = callback;
-	}
+    @Override
+    public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
+            var f_num_in = new StdVectorDM(arguments.stream().map(
+                    imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
+            var f_num_out = new StdVectorDM();
+            this.f_sym_casadi.call(f_num_in, f_num_out);
+            return f_num_out.stream().map(dm -> ((iMultivectorNumeric) new SparseCGANumericMultivector(dm))).toList();
+    }
+
+    @Override
+    public String toString() {
+            return f_sym_casadi.toString();
+    }
+
+    @Override
+    public void init(FunctionSymbolic.Callback callback) {
+            this.callback = callback;
+    }
+    @Override
+    public int getArity(){
+        return arity;
+    }
+    @Override
+    public int getResultCount(){
+        return resultCount;
+    }
+    @Override
+    public String getName(){
+        return name;
+    }
+    
 }

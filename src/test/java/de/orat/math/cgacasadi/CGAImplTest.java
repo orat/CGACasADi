@@ -4,9 +4,11 @@ import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
+import de.orat.math.gacalc.api.ExprGraphFactory;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseDoubleColumnVector;
@@ -24,17 +26,18 @@ public class CGAImplTest {
     final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
    
     public CGAImplTest() {
+        //ExprGraphFactory exprGraphFactory = ExprGraphFactory.get(new CGAExprGraphFactory());
     }
 
     @Test
     public void testAdd() {
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
         MultivectorSymbolic mvsb = exprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
         
-        MultivectorSymbolic mvsc = mvsa.add(mvsb);
+        MultivectorSymbolic mvsc = mvsa.addition(mvsb);
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mvsa);
@@ -75,13 +78,13 @@ public class CGAImplTest {
     
     @Test
     public void testSub() {
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
         MultivectorSymbolic mvsb = exprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
         
-        MultivectorSymbolic mvsc = mvsa.sub(mvsb);
+        MultivectorSymbolic mvsc = mvsa.subtraction(mvsb);
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mvsa);
@@ -123,13 +126,13 @@ public class CGAImplTest {
     
     @Test
     public void testOP() {
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         MultivectorSymbolic mvsa = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1,3,4});
         MultivectorSymbolic mvsb = exprGraphFactory.createMultivectorSymbolic("b", sparsity_b);
         
-        MultivectorSymbolic mvsc = mvsa.op(mvsb);
+        MultivectorSymbolic mvsc = mvsa.outerProduct(mvsb);
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mvsa);
@@ -183,7 +186,7 @@ public class CGAImplTest {
     
     @Test
     public void testGradeSelectionRandom(){
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = CGAMultivectorSparsity.dense();
         MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         //MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
@@ -197,7 +200,7 @@ public class CGAImplTest {
         //TODO
         // alle grades durchspielen bzw. random auswählen
         int grade = 3; // für 0, 1,2, 4,5 funktioniert es, für 3 funktioniert es nicht
-        MultivectorSymbolic res = mva.gradeSelection(grade);
+        MultivectorSymbolic res = mva.gradeExtraction(grade);
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -223,7 +226,7 @@ public class CGAImplTest {
     @Test
     public void testGPVec1Fix() {
         
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         //MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
         
@@ -235,7 +238,7 @@ public class CGAImplTest {
         //System.out.println("b (sparsity): "+mvb.getSparsity().toString());
         //System.out.println("b: "+mvb.toString());
         
-        MultivectorSymbolic res = mva.gp(mvb);
+        MultivectorSymbolic res = mva.geometricProduct(mvb);
         //System.out.println("result (sym): "+res.toString());
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
@@ -286,7 +289,7 @@ public class CGAImplTest {
     @Test
     public void testGPRandom() {
        
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+       ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a"/*, 1*/);
         MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b"/*, 1*/); 
         
@@ -294,7 +297,7 @@ public class CGAImplTest {
         parameters.add(mva);
         parameters.add(mvb); 
         
-        MultivectorSymbolic res = mva.gp(mvb);
+        MultivectorSymbolic res = mva.geometricProduct(mvb);
         
         List<MultivectorSymbolic> result = new ArrayList<>();
         result.add(res);
@@ -335,7 +338,8 @@ public class CGAImplTest {
     @Test
     public void testGPRandom1Vec() {
        
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        //CGAExprGraphFactory fac = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a", 1);
         MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b", 1); 
         
@@ -343,7 +347,7 @@ public class CGAImplTest {
         parameters.add(mva);
         parameters.add(mvb); 
         
-        MultivectorSymbolic res = mva.gp(mvb);
+        MultivectorSymbolic res = mva.geometricProduct(mvb);
         
         List<MultivectorSymbolic> result = new ArrayList<>();
         result.add(res);
@@ -351,11 +355,11 @@ public class CGAImplTest {
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
-        double[] values_A = exprGraphFactory.createRandomCGAKVector(1);
+        double[] values_A = TestExprGraphFactory.createRandomCGAKVector(1);
         MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         arguments.add(arg_a);
         
-        double[] values_B = exprGraphFactory.createRandomCGAKVector(1);
+        double[] values_B = TestExprGraphFactory.createRandomCGAKVector(1);
         MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
         arguments.add(arg_b);
        
@@ -439,7 +443,7 @@ public class CGAImplTest {
     
     @Test
     public void testInvoluteRandom(){
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
         System.out.println("mv: "+mv.toString());
@@ -514,7 +518,7 @@ public class CGAImplTest {
     
     @Test
     public void testReverseRandom(){
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
         System.out.println("mv: "+mv.toString());
@@ -621,11 +625,11 @@ public class CGAImplTest {
     
     @Test
     public void testConjugateRandom(){
-        CGAExprGraphFactory exprGraphFactory = new CGAExprGraphFactory();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 1);
         System.out.println("mv (sparsity): "+mv.getSparsity().toString());
         System.out.println("mv: "+mv.toString());
-        MultivectorSymbolic result = mv.conjugate();
+        MultivectorSymbolic result = mv.cliffordConjugate();
         System.out.println("result (sym): "+result.toString());
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();

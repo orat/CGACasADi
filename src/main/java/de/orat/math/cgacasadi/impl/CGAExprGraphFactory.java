@@ -25,36 +25,34 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     // create symbolic multivectors
     
     @Override
-    public MultivectorSymbolic createMultivectorSymbolic(String name, ColumnVectorSparsity sparsity) {
-        return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
-        //return new SparseCGASymbolicMultivector(name, sparsity);
+    public iMultivectorSymbolic createMultivectorSymbolic(String name, ColumnVectorSparsity sparsity) {
+        //return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
+        return new SparseCGASymbolicMultivector(name, sparsity);
     }
 
     @Override
-    public MultivectorSymbolic createMultivectorSymbolic(String name) {
-        return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
-        // return new SparseCGASymbolicMultivector(name);
+    public iMultivectorSymbolic createMultivectorSymbolic(String name) {
+        //return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
+        return new SparseCGASymbolicMultivector(name);
     }
     
     @Override
-    public MultivectorSymbolic createMultivectorSymbolic(String name, int grade) {
+    public iMultivectorSymbolic createMultivectorSymbolic(String name, int grade) {
         CGAKVectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
-        return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
-		
-        //CGAKVectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
-        //return new SparseCGASymbolicMultivector(name, sparsity);
+        //return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
+        return new SparseCGASymbolicMultivector(name, sparsity);
     }
 
     @Override
-    public MultivectorSymbolic createMultivectorSymbolic(String name, SparseDoubleColumnVector sparseVector) {
-        return MultivectorSymbolic.get(SparseCGASymbolicMultivector.instance(name, sparseVector));
-        //return SparseCGASymbolicMultivector.instance(name, sparseVector);
+    public iMultivectorSymbolic createMultivectorSymbolic(String name, SparseDoubleColumnVector sparseVector) {
+        //return MultivectorSymbolic.get(SparseCGASymbolicMultivector.instance(name, sparseVector));
+        return SparseCGASymbolicMultivector.instance(name, sparseVector);
     }
 
     
     // helper methods
     
-    static double[] createRandomMultivector(int basisBladesCount) {
+    public static double[] createRandomMultivector(int basisBladesCount) {
         Random random = new Random();
         return random.doubles(-1, 1).
                 limit(basisBladesCount).toArray();
@@ -94,30 +92,32 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
      * @param values
      * @return
      */
-    public MultivectorNumeric createMultivectorNumeric(double[] values) {
-        return MultivectorNumeric.get(new SparseCGANumericMultivector(values));
-        //return new SparseCGANumericMultivector(values);
+    @Override
+    public iMultivectorNumeric createMultivectorNumeric(double[] values) {
+        //return MultivectorNumeric.get(new SparseCGANumericMultivector(values));
+        return new SparseCGANumericMultivector(values);
     }
-
-    public MultivectorNumeric createMultivectorNumeric(double[] nonzeros, int[] rows) {
-        return MultivectorNumeric.get(new SparseCGANumericMultivector(nonzeros, rows));
+    @Override
+    public iMultivectorNumeric createMultivectorNumeric(double[] nonzeros, int[] rows) {
+        return new SparseCGANumericMultivector(nonzeros, rows);
     }
-
-    public MultivectorNumeric createRandomMultivectorNumeric() {
+    @Override
+    public iMultivectorNumeric createRandomMultivectorNumeric() {
         return createMultivectorNumeric(createRandomMultivector(baseCayleyTable.getBladesCount()));
     }
 
     @Override
-    public MultivectorNumeric createMultivectorNumeric(double[] nonzeros, SparseDoubleColumnVector sparsity) {
+    public iMultivectorNumeric createMultivectorNumeric(double[] nonzeros, SparseDoubleColumnVector sparsity) {
             throw new UnsupportedOperationException("Not supported yet.");
     }
 
     // create function objects
-    public FunctionSymbolic createFunctionSymbolic(String name, List<MultivectorSymbolic> parameters,
-            List<MultivectorSymbolic> returns) {
-            return FunctionSymbolic.get(new CGASymbolicFunction(), name, parameters, returns);
+    public iFunctionSymbolic createFunctionSymbolic(String name, List<iMultivectorSymbolic> parameters,
+            List<iMultivectorSymbolic> returns) {
+            return new CGASymbolicFunction(name, parameters, returns);
     }
 
+    
     // methods to describe the functionality of the implementation
     
     @Override
