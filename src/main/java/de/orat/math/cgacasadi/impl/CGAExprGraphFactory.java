@@ -3,6 +3,7 @@ package de.orat.math.cgacasadi.impl;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.spi.iEuclideanTypeConverter;
 import util.cga.CGAKVectorSparsity;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
@@ -12,6 +13,7 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.List;
 import java.util.Random;
+import org.jogamp.vecmath.Tuple3d;
 import util.cga.CGACayleyTableGeometricProduct;
 
 /**
@@ -107,8 +109,8 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     }
 
     @Override
-    public iMultivectorNumeric createMultivectorNumeric(double[] nonzeros, SparseDoubleColumnVector sparsity) {
-            throw new UnsupportedOperationException("Not supported yet.");
+    public iMultivectorNumeric createMultivectorNumeric(SparseDoubleColumnVector vec) {
+        return new SparseCGANumericMultivector(vec.nonzeros(), vec.getSparsity().getrow());
     }
 
     // create function objects
@@ -128,5 +130,81 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     @Override
     public String getName() {
         return "casadimx";
+    }
+
+    
+    // create constants
+    
+    @Override
+    public SparseDoubleColumnVector createBaseVectorOrigin(double scalor) {
+        double[] nonzeros = new double[]{-0.5d*scalor, 0.5d*scalor};
+        int[] rows = new int[]{4,5};
+        iMultivectorNumeric mvn = createMultivectorNumeric(nonzeros, rows);
+        //CGA e4s = new CGA(4, -0.5*scale);
+	//CGA e5s = new CGA(5, 0.5*scale);
+        //TODO
+        // wie komme ich aus iMultivectorNumeric ein iMultivectorSymbolic?
+        //return createMultivectorSymbolic(String name, SparseDoubleColumnVector sparseVector)
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public SparseDoubleColumnVector createBaseVectorInfinity(double scalor) {
+        //getEuclideanTypeConverter().
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createBaseVectorX(double scalar) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createBaseVectorY(double scalar) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createBaseVectorZ(double scalar) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createEpsilonPlus() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createEpsilonMinus() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createMinkovskyBiVector() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createEuclideanPseudoscalar() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createPseudoscalar() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
+    private static iEuclideanTypeConverter euclideanTypeConverter;
+    
+    public iEuclideanTypeConverter getEuclideanTypeConverter(){
+        if (euclideanTypeConverter == null){
+            euclideanTypeConverter = new CGAEuclideanTypeConverter(this);
+        }
+        return euclideanTypeConverter;
+    }
+
+    @Override
+    public SparseDoubleColumnVector createE(Tuple3d tuple3d) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

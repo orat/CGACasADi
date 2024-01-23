@@ -622,6 +622,40 @@ public class CGAImplTest {
         return arr;
     }
     
+    @Test
+    public void testDualRandom(){
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv");
+        System.out.println("mv (sparsity): "+mv.getSparsity().toString());
+        System.out.println("mv: "+mv.toString());
+        MultivectorSymbolic result = mv.dual();
+        System.out.println("result (sym): "+result.toString());
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mv);
+        
+        List<MultivectorSymbolic> res = new ArrayList<>();
+        res.add(result);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        double[] randomValues = exprGraphFactory.createRandomCGAMultivector();
+        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        arguments.add(arg);
+        
+        try {
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric out = result2.iterator().next();
+            System.out.println("b=dual(a)="+out.toString());
+            double[] values = out.elements();
+            
+            double[] test = dual(randomValues);
+            DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+            System.out.println(testMatrix.toString());
+            assertTrue(equals(values, test, mv.getSparsity()));
+        } catch (Exception e){}
+    }
+    
     
     @Test
     public void testConjugateRandom(){

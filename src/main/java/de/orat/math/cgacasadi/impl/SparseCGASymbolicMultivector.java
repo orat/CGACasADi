@@ -14,9 +14,12 @@ import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import util.CayleyTable;
+import util.cga.CGAOperations;
 
 public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
    
+    private static CGAExprGraphFactory exprGraphFac = new CGAExprGraphFactory();
+    
     private MultivectorSymbolic.Callback callback;
     private String name;
     
@@ -305,16 +308,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
 
     public iMultivectorSymbolic generalInverse(){
-        iMultivectorSymbolic conjugate = conjugate();
-        iMultivectorSymbolic gradeInversion = gradeInversion();
-        iMultivectorSymbolic reversion = reverse();
-        iMultivectorSymbolic part1 = conjugate.gp(gradeInversion).gp(reversion); 
-        iMultivectorSymbolic part2 = gp(part1); 
-        //iMultivectorSymbolic part3 = negate14(part2);
-        //double scalar = part2.gp(part3).scalarPart(); 
-        //return part1.gp(part3).gp(1d/scalar);
-        //TODO
-        return null;
+        return CGAOperations.generalInverse(this);
     }
     
     /**
@@ -374,5 +368,21 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
         MX result = MX.mtimes(CasADiUtil.toMX(m), mx);
         return new SparseCGASymbolicMultivector(result);
+    }
+
+    @Override
+    public iMultivectorSymbolic undual() {
+         //return gp(exprGraphFac.createPseudoscalar()).gp(-1); // -1 wird gebraucht
+         return dual().gp(-1);
+    }
+
+    @Override
+    public iMultivectorSymbolic negate14() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public double scalarPart() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
