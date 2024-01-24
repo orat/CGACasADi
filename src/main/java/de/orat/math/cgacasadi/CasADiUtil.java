@@ -16,6 +16,7 @@ import util.CayleyTable;
 import util.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseDoubleMatrix;
+import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
@@ -78,9 +79,11 @@ public class CasADiUtil {
      */
     public static MX toMXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable){
        
-        System.out.println("toMXproductMatrix(cv):  "+mv.getSparsity().toString());
+        String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
+        
+        System.out.println("toMXproductMatrix(input multivector sparsity):  "+mv.getSparsity().toString());
         MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
-        System.out.println("toMXproductMatrix(ct):  "+matrixSparsity.toString());
+        System.out.println("toMXproductMatrix(product matrix sparsity):  "+matrixSparsity.toString());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
         // testweise dense --> hat keinen Unterschied gemacht
         //de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(MatrixSparsity.dense(32, 32));
@@ -99,8 +102,9 @@ public class CasADiUtil {
                     if (sparsity.isNonZero(cell.bladeIndex(), 0)){
                         if (cell.Value() == 1d){
                             result.at(i, j).assign(mv.getMX().at(cell.bladeIndex(),0)); 
-                            System.out.println("to(sym)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
-                                    mv.getMX().at(cell.bladeIndex(),0));
+                            log[i][j] = mv.getMX().at(cell.bladeIndex(),0).toString();
+                            //System.out.println("to(sym)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
+                            //        mv.getMX().at(cell.bladeIndex(),0));
                         // -1, oder -xxxx multipliziert mit dem basis-blade
                         } else {
                             // Das ist ja eine Skalarmultiplikation
@@ -121,9 +125,11 @@ public class CasADiUtil {
                             // Zell-Objekt enthält dazu den index im Column-Vector.
                             result.at(i, j).assign(MX.times(new MX(cell.Value()), 
                                     mv.getMX().at(cell.bladeIndex())));
-                            System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
-                                   MX.times(new MX(cell.Value()), 
-                                    new MX(mv.getMX().at(cell.bladeIndex())) ));
+                            //System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
+                            //       MX.times(new MX(cell.Value()), 
+                            //        new MX(mv.getMX().at(cell.bladeIndex())) ));
+                            log[i][j] = MX.times(new MX(cell.Value()), 
+                                    new MX(mv.getMX().at(cell.bladeIndex())) ).toString();
                         }
                     // wegen sparsity 0 setzen
                     } else {
@@ -139,6 +145,10 @@ public class CasADiUtil {
                 }
             }
         }
+        
+        // testweise
+        DenseStringMatrix logMatrix = new DenseStringMatrix(log);
+        System.out.println("toMXProductMatrix: "+logMatrix);
         
         // testweise
         // Ausgabe taugt nichts, also die toStringMatrix() method taugt nichts

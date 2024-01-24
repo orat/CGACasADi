@@ -239,7 +239,7 @@ public class CGAImplTest {
         //System.out.println("b: "+mvb.toString());
         
         MultivectorSymbolic res = mva.geometricProduct(mvb);
-        //System.out.println("result (sym): "+res.toString());
+        System.out.println("result (sym vec1fix): "+res.toString());
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -289,7 +289,7 @@ public class CGAImplTest {
     @Test
     public void testGPRandom() {
        
-       ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a"/*, 1*/);
         MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b"/*, 1*/); 
         
@@ -298,6 +298,7 @@ public class CGAImplTest {
         parameters.add(mvb); 
         
         MultivectorSymbolic res = mva.geometricProduct(mvb);
+        System.out.println("gprandom: "+res.toString());
         
         List<MultivectorSymbolic> result = new ArrayList<>();
         result.add(res);
@@ -322,7 +323,7 @@ public class CGAImplTest {
             System.out.println("b="+arg_b.toString());
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric mv = result2.iterator().next();
-            System.out.println("random: a b="+mv.toString());
+            System.out.println("random (gp): a b="+mv.toString());
             System.out.println("test="+testMatrix.toString());
             //FIXME
             //a=[0.788533, 0.230104, 0.617871, -0.928288, -0.105082, -0.769252, -0.0912453, -0.338095, -0.603159, 0.426324, 0.353887, 0.830786, -0.266535, 0.933946, 0.974447, 0.381749, -0.52536, -0.275709, -0.163835, -0.387657, 0.0793199, 0.184763, -0.746645, -0.56926, 0.684507, 0.0170876, -0.754337, -0.0343847, 0.791464, -0.614593, 0.591833, 0.227089]
@@ -348,6 +349,7 @@ public class CGAImplTest {
         parameters.add(mvb); 
         
         MultivectorSymbolic res = mva.geometricProduct(mvb);
+        System.out.println("radmon1vec: "+res.toString());
         
         List<MultivectorSymbolic> result = new ArrayList<>();
         result.add(res);
@@ -626,10 +628,10 @@ public class CGAImplTest {
     public void testDualRandom(){
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv");
-        System.out.println("mv (sparsity): "+mv.getSparsity().toString());
-        System.out.println("mv: "+mv.toString());
+        System.out.println("mv (sparsity für dual): "+mv.getSparsity().toString());
+        System.out.println("mv: (dual) "+mv.toString());
         MultivectorSymbolic result = mv.dual();
-        System.out.println("result (sym): "+result.toString());
+        System.out.println("result (dual) (sym): "+result.toString());
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mv);
@@ -656,7 +658,37 @@ public class CGAImplTest {
         } catch (Exception e){}
     }
     
+    @Test
+    public void testScalarInverseRandom(){
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 0);
+        MultivectorSymbolic result = mv.scalarInverse();
+        System.out.println("result (sym scalarInverse): "+result.toString());
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mv);
+        
+        List<MultivectorSymbolic> res = new ArrayList<>();
+        res.add(result);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        double[] randomValues = exprGraphFactory.createRandomCGAMultivector();
+        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        arguments.add(arg);
+        
+        try {
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric out = result2.iterator().next();
+            System.out.println("b=scalarInverse(a)="+out.toString());
+            double[] values = out.elements();
+            assertTrue(values[0] == scalarInverse(randomValues));
+        } catch (Exception e){}
+    }
     
+    private double scalarInverse(double[] mv){
+        return 1d/mv[0];
+    }
     @Test
     public void testConjugateRandom(){
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();

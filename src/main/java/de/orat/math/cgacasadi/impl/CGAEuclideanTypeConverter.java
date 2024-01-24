@@ -5,6 +5,7 @@ import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.spi.iEuclideanTypeConverter;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
+import java.util.List;
 import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Tuple3d;
 import org.jogamp.vecmath.Vector3d;
@@ -71,7 +72,6 @@ public class CGAEuclideanTypeConverter implements iEuclideanTypeConverter {
     }
 
     public SparseCGAColumnVector scalar_ipns(double scalar) {
-        //var mvec = new CGAScalarIPNS(scalar);
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{32});
         return new SparseCGAColumnVector(sparsity, new double[]{scalar});
     }
@@ -235,4 +235,67 @@ public class CGAEuclideanTypeConverter implements iEuclideanTypeConverter {
         //var mvec = new CGATranslator(point);
         throw new RuntimeException("not yet implemented!");
     }
+    
+    
+    // from cga
+    
+    /*protected final List<CGAMultivector> inner;
+
+    protected Result(List<CGAMultivector> inner) {
+            this.inner = inner;
+    }
+
+    public Double firstDecomposeSquaredWeight() {
+            return ((CGAKVector) inner.get(0)).squaredWeight();
+    }
+
+    public double firstDecomposeScalar() {
+            return inner.get(0).decomposeScalar();
+    }
+
+    public Double[] decomposeScalarArray() {
+            return inner.stream().map(mv -> (mv.decomposeScalar())).toArray(Double[]::new);
+    }
+
+    public double[][] decomposeDoubleArray() {
+            return inner.stream().map(mv -> mv.extractCoordinates()).toArray(double[][]::new);
+    }
+
+    public double[] firstDecomposeDoubleArray() {
+            return inner.get(0).extractCoordinates();
+    }
+
+    public iCGATangentOrRound.EuclideanParameters firstDecomposeTangentOrRound() {
+            return (new CGAKVector(inner.get(0))).decomposeTangentOrRound();
+    }
+
+    public EuclideanParametersOfOrientedPointIPNS firstDecomposeOrientedPointIPNS() {
+            EuclideanParameters result = (new CGAOrientedPointIPNS(inner.get(0))).decomposeTangentOrRound();
+            return new EuclideanParametersOfOrientedPointIPNS(result.location(), result.attitude());
+    }
+
+    public EuclideanParametersFromPlaneIPNS firstDecomposePlaneIPNS() {
+            return new EuclideanParametersFromPlaneIPNS((new CGAPlaneIPNS(inner.get(0))).decomposeFlat());
+    }
+
+    public EuclideanParametersFromPlaneOPNS firstDecomposePlaneOPNS() {
+            return new EuclideanParametersFromPlaneOPNS((new CGAPlaneOPNS(inner.get(0))).decomposeFlat());
+    }
+
+    public Vector3d firstDecomposeAttitudeIPNS() {
+            return (new CGAAttitudeIPNS(inner.get(0))).direction();
+    }
+
+    public PointPair firstDecomposePointPairOPNS() {
+            //TODO herausfinden ob der Multivector ein ipns oder ein opns point-pair ist und entsprechend casten
+            return (new CGAPointPairOPNS(inner.get(0))).decomposePoints();
+    }
+
+    public Point3d firstDecomposeRoundPointIPNS() {
+            return (new CGARoundPointIPNS(inner.get(0))).location();
+    }
+
+    public Point3d[] decomposePoints() {
+            return inner.stream().map(mv -> (new CGARoundPointIPNS(mv)).location()).toArray(Point3d[]::new);
+    }*/
 }

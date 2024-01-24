@@ -63,7 +63,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         this.name = null;
     }
     
-    
+    @Override
+    public void init(MultivectorSymbolic.Callback callback) {
+        this.callback = callback;
+    }
+
     private static SparseCGASymbolicMultivector pseudoscalar;
     public /*static*/ SparseCGASymbolicMultivector pseudoscalar(){
         if (pseudoscalar == null){
@@ -103,55 +107,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         this.mx = mx;
         this.name = null;
     }
-    /*public SparseCGASymbolicMultivector(){
-        //sparsity = null;
-        mx = null;
-        this.name = null;
-    }*/
     
-    @Override
-    public String toString(){
-        //TODO
-        // eventuell sparsity noch mit ausgeben
-        SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(mx);
-        return stringMatrix.toString(true);
-    }
-    
-    @Override
-    public ColumnVectorSparsity getSparsity(){
-        return CasADiUtil.toColumnVectorSparsity(mx.sparsity());
-        //return sparsity;
-    }
-    public MX getMX(){
-        return mx;
-    }
-
-    public String getName(){
-        if (name != null) return name;
-        return mx.name();
-    }
-    
-    /**
-     * Get MX representation of a blade.
-     * 
-     * @param bladeName pseudoscalar_name of the blade
-     * @return null, if blade is structurel null else the MX representing the blade
-     * @throws IllegalArgumentException if the given blade pseudoscalar_name does not exist in the cayley-table
-     */
-    MX getMX(String bladeName){
-        int row = baseCayleyTable.getBasisBladeRow(bladeName);
-        if (row == -1) throw new IllegalArgumentException("The given bladeName ="+
-                bladeName+" does not exist in the cayley table!");
-        //if (sparsity.isNonZero(row,0)) return mx.at(row, 0);
-        if (mx.sparsity().has_nz(row, 0)) return mx.at(row, 0);
-        return null;
-    }
-    
-    public int getBladesCount(){
-        return baseCayleyTable.getBladesCount();
-    }
-    
-    
+   
     // operators
     
     public iMultivectorSymbolic reverse(){
@@ -311,6 +268,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return CGAOperations.generalInverse(this);
     }
     
+    public iMultivectorSymbolic scalorInverse(){
+       return new SparseCGASymbolicMultivector(MX.inv(mx));
+    }
+    
     /**
      * Negates only the signs of the vector and 4-vector parts of an multivector. 
      * 
@@ -336,31 +297,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     
     //------------
     
-    
-    @Override
-    public void init(MultivectorSymbolic.Callback callback) {
-        this.callback = callback;
-    }
-
-    @Override
-    public int grade() {
-        CGAMultivectorSparsity sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
-        return sparsity.getGrade();
-    }
-
-    @Override
-    public int[] grades() {
-        return CasADiUtil.toCGAMultivectorSparsity(mx.sparsity()).getGrades();
-    }
-
     @Override
     public iMultivectorSymbolic zeroInstance() {
         return new SparseCGASymbolicMultivector();
-    }
-
-    @Override
-    public CayleyTable getCayleyTable() {
-       return baseCayleyTable;
     }
 
     @Override
@@ -370,6 +309,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(result);
     }
 
+    /*@Override
+    public iMultivectorSymbolic dual() {
+        
+    }*/
+    
     @Override
     public iMultivectorSymbolic undual() {
          //return gp(exprGraphFac.createPseudoscalar()).gp(-1); // -1 wird gebraucht
@@ -381,8 +325,64 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    
+    //---- non symbolic functions
+    
     @Override
-    public double scalarPart() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public CayleyTable getCayleyTable() {
+       return baseCayleyTable;
+    }
+    
+    @Override
+    public int grade() {
+        CGAMultivectorSparsity sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
+        return sparsity.getGrade();
+    }
+
+    @Override
+    public int[] grades() {
+        return CasADiUtil.toCGAMultivectorSparsity(mx.sparsity()).getGrades();
+    }
+    
+    @Override
+    public String toString(){
+        //TODO
+        // eventuell sparsity noch mit ausgeben
+        SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(mx);
+        return stringMatrix.toString(true);
+    }
+    
+    @Override
+    public ColumnVectorSparsity getSparsity(){
+        return CasADiUtil.toColumnVectorSparsity(mx.sparsity());
+        //return sparsity;
+    }
+    public MX getMX(){
+        return mx;
+    }
+
+    /**
+     * Get MX representation of a blade.
+     * 
+     * @param bladeName pseudoscalar_name of the blade
+     * @return null, if blade is structurel null else the MX representing the blade
+     * @throws IllegalArgumentException if the given blade pseudoscalar_name does not exist in the cayley-table
+     */
+    MX getMX(String bladeName){
+        int row = baseCayleyTable.getBasisBladeRow(bladeName);
+        if (row == -1) throw new IllegalArgumentException("The given bladeName ="+
+                bladeName+" does not exist in the cayley table!");
+        //if (sparsity.isNonZero(row,0)) return mx.at(row, 0);
+        if (mx.sparsity().has_nz(row, 0)) return mx.at(row, 0);
+        return null;
+    }
+    
+    public String getName(){
+        if (name != null) return name;
+        return mx.name();
+    }
+    
+    public int getBladesCount(){
+        return baseCayleyTable.getBladesCount();
     }
 }
