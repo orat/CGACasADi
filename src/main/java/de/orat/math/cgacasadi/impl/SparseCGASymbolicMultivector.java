@@ -14,6 +14,7 @@ import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import util.CayleyTable;
+import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
 
 public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
@@ -34,7 +35,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     private SparseCGASymbolicMultivector(String name, SparseDoubleColumnVector vector){
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
+        //FIXME
+        // gibt das wirklich einen Spaltenvektor?
         mx = new MX(CasADiUtil.toCasADiSparsity(vector.getSparsity()), new MX(vecDouble));
+        //FIXME
+        // warum kann ich den Namen nicht im MX speichern?
         this.name = name;
     }
    
@@ -47,7 +52,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
                 ColumnVectorSparsity.empty(baseCayleyTable.getRows())), new MX(new StdVectorDouble()));
     }
     /*public SparseCGASymbolicMultivector(){
-        mx = null;
+        mx1 = null;
         this.name = null;
     }*/
     
@@ -103,7 +108,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         this.name = name;
     }
     SparseCGASymbolicMultivector(MX mx){
-        //sparsity = CasADiUtil.toCGAMultivectorSparsity(mx.sparsity());
+        //sparsity = CasADiUtil.toCGAMultivectorSparsity(mx1.sparsity());
         this.mx = mx;
         this.name = null;
     }
@@ -112,10 +117,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     // operators
     
     public iMultivectorSymbolic reverse(){
-        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
-        //System.out.println("Reverse matrix = "+m.toString(false));
-        //System.out.println(m.toString(true));
-        MX result = MX.mtimes(CasADiUtil.toMX(m), mx);
+        SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
+        System.out.println("Reverse matrix = "+revm.toString(false));
+        //System.out.println(revm.toString(true));
+        MX result = MX.mtimes(CasADiUtil.toMX(revm), mx);
         return new SparseCGASymbolicMultivector(result);
     }
     
@@ -151,7 +156,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      */
     public iMultivectorSymbolic conjugate(){
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
+        //System.out.println("conjugate result:"+revm.toString(true));
+        //FIXME
+        // muss da nicht times verwendet werden wie bei op und gp?
         MX result = MX.mtimes(CasADiUtil.toMX(m), mx);
+        //System.out.println(CasADiUtil.toStringMatrix(result).toString(true));
         return new SparseCGASymbolicMultivector(result);
     }
 
@@ -173,30 +182,22 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(MX.mtimes(CasADiUtil.toMX(m), mx));
     }
     
-    // implementation based on cayley table for the outer product
-    // test failed
-    /*public iMultivectorSymbolic op_(iMultivectorSymbolic b){
-        MX opm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableOuterProduct.instance());
-        //System.out.println("product matrix:");
-        //System.out.println(opm.toString(true));
-        return new SparseCGASymbolicMultivector(MX.mtimes(opm, ((SparseCGASymbolicMultivector) b).getMX()));
-    }*/
-
     public iMultivectorSymbolic gp(iMultivectorSymbolic b){
         System.out.println("---gp---");
-        MX gpm = CasADiUtil.toMXProductMatrix(this, CGACayleyTableGeometricProduct.instance());
-        // Der Output entspricht meiner Erwartung
+        MX opm = CasADiUtil.toMXProductMatrix((SparseCGASymbolicMultivector) this, CGACayleyTableGeometricProduct.instance());
         System.out.println("--- end of gp matrix creation ---");
-        // Die Darstellung ist praktisch nicht leserlich
-        //System.out.println("product matrix gp:");
-        //System.out.println(gpm.toString(true));
-        // mit .T sind nur noch alle Vorzeichen falsch bis auf das für das Skalar bei 1-vector
-        // bei random ist alles falsch bis auf das Skalar
-        // ohne .T ist bei random gp alles falsch
-        MX result = MX.mtimes(gpm/*.T()*/, ((SparseCGASymbolicMultivector) b).getMX());
+        MX result = MX.times(opm, ((SparseCGASymbolicMultivector) b).getMX());
         return new SparseCGASymbolicMultivector(result);
     }
     
+    // die default-impl im Interface sollte eigentlich auch funktionieren
+    public iMultivectorSymbolic op(iMultivectorSymbolic b){
+        System.out.println("---op---");
+        MX gpm = CasADiUtil.toMXProductMatrix((SparseCGASymbolicMultivector) this, CGACayleyTableOuterProduct.instance());
+        System.out.println("--- end of op matrix creation ---");
+        MX result = MX.times(gpm, ((SparseCGASymbolicMultivector) b).getMX());
+        return new SparseCGASymbolicMultivector(result);
+    }
 
     /**
      * Add.
@@ -223,7 +224,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @return a - b
      */
     /*public iMultivectorSymbolic sub (iMultivectorSymbolic b){
-        MX result = MX.minus(mx, ((SparseCGASymbolicMultivector) b).getMX());
+        MX result = MX.minus(mx1, ((SparseCGASymbolicMultivector) b).getMX());
         return new SparseCGASymbolicMultivector(result);
     }*/
 
@@ -238,8 +239,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * Calculate the Euclidean norm. (strict positive).
      */
     public iMultivectorSymbolic norm() {
-        MX mx = ((SparseCGASymbolicMultivector) gp(conjugate()).gradeSelection(0)).getMX();
-        return new SparseCGASymbolicMultivector(MX.sqrt(MX.abs(mx)));
+        MX mx1 = ((SparseCGASymbolicMultivector) gp(conjugate()).gradeSelection(0)).getMX();
+        return new SparseCGASymbolicMultivector(MX.sqrt(MX.abs(mx1)));
         //return Math.sqrt(Math.abs(binop_Mul(this, this.Conjugate())._mVec[0]));
     }
     
@@ -277,7 +278,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * 
      * @return multivector with changed signs for vector and 4-vector parts
      */
-    /*private iMultivectorSymbolic negate14(iMultivectorSymbolic m){
+    /*private iMultivectorSymbolic negate14(iMultivectorSymbolic revm){
         
         DM result = new DM(CasADiUtil.toCasADiSparsity(sparsity),dm);
         //StdVectorDouble result = dm.get_nonzeros();
@@ -346,8 +347,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     
     @Override
     public String toString(){
-        //TODO
-        // eventuell sparsity noch mit ausgeben
         SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(mx);
         return stringMatrix.toString(true);
     }
@@ -372,7 +371,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         int row = baseCayleyTable.getBasisBladeRow(bladeName);
         if (row == -1) throw new IllegalArgumentException("The given bladeName ="+
                 bladeName+" does not exist in the cayley table!");
-        //if (sparsity.isNonZero(row,0)) return mx.at(row, 0);
+        //if (sparsity.isNonZero(row,0)) return mx1.at(row, 0);
         if (mx.sparsity().has_nz(row, 0)) return mx.at(row, 0);
         return null;
     }
