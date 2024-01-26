@@ -270,7 +270,13 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     public iMultivectorSymbolic scalorInverse(){
-       return new SparseCGASymbolicMultivector(MX.inv(mx));
+       //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(mx.sparsity()).toString());
+       //System.out.println(CasADiUtil.toStringMatrix(mx).toString(true));
+       MX resultMX = new MX(mx.sparsity());
+       resultMX.at(0).assign(MX.inv(mx.at(0)));
+       SparseCGASymbolicMultivector result =  new SparseCGASymbolicMultivector(resultMX);
+       //System.out.println(CasADiUtil.toStringMatrix(mx).toString(true));
+       return result;
     }
     
     /**

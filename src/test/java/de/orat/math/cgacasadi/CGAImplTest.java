@@ -718,7 +718,7 @@ public class CGAImplTest {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv", 0);
         MultivectorSymbolic result = mv.scalarInverse();
-        System.out.println("result (sym scalarInverse): "+result.toString());
+        //System.out.println("result (sym scalarInverse): "+result.toString());
         
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mv);
