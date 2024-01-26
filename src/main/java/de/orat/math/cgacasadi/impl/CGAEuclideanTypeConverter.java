@@ -40,6 +40,9 @@ public class CGAEuclideanTypeConverter implements iEuclideanTypeConverter {
     
     private static final CGACayleyTable cgaCayleyTable = CGACayleyTableGeometricProduct.instance();
     
+    
+    // to CGA
+    
     // aus Arguments class de.dhbw.rahmlab.geomalgelang.api;
     
     private static CGAMultivectorSparsity euclideanVectorSparsity = 
@@ -62,8 +65,10 @@ public class CGAEuclideanTypeConverter implements iEuclideanTypeConverter {
         SparseCGAColumnVector v2mv = new SparseCGAColumnVector(euclideanVectorSparsity, 
                 new double[]{v2.x, v2.y, v2.z});
         iMultivectorNumeric v2mvn = fac.createMultivectorNumeric(v2mv);
-        //return v1mvn.op(v2mvn);
-        throw new RuntimeException("not yet implemented!");
+        SparseCGANumericMultivector result = (SparseCGANumericMultivector) v1mvn.op(v2mvn);
+        // implementation without sparsity:
+        // op() liefert dense
+        return new SparseCGAColumnVector(CGAMultivectorSparsity.dense(), result.elements());
     }
 
     public SparseCGAColumnVector scalar_opns(double scalar) {
@@ -239,63 +244,98 @@ public class CGAEuclideanTypeConverter implements iEuclideanTypeConverter {
     
     // from cga
     
-    /*protected final List<CGAMultivector> inner;
-
-    protected Result(List<CGAMultivector> inner) {
-            this.inner = inner;
+    public Double firstDecomposeSquaredWeight(List<SparseCGAColumnVector> mvs) {
+        return squaredWeight((mvs.get(0)));
+    }
+    public Double squaredWeight(SparseCGAColumnVector mv){
+        throw new UnsupportedOperationException("not yet implemented!");
+    }
+    
+    public double firstDecomposeScalar(List<SparseCGAColumnVector> mvs) {
+        return decomposeScalar(mvs.get(0));
+    }
+    
+    public Double[] decomposeScalarArray(List<SparseCGAColumnVector> mvs) {
+        return mvs.stream().map(mv -> (decomposeScalar(mv))).toArray(Double[]::new);
+    }
+    
+    public double decomposeScalar(SparseCGAColumnVector mv){
+        throw new UnsupportedOperationException("not yet implemented!");
+    }
+    
+    public double[][] decomposeDoubleArray(List<SparseCGAColumnVector> mvs) {
+        return mvs.stream().map(mv -> extractCoordinates(mv)).toArray(double[][]::new);
     }
 
-    public Double firstDecomposeSquaredWeight() {
-            return ((CGAKVector) inner.get(0)).squaredWeight();
+    public double[] firstDecomposeDoubleArray(List<SparseCGAColumnVector> mvs) {
+        return extractCoordinates(mvs.get(0));
+    }
+    
+    public double[] extractCoordinates(SparseCGAColumnVector mv){
+        throw new UnsupportedOperationException("not yet implemented!");
+    }
+    
+    public EuclideanParameters firstDecomposeTangentOrRound(List<SparseCGAColumnVector> mvs) {
+        return decomposeTangentOrRound(mvs.get(0));
+    }
+    
+    public EuclideanParameters decomposeTangentOrRound(SparseCGAColumnVector mv){
+        //attitude = inf.negate().lc(undual()).op(inf));
+        Point3d location;
+        Vector3d attitude;
+        throw new UnsupportedOperationException("not yet implemented!");
+    }
+    
+    public EuclideanParameters firstDecomposeOrientedPointIPNS(List<SparseCGAColumnVector> mvs) {
+        return decomposeTangentOrRound(mvs.get(0));
     }
 
-    public double firstDecomposeScalar() {
-            return inner.get(0).decomposeScalar();
+    public EuclideanParametersFromFlat firstDecomposePlaneIPNS(List<SparseCGAColumnVector> mvs) {
+        return decomposeIPNSFlat(mvs.get(0));
     }
 
-    public Double[] decomposeScalarArray() {
-            return inner.stream().map(mv -> (mv.decomposeScalar())).toArray(Double[]::new);
+    public EuclideanParametersFromFlat decomposeIPNSFlat(SparseCGAColumnVector mv){
+        throw new UnsupportedOperationException("not yet implemented!");
     }
-
-    public double[][] decomposeDoubleArray() {
-            return inner.stream().map(mv -> mv.extractCoordinates()).toArray(double[][]::new);
+    
+    public EuclideanParametersFromFlat firstDecomposePlaneOPNS(List<SparseCGAColumnVector> mvs) {
+        return decomposeOPNSFlat(mvs.get(0));
     }
-
-    public double[] firstDecomposeDoubleArray() {
-            return inner.get(0).extractCoordinates();
+    
+    public EuclideanParametersFromFlat decomposeOPNSFlat(SparseCGAColumnVector mv){
+        throw new UnsupportedOperationException("not yet implemented!");
     }
-
-    public iCGATangentOrRound.EuclideanParameters firstDecomposeTangentOrRound() {
-            return (new CGAKVector(inner.get(0))).decomposeTangentOrRound();
-    }
-
-    public EuclideanParametersOfOrientedPointIPNS firstDecomposeOrientedPointIPNS() {
-            EuclideanParameters result = (new CGAOrientedPointIPNS(inner.get(0))).decomposeTangentOrRound();
-            return new EuclideanParametersOfOrientedPointIPNS(result.location(), result.attitude());
-    }
-
-    public EuclideanParametersFromPlaneIPNS firstDecomposePlaneIPNS() {
-            return new EuclideanParametersFromPlaneIPNS((new CGAPlaneIPNS(inner.get(0))).decomposeFlat());
-    }
-
-    public EuclideanParametersFromPlaneOPNS firstDecomposePlaneOPNS() {
-            return new EuclideanParametersFromPlaneOPNS((new CGAPlaneOPNS(inner.get(0))).decomposeFlat());
-    }
-
+    
     public Vector3d firstDecomposeAttitudeIPNS() {
-            return (new CGAAttitudeIPNS(inner.get(0))).direction();
+        // return (new CGAAttitudeIPNS(inner.get(0))).direction();
+        throw new UnsupportedOperationException("not yet implemented!");
     }
 
-    public PointPair firstDecomposePointPairOPNS() {
+    public Point3d[] firstDecomposePointPairOPNS(List<SparseCGAColumnVector> mvs) {
             //TODO herausfinden ob der Multivector ein ipns oder ein opns point-pair ist und entsprechend casten
-            return (new CGAPointPairOPNS(inner.get(0))).decomposePoints();
+            return decomposePoints(mvs.get(0));
     }
 
     public Point3d firstDecomposeRoundPointIPNS() {
-            return (new CGARoundPointIPNS(inner.get(0))).location();
+        // return (new CGARoundPointIPNS(inner.get(0))).location();
+        throw new UnsupportedOperationException("not yet implemented!");
     }
+    
+    public Point3d[] decomposePoints(SparseCGAColumnVector mv) {
+        //CGAMultivector m = mn.negate().div(inf.lc(mn));
+        //CGARoundPointIPNS result = new CGARoundPointIPNS(m.compress());
+            
+        // center of this round, as a null vector
+        // https://github.com/pygae/clifford/blob/master/clifford/cga.py Zeile 284:
+        // self.mv * self.cga.einf * self.mv // * bedeutet geometrisches Produkt
+        //TODO ausprobieren?
 
-    public Point3d[] decomposePoints() {
-            return inner.stream().map(mv -> (new CGARoundPointIPNS(mv)).location()).toArray(Point3d[]::new);
-    }*/
+        // euclidean part rausziehen, scheint zu funktionieren
+        //CGAMultivector o = CGAMultivector.createOrigin(1d);
+        //CGAMultivector resultEuclidean = o.op(inf).ip(o.op(inf).op(result));
+    
+        //return inner.stream().map(mv -> (new CGARoundPointIPNS(mv)).location()).toArray(Point3d[]::new);
+        
+        throw new UnsupportedOperationException("not yet implemented!");
+    }
 }

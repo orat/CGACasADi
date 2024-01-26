@@ -8,6 +8,8 @@ import de.orat.math.gacalc.spi.iMultivectorNumeric;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
+ * 
+ * Achtung: Es können Objekte mit und ohne sparsity erzeugt werden
  */
 public class SparseCGANumericMultivector implements iMultivectorNumeric {
     
