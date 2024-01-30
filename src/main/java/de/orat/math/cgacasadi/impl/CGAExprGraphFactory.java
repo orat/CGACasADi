@@ -1,6 +1,5 @@
 package de.orat.math.cgacasadi.impl;
 
-//import de.orat.math.gacalc.spi.iEuclideanTypeConverter;
 import util.cga.CGAKVectorSparsity;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
@@ -27,26 +26,22 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     
     @Override
     public iMultivectorSymbolic createMultivectorSymbolic(String name, ColumnVectorSparsity sparsity) {
-        //return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
         return new SparseCGASymbolicMultivector(name, sparsity);
     }
 
     @Override
     public iMultivectorSymbolic createMultivectorSymbolic(String name) {
-        //return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name));
         return new SparseCGASymbolicMultivector(name);
     }
     
     @Override
     public iMultivectorSymbolic createMultivectorSymbolic(String name, int grade) {
         CGAKVectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
-        //return MultivectorSymbolic.get(new SparseCGASymbolicMultivector(name, sparsity));
         return new SparseCGASymbolicMultivector(name, sparsity);
     }
 
     @Override
     public iMultivectorSymbolic createMultivectorSymbolic(String name, SparseDoubleColumnVector sparseVector) {
-        //return MultivectorSymbolic.get(SparseCGASymbolicMultivector.instance(name, sparseVector));
         return SparseCGASymbolicMultivector.instance(name, sparseVector);
     }
 
@@ -106,6 +101,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         return new SparseCGANumericMultivector(vec.nonzeros(), vec.getSparsity().getrow());
     }
 
+    
     // create function objects
     
     public iFunctionSymbolic createFunctionSymbolic(String name, List<iMultivectorSymbolic> parameters,
@@ -118,7 +114,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     
     @Override
     public String getAlgebra() {
-            return "cga";
+        return "cga";
     }
     
     @Override
@@ -130,8 +126,8 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     // create constants
     
     @Override
-    public SparseDoubleColumnVector createBaseVectorOrigin(double scalor) {
-        double[] nonzeros = new double[]{-0.5d*scalor, 0.5d*scalor};
+    public SparseDoubleColumnVector createBaseVectorOrigin(double scalar) {
+        double[] nonzeros = new double[]{-0.5d*scalar, 0.5d*scalar};
         int[] rows = new int[]{4,5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseCGAColumnVector(sparsity, nonzeros);
@@ -199,8 +195,15 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
 
     @Override
     public SparseDoubleColumnVector createPseudoscalar() {
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{});
-        return new SparseCGAColumnVector(sparsity, new double[]{});
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{31});
+        return new SparseCGAColumnVector(sparsity, new double[]{1d});
+    }
+    
+    @Override
+    public SparseDoubleColumnVector createMinkovskyBiVector() {
+        // 2e45
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{15});
+        return new SparseCGAColumnVector(sparsity, new double[]{2d});
     }
     
     @Override
@@ -210,29 +213,36 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseCGAColumnVector(sparsity, nonzeros);
     }
-
-    @Override
-    public SparseDoubleColumnVector createMinkovskyBiVector() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
     
     @Override
     public SparseDoubleColumnVector createBaseVectorInfinityDorst() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        double[] nonzeros = new double[]{-1d, 1d};
+        int[] rows = new int[]{4,5};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
     @Override
     public SparseDoubleColumnVector createBaseVectorOriginDorst() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        double[] nonzeros = new double[]{0.5d, 0.5d};
+        int[] rows = new int[]{4,5};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
     @Override
     public SparseDoubleColumnVector createBaseVectorInfinityDoran() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        double[] nonzeros = new double[]{1d, 1d};
+        int[] rows = new int[]{4,5};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
     @Override
     public SparseDoubleColumnVector createBaseVectorOriginDoran() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        double[] nonzeros = new double[]{1d, -1d};
+        int[] rows = new int[]{4,5};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 }
