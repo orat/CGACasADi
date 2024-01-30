@@ -72,7 +72,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> mv = f.callNumeric(arguments);
             System.out.println("c=a+b="+mv.iterator().next().toString());
             System.out.println("test="+testMatrix.toString());
-            assertTrue(equals(mv.iterator().next().elements(), test));
+            assertTrue(equals(mv.iterator().next().elements().toArray(), test));
         } catch (Exception e){}
     }
     
@@ -119,7 +119,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> mv = f.callNumeric(arguments);
             System.out.println("c=a-b="+mv.iterator().next().toString());
             System.out.println("test="+testMatrix.toString());
-            assertTrue(equals(mv.iterator().next().elements(), test));
+            assertTrue(equals(mv.iterator().next().elements().toArray(), test));
         } catch (Exception e){}
     }
     
@@ -180,7 +180,7 @@ public class CGAImplTest {
             // test=={0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, -2.0, 1.0, 0.0, 2.0, 2.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
 
             System.out.println("test=="+testMatrix.toString());
-            assertTrue(equals(mv.elements(), test));
+            assertTrue(equals(mv.elements().toArray(), test));
         } catch (Exception e){}
     }
     
@@ -219,7 +219,7 @@ public class CGAImplTest {
             MultivectorNumeric mv = result2.iterator().next();
             System.out.println("gradeSelection()="+mv.toString());
             System.out.println("test="+testMatrix.toString());
-            assertTrue(equals(mv.elements(), test));
+            assertTrue(equals(mv.elements().toArray(), test));
         } catch (Exception e){}
     }
     
@@ -282,7 +282,7 @@ public class CGAImplTest {
             // test={4.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, -2.0, 1.0, 0.0, 2.0, 2.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
             // ganja: 4-2e12-2e13+e14+2e23+2e24+3e34
             // test function ist damit überprüft, der Vorzeichenfehler muss also an der symbolic-gp method liegen
-            assertTrue(equals(mv.elements(), test));
+            assertTrue(equals(mv.elements().toArray(), test));
         } catch (Exception e){}
     }
    
@@ -332,7 +332,7 @@ public class CGAImplTest {
             //test={1.5129998566656144, 0.18279855321983673, -1.5486842481574314, -1.0307638838007547, 1.7355424748572692, 0.6963847626010777, 1.9340365152238923, -1.0463436077043107, -1.061457856849736, -1.6177672782510588, 0.19108293787230862, 1.0730930365434563, 1.2005647669797161, 0.8094238573650144, -3.3604704289582132, -0.840300135953945, 0.342225499220247, -0.506030354827997, -2.379276486840147, 0.7498230502220242, -1.466120946386584, -2.104513282014597, 0.18580517101020536, 1.7646581748137726, 2.463900023143224, -2.7117845454550986, -2.2909198246697, -1.3522817204400508, 2.1899067681117153, -1.5587260627620478, -0.2283382415197428, 0.5172856161891328}
 
             double eps = 0.00001;
-            assertTrue(equals(mv.elements(), test, eps));
+            assertTrue(equals(mv.elements().toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -377,7 +377,7 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
             
             double eps = 0.00001;
-            assertTrue(equals(mv.elements(), test, eps));
+            assertTrue(equals(mv.elements().toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -438,7 +438,7 @@ public class CGAImplTest {
             // 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
 
             double eps = 0.00001;
-            assertTrue(equals(mv.elements(), test, eps));
+            assertTrue(equals(mv.elements().toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -523,7 +523,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
-            double[] values = out.elements();
+            double[] values = out.elements().toArray();
             assertTrue(equals(values, involute(randomValues), mv.getSparsity()));
         } catch (Exception e){}
     }
@@ -598,7 +598,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("reverse(a)="+out.toString());
-            double[] values = out.elements();
+            double[] values = out.elements().toArray();
             assertTrue(equals(values, reverse(randomValues), mv.getSparsity()));
         } catch (Exception e){}
     }
@@ -704,7 +704,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("b=dual(a)="+out.toString());
-            double[] values = out.elements();
+            double[] values = out.elements().toArray();
             
             double[] test = dual(randomValues);
             DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
@@ -736,7 +736,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("b=scalarInverse(a)="+out.toString());
-            double[] values = out.elements();
+            double[] values = out.elements().toArray();
             assertTrue(values[0] == scalarInverse(randomValues));
         } catch (Exception e){}
     }
@@ -769,7 +769,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
-            double[] values = out.elements();
+            double[] values = out.elements().toArray();
             assertTrue(equals(values, conjugate(randomValues), mv.getSparsity()));
         } catch (Exception e){}
     }

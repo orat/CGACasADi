@@ -17,6 +17,7 @@ import util.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 
@@ -128,12 +129,12 @@ public class CasADiUtil {
                             // Zelle der Cayleytable steht. Dieser muss multipliziert werden
                             // mit dem Wert der Zelle des korrespondierenden Multivektors. Das
                             // Zell-Objekt enthält dazu den index im Column-Vector.
-                            result.at(i, j).assign(MX.times(new MX(cell.Value()), 
+                            result.at(i, j).assign(MX.mtimes(new MX(cell.Value()), 
                                     mv.getMX().at(cell.bladeIndex(),0)));
                             //System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
                             //      MX.times(new MX(cell.Value()), 
                             //      new MX(mv.getMX().at(cell.bladeIndex(),0)) ).toString());
-                            log[i][j] = MX.times(new MX(cell.Value()), 
+                            log[i][j] = MX.mtimes(new MX(cell.Value()), 
                                     new MX(mv.getMX().at(cell.bladeIndex(),0)) ).toString();
                         }
                     // wegen sparsity 0 muss kein Wert gesetzt werden
@@ -187,14 +188,17 @@ public class CasADiUtil {
         }
         return result;
     }
-    public static double[] elements(DM dm){
-        StdVectorDouble res = dm.get_elements();
-        double[] result = new double[res.size()];
-        for (int i=0;i<result.length;i++){
-            result[i] = res.get(i);
+    public static SparseDoubleColumnVector elements(DM dm){
+        //StdVectorDouble res = dm.get_elements();
+        StdVectorDouble nonzeros = dm.nonzeros();
+        double[] nonzerosArray = new double[nonzeros.size()];
+        for (int i=0;i<nonzerosArray.length;i++){
+            nonzerosArray[i] = nonzeros.get(i);
         }
-        return result;
+        ColumnVectorSparsity sparsity = toColumnVectorSparsity(dm.sparsity());
+        return new SparseDoubleColumnVector(sparsity, nonzerosArray);
     }
+    
     public static DenseCGAColumnVector toDenseDoubleMatrix(DM dm, CGAMultivectorSparsity sparsity){
         double[] nonzeros = nonzeros(dm);
         return new DenseCGAColumnVector(nonzeros, sparsity.getrow());

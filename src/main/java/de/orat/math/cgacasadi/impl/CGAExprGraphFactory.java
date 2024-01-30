@@ -1,9 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.orat.math.gacalc.api.FunctionSymbolic;
-import de.orat.math.gacalc.api.MultivectorNumeric;
-import de.orat.math.gacalc.api.MultivectorSymbolic;
-import de.orat.math.gacalc.spi.iEuclideanTypeConverter;
+//import de.orat.math.gacalc.spi.iEuclideanTypeConverter;
 import util.cga.CGAKVectorSparsity;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
@@ -11,10 +8,13 @@ import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.jogamp.vecmath.Tuple3d;
 import util.cga.CGACayleyTableGeometricProduct;
+import util.cga.CGAMultivectorSparsity;
+import util.cga.SparseCGAColumnVector;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -115,8 +115,8 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
 
     // create function objects
     public iFunctionSymbolic createFunctionSymbolic(String name, List<iMultivectorSymbolic> parameters,
-            List<iMultivectorSymbolic> returns) {
-            return new CGASymbolicFunction(name, parameters, returns);
+        List<iMultivectorSymbolic> returns) {
+        return new CGASymbolicFunction(name, parameters, returns);
     }
 
     
@@ -139,36 +139,52 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     public SparseDoubleColumnVector createBaseVectorOrigin(double scalor) {
         double[] nonzeros = new double[]{-0.5d*scalor, 0.5d*scalor};
         int[] rows = new int[]{4,5};
-        iMultivectorNumeric mvn = createMultivectorNumeric(nonzeros, rows);
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
         //CGA e4s = new CGA(4, -0.5*scale);
 	//CGA e5s = new CGA(5, 0.5*scale);
-        //TODO
-        // wie komme ich aus iMultivectorNumeric ein iMultivectorSymbolic?
-        //return createMultivectorSymbolic(String name, SparseDoubleColumnVector sparseVector)
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public SparseDoubleColumnVector createBaseVectorInfinity(double scalor) {
-        //getEuclideanTypeConverter().
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public SparseDoubleColumnVector createBaseVectorInfinity(double scalar) {
+        double[] nonzeros = new double[]{scalar, scalar};
+        //CGA e4s = new CGA(4, scale);
+	//CGA e5s = new CGA(5, scale);
+        int[] rows = new int[]{4,5};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
     @Override
     public SparseDoubleColumnVector createBaseVectorX(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        double[] nonzeros = new double[]{scalar};
+        int[] rows = new int[]{1};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
     @Override
     public SparseDoubleColumnVector createBaseVectorY(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        double[] nonzeros = new double[]{scalar};
+        int[] rows = new int[]{2};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
     @Override
     public SparseDoubleColumnVector createBaseVectorZ(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        double[] nonzeros = new double[]{scalar};
+        int[] rows = new int[]{3};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
+    @Override
+    public SparseCGAColumnVector createScalar(double scalar) {
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
+        return new SparseCGAColumnVector(sparsity, new double[]{scalar});
+    }
+    
     @Override
     public SparseDoubleColumnVector createEpsilonPlus() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -194,17 +210,21 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
-    private static iEuclideanTypeConverter euclideanTypeConverter;
+    @Override
+    public SparseDoubleColumnVector createE(Tuple3d tuple3d) {
+        double[] nonzeros = new double[]{tuple3d.x, tuple3d.y, tuple3d.z};
+        int[] rows = new int[]{1,2,3};
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
+        return new SparseCGAColumnVector(sparsity, nonzeros);
+    }
+
     
-    public iEuclideanTypeConverter getEuclideanTypeConverter(){
+    //private static iEuclideanTypeConverter euclideanTypeConverter;
+    
+    /*public iEuclideanTypeConverter getEuclideanTypeConverter(){
         if (euclideanTypeConverter == null){
             euclideanTypeConverter = new CGAEuclideanTypeConverter(this);
         }
         return euclideanTypeConverter;
-    }
-
-    @Override
-    public SparseDoubleColumnVector createE(Tuple3d tuple3d) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    }*/
 }

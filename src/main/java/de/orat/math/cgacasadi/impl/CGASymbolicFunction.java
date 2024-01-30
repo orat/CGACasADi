@@ -51,21 +51,21 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
 
     @Override
     public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
-            var f_num_in = new StdVectorDM(arguments.stream().map(
-                    imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
-            var f_num_out = new StdVectorDM();
-            this.f_sym_casadi.call(f_num_in, f_num_out);
-            return f_num_out.stream().map(dm -> ((iMultivectorNumeric) new SparseCGANumericMultivector(dm))).toList();
+        var f_num_in = new StdVectorDM(arguments.stream().map(
+                imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
+        var f_num_out = new StdVectorDM();
+        this.f_sym_casadi.call(f_num_in, f_num_out);
+        return f_num_out.stream().map(dm -> ((iMultivectorNumeric) new SparseCGANumericMultivector(dm))).toList();
     }
 
     @Override
     public String toString() {
-            return f_sym_casadi.toString();
+        return f_sym_casadi.toString();
     }
 
     @Override
     public void init(FunctionSymbolic.Callback callback) {
-            this.callback = callback;
+        this.callback = callback;
     }
     @Override
     public int getArity(){

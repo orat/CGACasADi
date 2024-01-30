@@ -30,13 +30,12 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     // a multivector is represented by a sparse column vector
     private final MX mx;
     
+    // zum Erzeugen von symbolischen Konstanten
     public static SparseCGASymbolicMultivector instance(String name, SparseDoubleColumnVector vector){
         return new SparseCGASymbolicMultivector(name, vector);
     }
     private SparseCGASymbolicMultivector(String name, SparseDoubleColumnVector vector){
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
-        //FIXME
-        // gibt das wirklich einen Spaltenvektor?
         mx = new MX(CasADiUtil.toCasADiSparsity(vector.getSparsity()), new MX(vecDouble));
         //FIXME
         // warum kann ich den Namen nicht im MX speichern?
@@ -73,8 +72,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         this.callback = callback;
     }
 
+    // solche symbolischen Konstanten sind doch unbrauchbar, da müssten ja erst 
+    // noch 1-werte reingesetzt werden ...
+    // brauche ich aber für die default dual() implementation im interface
     private static SparseCGASymbolicMultivector pseudoscalar;
-    public /*static*/ SparseCGASymbolicMultivector pseudoscalar(){
+    public SparseCGASymbolicMultivector pseudoscalar(){
         if (pseudoscalar == null){
             String pseudoscalar_name = baseCayleyTable.getPseudoscalarName();
             int grade = baseCayleyTable.getGrade(baseCayleyTable.getBasisBladeNames().length-1);
@@ -83,7 +85,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return pseudoscalar;
     }
     private static SparseCGASymbolicMultivector inversePseudoscalar;
-    public /*static*/ SparseCGASymbolicMultivector inversePseudoscalar(){
+    public SparseCGASymbolicMultivector inversePseudoscalar(){
         if (inversePseudoscalar == null){
             inversePseudoscalar = (SparseCGASymbolicMultivector) pseudoscalar().reverse();
         }
@@ -184,9 +186,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     
     public iMultivectorSymbolic gp(iMultivectorSymbolic b){
         System.out.println("---gp---");
-        MX opm = CasADiUtil.toMXProductMatrix((SparseCGASymbolicMultivector) this, CGACayleyTableGeometricProduct.instance());
+        MX opm = CasADiUtil.toMXProductMatrix((SparseCGASymbolicMultivector) b, CGACayleyTableGeometricProduct.instance());
         System.out.println("--- end of gp matrix creation ---");
-        MX result = MX.times(opm, ((SparseCGASymbolicMultivector) b).getMX());
+        MX result = MX.mtimes(opm.T(), ((SparseCGASymbolicMultivector) this).getMX());
         return new SparseCGASymbolicMultivector(result);
     }
     
@@ -195,7 +197,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         System.out.println("---op---");
         MX gpm = CasADiUtil.toMXProductMatrix((SparseCGASymbolicMultivector) this, CGACayleyTableOuterProduct.instance());
         System.out.println("--- end of op matrix creation ---");
-        MX result = MX.times(gpm, ((SparseCGASymbolicMultivector) b).getMX());
+        MX result = MX.mtimes(gpm, ((SparseCGASymbolicMultivector) b).getMX());
         return new SparseCGASymbolicMultivector(result);
     }
 
