@@ -8,7 +8,6 @@ import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.jogamp.vecmath.Tuple3d;
@@ -76,15 +75,10 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         return result;
     }
 
-    /*public double[] createRandomCGAKVector(){
-        Random random = new Random();
-        return createRandomCGAKVector(random.nextInt(0, baseCayleyTable.getPseudoscalarGrade()+1));
-    }*/
     public double[] createRandomCGAKVector(int grade){
         return createRandomCGAKVector(baseCayleyTable.getBladesCount(), grade);
     }
 
-	
 
     // create numeric multivectors
     
@@ -96,7 +90,6 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
      */
     @Override
     public iMultivectorNumeric createMultivectorNumeric(double[] values) {
-        //return MultivectorNumeric.get(new SparseCGANumericMultivector(values));
         return new SparseCGANumericMultivector(values);
     }
     @Override
@@ -114,6 +107,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     }
 
     // create function objects
+    
     public iFunctionSymbolic createFunctionSymbolic(String name, List<iMultivectorSymbolic> parameters,
         List<iMultivectorSymbolic> returns) {
         return new CGASymbolicFunction(name, parameters, returns);
@@ -187,27 +181,26 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     
     @Override
     public SparseDoubleColumnVector createEpsilonPlus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{4,5});
+        return new SparseCGAColumnVector(sparsity, new double[]{0d, 1d});
     }
 
     @Override
     public SparseDoubleColumnVector createEpsilonMinus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public SparseDoubleColumnVector createMinkovskyBiVector() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{4,5});
+        return new SparseCGAColumnVector(sparsity, new double[]{1d,0d});
     }
 
     @Override
     public SparseDoubleColumnVector createEuclideanPseudoscalar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{16});
+        return new SparseCGAColumnVector(sparsity, new double[]{1d});
     }
 
     @Override
     public SparseDoubleColumnVector createPseudoscalar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{});
+        return new SparseCGAColumnVector(sparsity, new double[]{});
     }
     
     @Override
@@ -218,13 +211,28 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         return new SparseCGAColumnVector(sparsity, nonzeros);
     }
 
+    @Override
+    public SparseDoubleColumnVector createMinkovskyBiVector() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
-    //private static iEuclideanTypeConverter euclideanTypeConverter;
-    
-    /*public iEuclideanTypeConverter getEuclideanTypeConverter(){
-        if (euclideanTypeConverter == null){
-            euclideanTypeConverter = new CGAEuclideanTypeConverter(this);
-        }
-        return euclideanTypeConverter;
-    }*/
+    @Override
+    public SparseDoubleColumnVector createBaseVectorInfinityDorst() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createBaseVectorOriginDorst() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createBaseVectorInfinityDoran() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseDoubleColumnVector createBaseVectorOriginDoran() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
