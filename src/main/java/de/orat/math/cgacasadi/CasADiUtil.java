@@ -5,13 +5,15 @@ import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
-import de.dhbw.rahmlab.casadi.impl.casadi.MX;
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.MxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.Dict;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.CayleyTable;
 import util.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -48,29 +50,29 @@ public class CasADiUtil {
         return result;
     }
     
-    public static MatrixSparsity toMatrixSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity mxSparsity){
+    public static MatrixSparsity toMatrixSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity){
         //TODO
         // kann ich identifizieren ob es ein Row- oder Column -Vektor ist und wenn ja
         // mit welchem grade?
-        return new MatrixSparsity((int) mxSparsity.rows(), (int) mxSparsity.columns(), 
-                                  toIntArr(mxSparsity.get_colind()), 
-                                  toIntArr(mxSparsity.get_row()));
+        return new MatrixSparsity((int) sxSparsity.rows(), (int) sxSparsity.columns(), 
+                                  toIntArr(sxSparsity.get_colind()), 
+                                  toIntArr(sxSparsity.get_row()));
     }
     
-    public static ColumnVectorSparsity toColumnVectorSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity mxSparsity){
-        return new ColumnVectorSparsity((int) mxSparsity.rows(),  
-                                  toIntArr(mxSparsity.get_row()));
+    public static ColumnVectorSparsity toColumnVectorSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity){
+        return new ColumnVectorSparsity((int) sxSparsity.rows(),  
+                                  toIntArr(sxSparsity.get_row()));
     }
     
-    public static CGAMultivectorSparsity toCGAMultivectorSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity mxSparsity){
-        return new CGAMultivectorSparsity(toIntArr(mxSparsity.get_row()));
+    public static CGAMultivectorSparsity toCGAMultivectorSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity){
+        return new CGAMultivectorSparsity(toIntArr(sxSparsity.get_row()));
     }
 
-    public static MX toMX(SparseDoubleMatrix m){
-       return new MX(toCasADiSparsity(m.getSparsity()), toMX(m.getData()));
+    public static SX toSX(SparseDoubleMatrix m){
+       return new SX(toCasADiSparsity(m.getSparsity()), toSX(m.getData()));
     }
-    public static MX toMX(double[] values){
-        return new MX(toStdVectorDouble(values));
+    public static SX toSX(double[] values){
+        return new SX(new StdVectorVectorDouble(new StdVectorDouble[]{toStdVectorDouble(values)}));
     }
     
     
@@ -81,16 +83,16 @@ public class CasADiUtil {
      * @param mv multivector which is converted into a matrix representation
      * @param cgaCayleyTable Cayley-table representing the specific product 
      */
-    public static MX toMXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable){
+    public static SX toSXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable){
        
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
         
-        System.out.println("toMXproductMatrix(input multivector sparsity):  "+mv.getSparsity().toString());
+        System.out.println("toSXproductMatrix(input multivector sparsity):  "+mv.getSparsity().toString());
         MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
-        System.out.println("toMXproductMatrix(product matrix sparsity):  "+matrixSparsity.toString());
+        System.out.println("toSXproductMatrix(product matrix sparsity):  "+matrixSparsity.toString());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
         
-        MX result = new MX(sp);
+        SX result = new SX(sp);
         
         MatrixSparsity sparsity = mv.getSparsity();
         for (int i=0;i<cgaCayleyTable.getRows();i++){
@@ -104,11 +106,11 @@ public class CasADiUtil {
                             //TODO
                             // statt dem Ausdruck im Column-Vector könnte ich doch auch
                             // den columvector[bladeIndex] nehmen? Aber wie formuliere ich das?
-                            // möglicherweise liegt hier der Unterschied zwischen MX und SX, also
-                            // bei MX wird die Referenz gesetzt und bei SX wird die Expr rausgeholt
+                            // möglicherweise liegt hier der Unterschied zwischen SX und SX, also
+                            // bei SX wird die Referenz gesetzt und bei SX wird die Expr rausgeholt
                             // und gesetzt
-                            result.at(i, j).assign(mv.getMX().at(cell.bladeIndex(),0)); 
-                            log[i][j] = mv.getMX().at(cell.bladeIndex(),0).toString();
+                            result.at(i, j).assign(mv.getSX().at(cell.bladeIndex(),0)); 
+                            log[i][j] = mv.getSX().at(cell.bladeIndex(),0).toString();
                             //FIXME
                             // gelogged wird hier derzeit fälschlicherweise immer "a" statt <[<index>]
                         // -1, oder -xxxx multipliziert mit dem basis-blade
@@ -119,7 +121,7 @@ public class CasADiUtil {
                             //TODO
                             // mit Funktion ist unklar, ob ich dann nicht notwendigerweise den
                             // Multivektor als SX speichern muss
-                            // dann wiederum ist unklar, ob SX alle Operatoren hat im Vergleich mit MX 
+                            // dann wiederum ist unklar, ob SX alle Operatoren hat im Vergleich mit SX 
                             // die ich brauche
                             // wie kann ich eine Funktion in die Cell einer Matrix hängen?
                             //TODO
@@ -129,13 +131,13 @@ public class CasADiUtil {
                             // Zelle der Cayleytable steht. Dieser muss multipliziert werden
                             // mit dem Wert der Zelle des korrespondierenden Multivektors. Das
                             // Zell-Objekt enthält dazu den index im Column-Vector.
-                            result.at(i, j).assign(MX.mtimes(new MX(cell.Value()), 
-                                    mv.getMX().at(cell.bladeIndex(),0)));
+                            result.at(i, j).assign(SX.mtimes(new SX(cell.Value()), 
+                                    mv.getSX().at(cell.bladeIndex(),0)));
                             //System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
-                            //      MX.times(new MX(cell.Value()), 
-                            //      new MX(mv.getMX().at(cell.bladeIndex(),0)) ).toString());
-                            log[i][j] = MX.mtimes(new MX(cell.Value()), 
-                                    new MX(mv.getMX().at(cell.bladeIndex(),0)) ).toString();
+                            //      SX.times(new SX(cell.Value()), 
+                            //      new SX(mv.getSX().at(cell.bladeIndex(),0)) ).toString());
+                            log[i][j] = SX.mtimes(new SX(cell.Value()), 
+                                    new SX(mv.getSX().at(cell.bladeIndex(),0)) ).toString();
                         }
                     // wegen sparsity 0 muss kein Wert gesetzt werden
                     } else {}
@@ -144,14 +146,14 @@ public class CasADiUtil {
                     //FIXME
                     // muss ich dann überhaupt einen Wert setzen?
                     // den Fall hatte ich bisher noch nicht
-                    result.at(i, j).assign(new MX(0d));
+                    result.at(i, j).assign(new SX(0d));
                 }
             }
         }
         
         // testweise
         DenseStringMatrix logMatrix = new DenseStringMatrix(log);
-        System.out.println("toMXProductMatrix: "+logMatrix);
+        System.out.println("toSXProductMatrix: "+logMatrix);
         
         return result;
     }
@@ -203,13 +205,13 @@ public class CasADiUtil {
         double[] nonzeros = nonzeros(dm);
         return new DenseCGAColumnVector(nonzeros, sparsity.getrow());
     }
-    public static SparseStringMatrix toStringMatrix(MX m){
+    public static SparseStringMatrix toStringMatrix(SX m){
         String[][] stringArr = new String[(int) m.rows()][(int) m.columns()];
         for (int i=0;i<m.rows();i++){
             for (int j=0;j<m.columns();j++){
                 // was passiert wenn eine Zelle structurell null ist (sparsity)?
                 // bekomme ich dann 00?
-                MxSubMatrix cell = m.at(i, j);
+                SxSubMatrix cell = m.at(i, j);
                 stringArr[i][j] = cell.toString();
             }
         }

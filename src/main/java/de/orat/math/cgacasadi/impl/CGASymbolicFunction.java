@@ -1,9 +1,9 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
-import de.dhbw.rahmlab.casadi.impl.casadi.MX;
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorMX;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
@@ -36,15 +36,15 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
         this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
     }
     
-    protected static StdVectorMX transformImpl(List<iMultivectorSymbolic> mvs) {
-            List<MX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getMX()).toList();
-            return new StdVectorMX(mxs);
+    protected static StdVectorSX transformImpl(List<iMultivectorSymbolic> mvs) {
+            List<SX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getSX()).toList();
+            return new StdVectorSX(mxs);
     }
 
     @Override
     public List<iMultivectorSymbolic> callSymbolic(List<iMultivectorSymbolic> arguments) {
             var f_sym_in = transformImpl(arguments);
-            var f_sym_out = new StdVectorMX();
+            var f_sym_out = new StdVectorSX();
             this.f_sym_casadi.call(f_sym_in, f_sym_out);
             return f_sym_out.stream().map(mx -> ((iMultivectorSymbolic) new SparseCGASymbolicMultivector(mx))).toList();
     }
