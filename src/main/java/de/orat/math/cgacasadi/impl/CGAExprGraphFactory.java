@@ -119,7 +119,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     
     @Override
     public String getName() {
-        return "casadimx";
+        return "cgacasadimx";
     }
 
     

@@ -1,6 +1,7 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAKVectorSparsity;
@@ -19,7 +20,7 @@ import util.cga.CGAOperations;
 
 public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
    
-    private static CGAExprGraphFactory exprGraphFac = new CGAExprGraphFactory();
+    //private static CGAExprGraphFactory exprGraphFac = new CGAExprGraphFactory();
     
     private MultivectorSymbolic.Callback callback;
     private String name;
@@ -96,7 +97,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(name, sparsity);
     }
     protected SparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity){
-        //this.sparsity = new CGAMultivectorSparsity(sparsity);
         mx = MX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         this.name = null;
     }
@@ -110,7 +110,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         this.name = name;
     }
     SparseCGASymbolicMultivector(MX mx){
-        //sparsity = CasADiUtil.toCGAMultivectorSparsity(mx1.sparsity());
         this.mx = mx;
         this.name = null;
     }
@@ -193,6 +192,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     // die default-impl im Interface sollte eigentlich auch funktionieren
+    // tut sie aber nicht
     public iMultivectorSymbolic op(iMultivectorSymbolic b){
         System.out.println("---op---");
         MX gpm = CasADiUtil.toMXProductMatrix((SparseCGASymbolicMultivector) this, CGACayleyTableOuterProduct.instance());
@@ -255,6 +255,13 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         //return unop_Dual(this).norm();
     }
 
+    private iMultivectorSymbolic muls(iMultivectorSymbolic s){
+        //SX sx;
+        //sx.scalar()
+        //TODO
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+ 
+    }
     
     /**
      * normalized.
@@ -263,8 +270,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      */
     public iMultivectorSymbolic normalized() {
         //return binop_muls(this, 1d / norm());
+        // mx.rdivide ... Elementwise division: (x,y) -> x ./ y
+        //return gp(MX.1d/norm());
+        
         //TODO
-        return null;
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     public iMultivectorSymbolic generalInverse(){
@@ -311,6 +321,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector();
     }
 
+    //TODO brauche ich hier nicht statt double ein symbolic scalar?
     @Override
     public iMultivectorSymbolic gp(double s) {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
@@ -362,7 +373,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     @Override
     public ColumnVectorSparsity getSparsity(){
         return CasADiUtil.toColumnVectorSparsity(mx.sparsity());
-        //return sparsity;
     }
     public MX getMX(){
         return mx;
@@ -392,4 +402,149 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     public int getBladesCount(){
         return baseCayleyTable.getBladesCount();
     }
+
+    @Override
+    public iMultivectorSymbolic atan2(iMultivectorSymbolic y) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public iMultivectorSymbolic exp() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
+    
+    /**
+     * Scalar product.
+     * 
+     * @param x
+     * @param M metric
+     * @return scalar product of this with a 'x' using metric 'M'
+     */
+    private SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector b) {
+        // eventuell sollte ich ip() explizit implementieren und hier verwenden,
+        // damit scp() unabhängig von der Reihenfolge der Argumente wird
+        // return ip(x, LEFT_CONTRACTION).scalarPart();
+        MX mxres = ((SparseCGASymbolicMultivector) lc(b)).getMX().at(0);
+        //TODO 
+        // hier sollte ein neues MX mit passender Sparsity für ein scalar erzeugt
+        // und übergeben werden ...
+	return new SparseCGASymbolicMultivector(mxres);
+    }
+    // umbenennen in euclideanNorm()
+    private static SparseCGASymbolicMultivector norm_e(SparseCGASymbolicMultivector a) {
+        //TODO
+        // sqrt symbolisch mit MX formulieren
+        iMultivectorSymbolic res = norm_e2(a);
+        MX mxres = MX.sqrt(a.getMX().at(0));
+        //return Math.sqrt(norm_e2(b));
+        // hier sollte ein neues MX mit passender Sparsity für ein scalar erzeugt
+        // und übergeben werden ...
+        return new SparseCGASymbolicMultivector(mxres);
+    }
+    // umbenennen in euclideanNormSquare()
+    private static SparseCGASymbolicMultivector norm_e2(SparseCGASymbolicMultivector a) {
+        iMultivectorSymbolic s = a.scp((SparseCGASymbolicMultivector) a.reverse());
+        // 0>s MX.gt(0d, s)
+        // MX.lt(mx, mx)
+        //TODO
+        // hier noch die passende Sparsity für Scalar berücksichtigen
+        return new SparseCGASymbolicMultivector(MX.times(
+                MX.gt(((SparseCGASymbolicMultivector) s).getMX(), new MX(0d)), 
+                ((SparseCGASymbolicMultivector) s).getMX()));
+        //if (s < 0.0) return 0.0; // avoid FP round off causing negative 's'
+    }
+    
+    private SparseCGASymbolicMultivector expSeries(SparseCGASymbolicMultivector mv, int order){
+        
+        long scale = 1;
+        //TODO
+        // first scale by power of 2 so that its norm is ~ 1
+        /*long scale=1; {
+            SparseCGASymbolicMultivector max = norm_e(mv); // das war vorher double
+            if (max > 1.0) scale <<= 1;
+            while (max > 1.0) {
+                max = max / 2;
+                scale <<= 1;
+            }
+        }*/
+
+        iMultivectorSymbolic scaled = mv.gp(1.0 / scale);
+        
+        //TODO
+        return null;
+    }
+    /** 
+     * evaluates exp(this) using special cases if possible, using series otherwise.
+     * 
+     * @param M
+     * @param order
+     * @return  
+     */
+    /*protected Multivector exp(Object M, int order) {
+        // check out this^2 for special cases
+        Multivector A2 = this.gp(this, M).compress();
+        if (A2.isNull(1e-8)) {
+            // special case A^2 = 0
+            return this.add(1);
+        } else if (A2.isScalar()) {
+            double a2 = A2.scalarPart();
+            // special case A^2 = +-alpha^2
+            if (a2 < 0) {
+                double alpha = Math.sqrt(-a2);
+                return gp(Math.sin(alpha) / alpha).add(Math.cos(alpha));
+            }
+            //hey: todo what if a2 == 0?
+            else {
+                double alpha = Math.sqrt(a2);
+                return gp(MathU.sinh(alpha) / alpha).add(MathU.cosh(alpha));
+            }
+        } else return expSeries(M, order);
+    }*/
+
+    /** 
+     * Evaluates exp using series ...(== SLOW & INPRECISE!)
+     * 
+     * @param M metric
+     * @param order typicall 12
+     * @return  
+     */
+    /*protected Multivector expSeries(Object M, int order) {
+        // first scale by power of 2 so that its norm is ~ 1
+        long scale=1; {
+            double max = this.norm_e();
+            if (max > 1.0) scale <<= 1;
+            while (max > 1.0) {
+                max = max / 2;
+                scale <<= 1;
+            }
+        }
+
+        Multivector scaled = this.gp(1.0 / scale);
+
+        // taylor approximation
+        Multivector result = new Multivector(1.0); {
+            Multivector tmp = new Multivector(1.0);
+            for (int i = 1; i < order; i++) {
+                tmp = tmp.gp(scaled.gp(1.0 / i), M);
+                result = result.add(tmp);
+            }
+        }
+
+        // undo scaling
+        while (scale > 1) {
+            result = result.gp(result, M);
+            scale >>>= 1;
+        }
+        return result;
+    }*/
+    
+    public iMultivectorSymbolic meet(iMultivectorSymbolic b){
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+ 
+    }
+    public iMultivectorSymbolic join(iMultivectorSymbolic b){
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 }
