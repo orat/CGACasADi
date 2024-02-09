@@ -98,9 +98,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(name);
     }
     protected SparseCGASymbolicMultivector(String name){
-        CGAMultivectorSparsity sparsity = CGAKVectorSparsity.dense();
-        sx = SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
-        //TODO gleich in casadi eine dense sparsity erzeugen
+        //de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity = CasADiUtil.toCasADiSparsity(CGAKVectorSparsity.dense());
+        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity2 = de.dhbw.rahmlab.casadi.impl.casadi.Sparsity.dense(32);
+        sx = SX.sym(name, sparsity2);
         this.name = name;
     }
     SparseCGASymbolicMultivector(SX sx){
@@ -140,19 +140,19 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         for (int i=0;i<grades.length;i++){
             System.out.println("reverse:grade()="+String.valueOf(grades[i]));
             SX multiplier = SX.pow(new SX(-1d), new SX((new SX(grades[i])),));
-            iMultivectorSymbolic res = gradeSelection(grades[i]).
+            iMultivectorSymbolic norme2 = gradeSelection(grades[i]).
                     gp(new SparseCGASymbolicMultivector(multiplier));
-            System.out.println("reverse:res grade()="+String.valueOf(grades[i])+" ="+res.toString());
+            System.out.println("reverse:norme2 grade()="+String.valueOf(grades[i])+" ="+norme2.toString());
             //TODO
             // eleganter wäre es die for-Schleifen bei 1 starten zu lassen
             // und den ersten Wert vor dem Vorschleifen in die Variable zu streichen
             // dann könnte ich das if vermeiden.
             if (result == null) {
-                result = res;
+                result = norme2;
             } else {
-                result = result.add(res);
+                result = result.add(norme2);
             }
-            System.out.println("reverse:res sparsity="+result.getSparsity().toString());
+            System.out.println("reverse:norme2 sparsity="+result.getSparsity().toString());
         }
         return result;
     }*/
@@ -379,7 +379,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     public iMultivectorSymbolic scalarInverse(){
        //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(sx.sparsity()).toString());
        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
-       //TODO
        SX resultSX = new SX(sx.sparsity());
        resultSX.at(0).assign(SX.inv(sx.at(0)));
        SparseCGASymbolicMultivector result =  new SparseCGASymbolicMultivector(resultSX);
@@ -509,44 +508,43 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     /**
      * Scalar product.
      * 
-     * @param x
-     * @param M metric
-     * @return scalar product of this with a 'x' using metric 'M'
+     * TODO
+     * alternativ via gradeSelection() implementieren?
+     * 
+     * @param rhs
+     * @return scalar product of this with a 'rhs'
      */
-    private SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector b) {
+    private SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector rhs) {
         // eventuell sollte ich ip() explizit implementieren und hier verwenden,
         // damit scp() unabhängig von der Reihenfolge der Argumente wird
         // return ip(x, LEFT_CONTRACTION).scalarPart();
-        
-        //StdVectorCasadiSXElem[] scalar = new StdVectorCasadiSXElem[]{((SparseCGASymbolicMultivector) lc(b)).getSX().scalar()};
-        SX sxres = ((SparseCGASymbolicMultivector) lc(b)).getSX().at(0);
-        //TODO 
-        // hier sollte ein neues SX mit passender Sparsity für ein scalar erzeugt
-        // und übergeben werden ...
+        SX sxres = ((SparseCGASymbolicMultivector) lc(rhs)).getSX().at(0);
+        CGAMultivectorSparsity scalarSparsity = new CGAMultivectorSparsity(new int[]{0});
+        SX result = new SX(CasADiUtil.toCasADiSparsity(scalarSparsity));
+        result.assign(sxres);
 	return new SparseCGASymbolicMultivector(sxres);
     }
+    // strict positive?
     // umbenennen in euclideanNorm()
     private static SparseCGASymbolicMultivector norm_e(SparseCGASymbolicMultivector a) {
-        //TODO
-        // sqrt symbolisch mit SX formulieren
-        SparseCGASymbolicMultivector res = norm_e2(a);
-        SX sxres = SX.sqrt(a.getSX().at(0));
+        SX norme = SX.sqrt(norm_e2(a).getSX().at(0));
         //return Math.sqrt(norm_e2(b));
-        // hier sollte ein neues SX mit passender Sparsity für ein scalar erzeugt
-        // und übergeben werden ...
-        return new SparseCGASymbolicMultivector(sxres);
+        CGAMultivectorSparsity scalarSparsity = new CGAMultivectorSparsity(new int[]{0});
+        SX result = new SX(CasADiUtil.toCasADiSparsity(scalarSparsity));
+        result.assign(norme);
+        return new SparseCGASymbolicMultivector(norme);
     }
     // umbenennen in euclideanNormSquare()
     private static SparseCGASymbolicMultivector norm_e2(SparseCGASymbolicMultivector a) {
         iMultivectorSymbolic s = a.scp((SparseCGASymbolicMultivector) a.reverse());
-        // 0>s SX.gt(0d, s)
-        // SX.lt(sx, sx)
-        //TODO
-        // hier noch die passende Sparsity für Scalar berücksichtigen
-        return new SparseCGASymbolicMultivector(SX.times(
-                SX.gt(((SparseCGASymbolicMultivector) s).getSX(), new SX(0d)), 
-                ((SparseCGASymbolicMultivector) s).getSX()));
+        CGAMultivectorSparsity scalarSparsity = new CGAMultivectorSparsity(new int[]{0});
+        SX result = new SX(CasADiUtil.toCasADiSparsity(scalarSparsity));
+        SX norme2 = SX.times(SX.gt(((SparseCGASymbolicMultivector) s).getSX(), new SX(0d)), 
+                ((SparseCGASymbolicMultivector) s).getSX());
+        //double s = scp(reverse());
         //if (s < 0.0) return 0.0; // avoid FP round off causing negative 's'
+        result.assign(norme2);
+        return new SparseCGASymbolicMultivector(result);
     }
     
     private SparseCGASymbolicMultivector expSeries(SparseCGASymbolicMultivector mv, int order){

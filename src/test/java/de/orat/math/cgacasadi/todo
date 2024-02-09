@@ -1,0 +1,8 @@
+- test für scp bauen, geht impl auch auf Basis rc oder gp? oder auf Basis von gradeselection?
+- norm/euclidian norm vervollständigen
+- Test für generalInverse, versorInverse, div
+- fix lc
+- test rc
+- implement ip
+- implement exp, join, meet, atan2
+- Euclidian Type conversion function in unserer DSL implementieren und tests schreiben

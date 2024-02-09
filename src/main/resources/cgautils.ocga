@@ -1,0 +1,26 @@
+/* Create an ipns round point from an euclidian point */
+fn ipns_round_point(p){
+    p+0.5p²εᵢ+ε₀
+}
+/* Create an ipns sphere from an euclidian point and its radius (scalar) */
+fn ipns_sphere(p, r){
+    ipns_round(p)-0.5r²εᵢ
+}
+/* Create an ipns plane from an euclidian point and the planes normal vector */
+fn ipns_plane(p, nv){
+    ipns_round_point(p)⋅(nv εᵢ)
+}
+/*fn ipns_plane(nv, d){
+    nv+d εᵢ
+}*/
+fn ipns_circle(p, nv, r){
+    ε₀∧nv+(p⋅nv)E₀+p∧nv+((p⋅nv)p-0.5(p-r²)nv)∧εᵢ
+}
+fn ipns_circle(opns_sphere_1, opns_sphere_2){
+    opns_sphere_1*∧opns_sphere_2*
+}
+fn ipns_round_to_euclidian(ipns_sphere){
+    position :=-ipns_sphere/(εᵢ⌋ipns_sphere)
+    rSquared := -(ipns_sphere ipns_sphere˜)/(εᵢ⌋ipns_sphere)²
+    position, rSquared
+}

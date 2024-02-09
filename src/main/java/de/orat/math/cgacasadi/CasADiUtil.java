@@ -6,11 +6,8 @@ import util.cga.DenseCGAColumnVector;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.dhbw.rahmlab.casadi.impl.casadi.MxSubMatrix;
-import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
-import de.dhbw.rahmlab.casadi.impl.std.Dict;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
@@ -222,14 +219,14 @@ public class CasADiUtil {
         StdVectorCasadiInt row = new StdVectorCasadiInt(toLongArr(sparsity.getrow()));
         StdVectorCasadiInt colind = new StdVectorCasadiInt(toLongArr(sparsity.getcolind()));
         Sparsity result = new Sparsity(sparsity.getn_row(), sparsity.getn_col(), colind, row);
-        result.spy();
+        //result.spy();
         return result;
     }
     
     public static DM toDM(double[] values){
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(values);
         //TODO
-        // Achtung: Hier gehe ich davon aus, dass einfach nur die non-values zu übergeben sind
+        // Achtung: Hier gehe ich davon aus, dass einfach nur die nonzero-values zu übergeben sind
         // das habe ich aber noch nicht verifiziert
         StdVectorDouble nonzeros = new StdVectorDouble();
         for (int i=0;i<values.length;i++){
