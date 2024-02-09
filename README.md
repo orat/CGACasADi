@@ -1,0 +1,1 @@
+This is a CasADi (SX) based implementation of the GACalcAPI, which allows to create CGA expression graphs for symbolic calculations. The aim of this implementation is to allow fast computations especially of jacobien and hesse derivatives by CasADis automated differenciation functionality.
