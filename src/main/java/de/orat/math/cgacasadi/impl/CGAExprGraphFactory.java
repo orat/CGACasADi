@@ -48,17 +48,11 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     
     // helper methods
     
-    public static double[] createRandomMultivector(int basisBladesCount) {
-        Random random = new Random();
-        return random.doubles(-1, 1).
-                limit(basisBladesCount).toArray();
-    }
-
-    public double[] createRandomCGAMultivector() {
+    public double[] createRandomMultivector() {
         return createRandomMultivector(baseCayleyTable.getBladesCount());
     }
     
-    public double[] createRandomCGAKVector(int basisBladesCount, int grade){
+    public double[] createRandomKVector(int grade){
         double[] result = new double[baseCayleyTable.getRows()];
         Random random = new Random();
         int[] indizes = baseCayleyTable.getIndizes(grade);
@@ -68,10 +62,6 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
             result[indizes[i]] = values[i];
         }
         return result;
-    }
-
-    public double[] createRandomCGAKVector(int grade){
-        return createRandomCGAKVector(baseCayleyTable.getBladesCount(), grade);
     }
 
 
@@ -93,7 +83,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     }
     @Override
     public iMultivectorNumeric createRandomMultivectorNumeric() {
-        return createMultivectorNumeric(createRandomMultivector(baseCayleyTable.getBladesCount()));
+        return createMultivectorNumeric(createRandomKVector(baseCayleyTable.getBladesCount()));
     }
 
     @Override

@@ -10,29 +10,29 @@ import java.util.Random;
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class TestExprGraphFactory extends ExprGraphFactory {
-    public static CGAExprGraphFactory impl = new CGAExprGraphFactory();
+    public static CGAExprGraphFactory impl_ = new CGAExprGraphFactory();
     
     public static ExprGraphFactory instance(){
-        return get(impl);
+        return get(impl_);
     }
     
     protected TestExprGraphFactory(iExprGraphFactory impl) {
         super(impl);
     }
     
-    public static double[] createRandomMultivector(int basisBladesCount) {
-        return impl.createRandomMultivector(basisBladesCount);
+    /*public static double[] createRandomKVector(int basisBladesCount) {
+        return impl_.createRandomKVector(basisBladesCount);
     }
 
     public double[] createRandomCGAMultivector() {
-        return impl.createRandomCGAMultivector();
+        return impl_.createRandomCGAMultivector();
     }
     
     public static double[] createRandomCGAKVector(int basisBladesCount, int grade){
-        return impl.createRandomCGAKVector(basisBladesCount, grade);
+        return impl_.createRandomCGAKVector(basisBladesCount, grade);
     }
 
     public static double[] createRandomCGAKVector(int grade){
-        return impl.createRandomCGAKVector(grade);
-    }
+        return impl_.createRandomCGAKVector(grade);
+    }*/
 }

@@ -639,4 +639,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    @Override
+    public iMultivectorSymbolic abs() {
+        return new SparseCGASymbolicMultivector(SX.abs(sx));
+    }
 }
