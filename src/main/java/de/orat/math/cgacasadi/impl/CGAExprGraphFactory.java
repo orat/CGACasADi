@@ -9,7 +9,6 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.List;
 import java.util.Random;
-import org.jogamp.vecmath.Tuple3d;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
@@ -197,8 +196,8 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     }
     
     @Override
-    public SparseDoubleColumnVector createE(Tuple3d tuple3d) {
-        double[] nonzeros = new double[]{tuple3d.x, tuple3d.y, tuple3d.z};
+    public SparseDoubleColumnVector createE(double x, double y, double z) {
+        double[] nonzeros = new double[]{x, y, z};
         int[] rows = new int[]{1,2,3};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseCGAColumnVector(sparsity, nonzeros);

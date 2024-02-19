@@ -323,7 +323,7 @@ public class CGAImplTest {
         List<MultivectorSymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
        
-        MultivectorSymbolic res = mva.abs();
+        MultivectorSymbolic res = mva.scalarAbs();
         System.out.println("absRandom: "+res.toString());
         
         List<MultivectorSymbolic> result = new ArrayList<>();
@@ -431,7 +431,7 @@ public class CGAImplTest {
         MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
         arguments.add(arg_b);
        
-        double[] test = lc(values_A, values_B);
+        double[] test = dot(values_A, values_B);
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
         
         try {
@@ -440,6 +440,100 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric mv = result2.iterator().next();
             System.out.println("random (lc): "+mv.toString());
+            System.out.println("test="+testMatrix.toString());
+           
+            // nur der scalar stimmt alle anderen Werte sind falsch
+            //TODO
+            
+            double eps = 0.00001;
+            assertTrue(equals(mv.elements().toArray(), test, eps));
+        } catch (Exception e){}
+    }
+    
+    @Test
+    public void testIPRandom() {
+       
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a");
+        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b"); 
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        parameters.add(mvb); 
+        
+        MultivectorSymbolic res = mva.innerProduct(mvb);
+        System.out.println("iprandom: "+res.toString());
+        
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+        
+        double[] values_B = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        arguments.add(arg_b);
+       
+        double[] test = dot(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        
+        try {
+            System.out.println("a="+arg_a.toString());
+            System.out.println("b="+arg_b.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("random (ip): "+mv.toString());
+            System.out.println("test="+testMatrix.toString());
+           
+            // nur der scalar stimmt alle anderen Werte sind falsch
+            //TODO
+            
+            double eps = 0.00001;
+            assertTrue(equals(mv.elements().toArray(), test, eps));
+        } catch (Exception e){}
+    }
+    
+     @Test
+    public void testDotRandom() {
+       
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a");
+        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b"); 
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        parameters.add(mvb); 
+        
+        MultivectorSymbolic res = mva.dotProduct(mvb);
+        System.out.println("dotRandom: "+res.toString());
+        
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+        
+        double[] values_B = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        arguments.add(arg_b);
+       
+        double[] test = dot(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        
+        try {
+            System.out.println("a="+arg_a.toString());
+            System.out.println("b="+arg_b.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("random (dot): "+mv.toString());
             System.out.println("test="+testMatrix.toString());
            
             // nur der scalar stimmt alle anderen Werte sind falsch
@@ -537,6 +631,43 @@ public class CGAImplTest {
             assertTrue(equals(mv.elements().toArray(), test, eps));
         } catch (Exception e){}
     }
+    
+    /*@Test
+    public void testGeneralInverseRandom() {
+       
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a");
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorSymbolic res = mva.generalInverse();
+        System.out.println("generalInverseRandom: "+res.toString());
+        
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+        
+        double[] test = generalInverse(values_A);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        
+        try {
+            System.out.println("a="+arg_a.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("random (generalInverse): "+mv.toString());
+            System.out.println("test="+testMatrix.toString());
+           
+            double eps = 0.00001;
+            assertTrue(equals(mv.elements().toArray(), test, eps));
+        } catch (Exception e){}
+    }*/
     
     /**
      * Vee.
@@ -898,7 +1029,7 @@ public class CGAImplTest {
         MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv");
         System.out.println("mv (sparsity für dual): "+mv.getSparsity().toString());
         System.out.println("mv: (dual) "+mv.toString());
-        // dual() basiert derzeit auf lc
+        // dual() basiert derzeit auf dot
         MultivectorSymbolic result = mv.dual();
         System.out.println("result (dual) (sym): "+result.toString());
         
@@ -1114,19 +1245,20 @@ public class CGAImplTest {
     }
     
     public static double[] rc(double[] a, double[] b){
-        return reverse(lc(reverse(b),reverse(a)));
+        return reverse(dot(reverse(b),reverse(a)));
     }
    
     /**
      * Dot.
      *
-     * The inner product defined as left contraction.
+     * Die Erwartung war inner product defined as left contraction. Was sich
+     * allerdings nicht bestätigt hat.
      * 
      * @param a
      * @param b
      * @return a | b
      */
-    public static double[] lc (double[] a, double[] b){
+    public static double[] dot (double[] a, double[] b){
         double[] res = new double[a.length];
         res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31];
 	res[1]=b[1]*a[0]+b[0]*a[1]-b[6]*a[2]-b[7]*a[3]-b[8]*a[4]+b[9]*a[5]+b[2]*a[6]+b[3]*a[7]+b[4]*a[8]-b[5]*a[9]-b[16]*a[10]-b[17]*a[11]+b[18]*a[12]-b[19]*a[13]+b[20]*a[14]+b[21]*a[15]-b[10]*a[16]-b[11]*a[17]+b[12]*a[18]-b[13]*a[19]+b[14]*a[20]+b[15]*a[21]+b[26]*a[22]-b[27]*a[23]-b[28]*a[24]-b[29]*a[25]-b[22]*a[26]+b[23]*a[27]+b[24]*a[28]+b[25]*a[29]-b[31]*a[30]-b[30]*a[31];
@@ -1304,6 +1436,119 @@ public class CGAImplTest {
         return res;
     }
 
+    // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
+    // renormalization in R41 (CGA)
+    // needed to calculate square roots
+    private static double[] normalize(double[] R){
+        var S  = R[0]*R[0]-R[10]*R[10]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]+R[1]*R[1]
+                +R[2]*R[2]+R[3]*R[3]-R[4]*R[4]+R[5]*R[5]+R[6]*R[6]-R[7]*R[7]+R[8]*R[8]-R[9]*R[9];
+        var T1 = 2*(R[0]*R[11]-R[10]*R[12]+R[13]*R[9]-R[14]*R[7]+R[15]*R[4]-R[1]*R[8]+R[2]*R[6]-R[3]*R[5]);
+        var T2 = 2*(R[0]*R[12]-R[10]*R[11]+R[13]*R[8]-R[14]*R[6]+R[15]*R[3]-R[1]*R[9]+R[2]*R[7]-R[4]*R[5]);
+        var T3 = 2*(R[0]*R[13]-R[10]*R[1]+R[11]*R[9]-R[12]*R[8]+R[14]*R[5]-R[15]*R[2]+R[3]*R[7]-R[4]*R[6]);
+        var T4 = 2*(R[0]*R[14]-R[10]*R[2]-R[11]*R[7]+R[12]*R[6]-R[13]*R[5]+R[15]*R[1]+R[3]*R[9]-R[4]*R[8]);
+        var T5 = 2*(R[0]*R[15]-R[10]*R[5]+R[11]*R[4]-R[12]*R[3]+R[13]*R[2]-R[14]*R[1]+R[6]*R[9]-R[7]*R[8]);
+        var TT = -T1*T1+T2*T2+T3*T3+T4*T4+T5*T5;
+        //var N = ((S*S+TT)**.5+S)**.5, N2 = N*N;
+        double N = Math.pow((Math.pow(S*S+TT,0.5d)+S),0.5d);
+        double N2 = N*N;
+        //var ND = 2**.5*N/(N2*N2+TT);
+        double ND = Math.pow(2,0.5)*N/(N2*N2+TT);
+        double C = N2*ND;
+        double D1 = -T1*ND;
+        double D2 = -T2*ND;
+        double D3 = -T3*ND;
+        double D4 = -T4*ND;
+        double D5 = -T5*ND;
+        double[] result = new double[32];
+      
+        result[0] = C*R[0]+D1*R[11]-D2*R[12]-D3*R[13]-D4*R[14]-D5*R[15];
+        result[6] = C*R[1]-D1*R[8]+D2*R[9]+D3*R[10]-D4*R[15]+D5*R[14];
+        result[7] = C*R[2]+D1*R[6]-D2*R[7]+D3*R[15]+D4*R[10]-D5*R[13];
+        result[8] = C*R[3]-D1*R[5]-D2*R[15]-D3*R[7]-D4*R[9]+D5*R[12];
+        result[9] = C*R[4]-D1*R[15]-D2*R[5]-D3*R[6]-D4*R[8]+D5*R[11];
+        result[10] = C*R[5]-D1*R[3]+D2*R[4]-D3*R[14]+D4*R[13]+D5*R[10];
+        result[11] = C*R[6]+D1*R[2]+D2*R[14]+D3*R[4]-D4*R[12]-D5*R[9];
+        result[12] = C*R[7]+D1*R[14]+D2*R[2]+D3*R[3]-D4*R[11]-D5*R[8];
+        result[13] = C*R[8]-D1*R[1]-D2*R[13]+D3*R[12]+D4*R[4]+D5*R[7];
+        result[14] = C*R[9]-D1*R[13]-D2*R[1]+D3*R[11]+D4*R[3]+D5*R[6];
+        result[15] = C*R[10]+D1*R[12]-D2*R[11]-D3*R[1]-D4*R[2]-D5*R[5];
+        result[26] = C*R[11]+D1*R[0]+D2*R[10]-D3*R[9]+D4*R[7]-D5*R[4];
+        result[27] = C*R[12]+D1*R[10]+D2*R[0]-D3*R[8]+D4*R[6]-D5*R[3];
+        result[28] = C*R[13]-D1*R[9]+D2*R[8]+D3*R[0]-D4*R[5]+D5*R[2];
+        result[29] = C*R[14]+D1*R[7]-D2*R[6]+D3*R[5]+D4*R[0]-D5*R[1];
+        result[30] = C*R[15]-D1*R[4]+D2*R[3]-D3*R[2]+D4*R[1]+D5*R[0];
+        return result;
+    }
+    
+    // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
+    // exponential of a bivector only for CGA (R41)
+    private static double[] exp(double[] B){
+        // B*B = S + Ti*ei*I
+        double S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
+        double T1 = 2*(B[4]*B[9]-B[5]*B[8]+B[6]*B[7]); //e2345
+        double T2 = 2*(B[1]*B[9]-B[2]*B[8]+B[3]*B[7]); //e1345
+        double T3 = 2*(B[0]*B[9]-B[2]*B[6]+B[3]*B[5]); //e1245
+        double T4 = 2*(B[0]*B[8]-B[1]*B[6]+B[3]*B[4]); //e1235
+        double T5 = 2*(B[0]*B[7]-B[1]*B[5]+B[2]*B[4]); //e1234
+        
+        // Calculate the norms of the invariants
+        double Tsq = -T1*T1-T2*T2-T3*T3-T4*T4+T5*T5;
+        double norm = Math.sqrt(S*S - Tsq);
+        double sc = -0.5/norm; 
+        double lambdap = 0.5*S+0.5*norm;
+        double lp = Math.sqrt(Math.abs(lambdap));
+        double lm = Math.sqrt(-0.5*S+0.5*norm);
+        // The associated trig (depending on sign lambdap)
+        //double [cp, sp] = lambdap>0?[cosh(lp), sinh(lp)/lp]:lambdap<0?[cos(lp), sin(lp)/lp]:[1,1]
+        double cp, sp;
+        if (lambdap>0){
+            cp = Math.cosh(lp);
+            sp = Math.sinh(lp)/lp;
+        } else if (lambdap<0){
+            cp = Math.cos(lp);
+            sp = Math.sin(lp)/lp;
+        } else {
+            cp = 1;
+            sp = 1;
+        }
+        //var [cm, sm] = [cos(lm), lm==0?1:sin(lm)/lm]
+        double cm = Math.cos(lm);
+        double sm;
+        if (lm==0) sm=1; else sm= Math.sin(lm)/lm;
+        // Calculate the mixing factors alpha and beta_i.
+        double cmsp = cm*sp;
+        double cpsm = cp*sm;
+        double spsm = sp*sm/2d;
+        double D = cmsp-cpsm;
+        double E = sc*D;
+        double alpha = D*(0.5-sc*S) + cpsm;
+        double beta1 = E*T1;
+        double beta2 = -E*T2;
+        double beta3 = E*T3;
+        double beta4 = -E*T4;
+        double beta5 = -E*T5;
+        
+        // Create the final rotor.
+        double[] result = new double[32];
+        result[0] = cp*cm;
+        result[6] = (B[0]*alpha+B[7]*beta5-B[8]*beta4+B[9]*beta3);
+        result[7] = (B[1]*alpha-B[5]*beta5+B[6]*beta4-B[9]*beta2);
+        result[8] = (B[2]*alpha+B[4]*beta5-B[6]*beta3+B[8]*beta2);
+        result[9] = (B[3]*alpha+B[4]*beta4-B[5]*beta3+B[7]*beta2);
+        result[10] = (B[4]*alpha+B[2]*beta5-B[3]*beta4+B[9]*beta1);
+        result[11] = (B[5]*alpha-B[1]*beta5+B[3]*beta3-B[8]*beta1);
+        result[12] = (B[6]*alpha-B[1]*beta4+B[2]*beta3-B[7]*beta1);
+        result[13] = (B[7]*alpha+B[0]*beta5-B[3]*beta2+B[6]*beta1);
+        result[14] = (B[8]*alpha+B[0]*beta4-B[2]*beta2+B[5]*beta1);
+        result[15] = (B[9]*alpha-B[0]*beta3+B[1]*beta2-B[4]*beta1);
+        result[26] = spsm*T5;
+        result[27] = spsm*T4;
+        result[28] = spsm*T3; 
+        result[29] = spsm*T2;
+        result[30] = spsm*T1;
+        return result;
+    }
+    
     private boolean equals(double[] a, double[] b, double eps){
         if (a.length != b.length) throw new IllegalArgumentException("a.length != b.length");
         for (int i=0;i<a.length;i++){
