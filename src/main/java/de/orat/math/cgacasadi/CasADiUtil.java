@@ -187,7 +187,7 @@ public class CasADiUtil {
         }
         return result;
     }
-    public static SparseDoubleColumnVector elements(DM dm){
+    public static SparseDoubleMatrix elements(DM dm){
         //StdVectorDouble res = dm.get_elements();
         StdVectorDouble nonzeros = dm.nonzeros();
         double[] nonzerosArray = new double[nonzeros.size()];
@@ -195,7 +195,7 @@ public class CasADiUtil {
             nonzerosArray[i] = nonzeros.get(i);
         }
         ColumnVectorSparsity sparsity = toColumnVectorSparsity(dm.sparsity());
-        return new SparseDoubleColumnVector(sparsity, nonzerosArray);
+        return new SparseDoubleMatrix(sparsity, nonzerosArray);
     }
     
     public static DenseCGAColumnVector toDenseDoubleMatrix(DM dm, CGAMultivectorSparsity sparsity){

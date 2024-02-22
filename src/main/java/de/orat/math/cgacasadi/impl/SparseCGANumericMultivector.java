@@ -5,7 +5,8 @@ import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
+import de.orat.math.sparsematrix.SparseDoubleMatrix;
+//import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -67,7 +68,7 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
      * @return double[32] elements corresponding to the underlaying implementation
      * specific coordindate system.
      */
-    public SparseDoubleColumnVector elements(){
+    public SparseDoubleMatrix elements(){
         return CasADiUtil.elements(dm);
     }
 

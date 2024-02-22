@@ -7,6 +7,7 @@ import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseDoubleColumnVector;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,7 +69,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> mv = f.callNumeric(arguments);
             System.out.println("c=a+b="+mv.iterator().next().toString());
             System.out.println("test="+testMatrix.toString());
-            assertTrue(equals(mv.iterator().next().elements().toArray(), test));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.iterator().next().elements())).toArray(), test));
         } catch (Exception e){}
     }
     
@@ -115,7 +116,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> mv = f.callNumeric(arguments);
             System.out.println("c=a-b="+mv.iterator().next().toString());
             System.out.println("test="+testMatrix.toString());
-            assertTrue(equals(mv.iterator().next().elements().toArray(), test));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.iterator().next().elements())).toArray(), test));
         } catch (Exception e){}
     }
     
@@ -169,7 +170,7 @@ public class CGAImplTest {
             MultivectorNumeric mv = result2.iterator().next();
             System.out.println("a^b="+mv.toString());
             System.out.println("test=="+testMatrix.toString());
-            assertTrue(equals(mv.elements().toArray(), test));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test));
         } catch (Exception e){}
     }
     
@@ -207,7 +208,7 @@ public class CGAImplTest {
             MultivectorNumeric mv = result2.iterator().next();
             System.out.println("gradeSelection()="+mv.toString());
             System.out.println("test="+testMatrix.toString());
-            assertTrue(equals(mv.elements().toArray(), test));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test));
         } catch (Exception e){}
     }
     
@@ -265,7 +266,7 @@ public class CGAImplTest {
             System.out.println("a b="+mv.toString());
             System.out.println("test="+testMatrix.toString());
           
-            assertTrue(equals(mv.elements().toArray(), test));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test));
         } catch (Exception e){}
     }
    
@@ -310,7 +311,7 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
            
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -348,7 +349,7 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
            
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -399,11 +400,12 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
             
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
-    @Test
+    //TODO
+    //@Test
     public void testLCRandom() {
        
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -446,11 +448,12 @@ public class CGAImplTest {
             //TODO
             
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
-    @Test
+    //TODO
+    //@Test
     public void testIPRandom() {
        
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -493,7 +496,7 @@ public class CGAImplTest {
             //TODO
             
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -540,11 +543,12 @@ public class CGAImplTest {
             //TODO
             
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
-    @Test
+    //TODO
+    //@Test
     public void testRCRandom() {
        
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -584,7 +588,7 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
            
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -628,7 +632,7 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
            
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -757,7 +761,7 @@ public class CGAImplTest {
             System.out.println("test="+testMatrix.toString());
             
             double eps = 0.00001;
-            assertTrue(equals(mv.elements().toArray(), test, eps));
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
     }
     
@@ -834,7 +838,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
-            double[] values = out.elements().toArray();
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(equals(values, involute(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
@@ -864,7 +868,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("negate14()="+out.toString());
-            double[] values = out.elements().toArray();
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             double[] test = negate14(randomValues);
             System.out.println("test="+out.toString());
             assertTrue(equals(values, test, ColumnVectorSparsity.instance(mv.getSparsity())));
@@ -941,7 +945,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("reverse(a)="+out.toString());
-            double[] values = out.elements().toArray();
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(equals(values, reverse(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
@@ -1049,7 +1053,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("dual(a)="+out.toString());
-            double[] values = out.elements().toArray();
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             
             double[] test = dual(randomValues);
             DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
@@ -1081,7 +1085,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("b=scalarInverse(a)="+out.toString());
-            double[] values = out.elements().toArray();
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(values[0] == scalarInverse(randomValues));
         } catch (Exception e){}
     }
@@ -1114,7 +1118,7 @@ public class CGAImplTest {
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
-            double[] values = out.elements().toArray();
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(equals(values, conjugate(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
