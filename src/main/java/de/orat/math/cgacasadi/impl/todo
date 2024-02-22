@@ -1,0 +1,3 @@
+cache für Sparsity und allen Operatoren als Function-Objects
+
+https://stackoverflow.com/questions/61719589/do-you-need-to-override-hashcode-and-equals-for-records

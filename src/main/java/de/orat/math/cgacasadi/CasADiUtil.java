@@ -66,7 +66,7 @@ public class CasADiUtil {
     }
 
     public static SX toSX(SparseDoubleMatrix m){
-       return new SX(toCasADiSparsity(m.getSparsity()), toSX(m.getData()));
+       return new SX(toCasADiSparsity(m.getSparsity()), toSX(m.nonzeros()));
     }
     public static SX toSX(double[] values){
         return new SX(new StdVectorVectorDouble(new StdVectorDouble[]{toStdVectorDouble(values)}));

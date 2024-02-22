@@ -835,7 +835,7 @@ public class CGAImplTest {
             MultivectorNumeric out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
             double[] values = out.elements().toArray();
-            assertTrue(equals(values, involute(randomValues), mv.getSparsity()));
+            assertTrue(equals(values, involute(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
     
@@ -867,7 +867,7 @@ public class CGAImplTest {
             double[] values = out.elements().toArray();
             double[] test = negate14(randomValues);
             System.out.println("test="+out.toString());
-            assertTrue(equals(values, test, mv.getSparsity()));
+            assertTrue(equals(values, test, ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
     
@@ -942,7 +942,7 @@ public class CGAImplTest {
             MultivectorNumeric out = result2.iterator().next();
             System.out.println("reverse(a)="+out.toString());
             double[] values = out.elements().toArray();
-            assertTrue(equals(values, reverse(randomValues), mv.getSparsity()));
+            assertTrue(equals(values, reverse(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
     
@@ -1054,7 +1054,7 @@ public class CGAImplTest {
             double[] test = dual(randomValues);
             DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
             System.out.println(testMatrix.toString());
-            assertTrue(equals(values, test, mv.getSparsity()));
+            assertTrue(equals(values, test, ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
     
@@ -1115,7 +1115,7 @@ public class CGAImplTest {
             MultivectorNumeric out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
             double[] values = out.elements().toArray();
-            assertTrue(equals(values, conjugate(randomValues), mv.getSparsity()));
+            assertTrue(equals(values, conjugate(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
         } catch (Exception e){}
     }
     

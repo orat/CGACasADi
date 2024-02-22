@@ -2,7 +2,7 @@ package de.orat.math.cgacasadi.impl;
 
 //import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
+//import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -17,7 +17,7 @@ import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import util.CayleyTable;
-import util.cga.CGACayleyTableOuterProduct;
+//import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
 
 public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
@@ -34,10 +34,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     private final SX sx;
     
     // zum Erzeugen von symbolischen Konstanten
-    public static SparseCGASymbolicMultivector instance(String name, SparseDoubleColumnVector vector){
+    public static SparseCGASymbolicMultivector instance(String name, SparseDoubleMatrix vector){
         return new SparseCGASymbolicMultivector(name, vector);
     }
-    private SparseCGASymbolicMultivector(String name, SparseDoubleColumnVector vector){
+    protected SparseCGASymbolicMultivector(String name, SparseDoubleMatrix vector){
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
         sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()), 
                 new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
@@ -49,9 +49,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     public static SparseCGASymbolicMultivector instance(String name, int grade){
         return new SparseCGASymbolicMultivector(name, grade);
     }
-    
-   
-    
     /**
      * Creates a k-Vector.
      * 
@@ -70,14 +67,14 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
 
     public iMultivectorSymbolic scalar(double value){
-            SparseDoubleColumnVector sca = fac.createScalar(value);
+            SparseDoubleMatrix sca = fac.createScalar(value);
             String scalar_name = baseCayleyTable.getBasisBladeName(0);
             return fac.createMultivectorSymbolic(scalar_name, sca);
     }
     private static iMultivectorSymbolic pseudoscalar;
     public iMultivectorSymbolic pseudoscalar(){
         if (pseudoscalar == null){
-            SparseDoubleColumnVector pseudo = fac.createPseudoscalar();
+            SparseDoubleMatrix pseudo = fac.createPseudoscalar();
             String pseudoscalar_name = baseCayleyTable.getPseudoscalarName();
             pseudoscalar = fac.createMultivectorSymbolic(pseudoscalar_name, pseudo);
             //int grade = baseCayleyTable.getGrade(baseCayleyTable.getBasisBladeNames().length-1);
