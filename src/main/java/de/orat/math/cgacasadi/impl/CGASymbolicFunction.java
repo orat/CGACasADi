@@ -5,7 +5,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacalc.api.FunctionSymbolic;
-import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
@@ -79,5 +78,4 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
     public String getName(){
         return name;
     }
-    
 }

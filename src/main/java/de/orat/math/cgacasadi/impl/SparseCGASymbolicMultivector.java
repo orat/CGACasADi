@@ -11,14 +11,19 @@ import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.spi.iFunctionSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import util.CayleyTable;
 //import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
    
@@ -111,38 +116,102 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         this.name = null;
     }
     
-   
-    // operators
-    
-    /**
-     * Generic GA reverse implementation based on matrix calculations.
-     * 
-     * @return reverse of the multivector
-     */
-    @Override
-    public iMultivectorSymbolic reverse(){
-        SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
-        //System.out.println("Reverse matrix = "+revm.toString(false));
-        //System.out.println(revm.toString(true));
-        SX result = SX.mtimes(CasADiUtil.toSX(revm), sx);
-        return new SparseCGASymbolicMultivector(result);
+    protected final static class Lazy implements Supplier<CGASymbolicFunction> {
+
+        private Supplier<CGASymbolicFunction> supplier;
+        private CGASymbolicFunction value;
+
+        private Lazy(Supplier<CGASymbolicFunction> supplier) {
+            this.supplier = supplier;
+        }
+
+        @Override
+        public CGASymbolicFunction get() {
+            if (supplier == null) {
+                return value;
+            } else {
+                value = supplier.get();
+                supplier = null;
+                return value;
+            }
+        }
     }
     
-    // tested
+    
+    // operators
+    
+    private static final Supplier<CGASymbolicFunction> reverseFunction = 
+            new Lazy(() -> createReverseFunction());
+      
+    /**
+     * Generic GA reverse function implementation based on matrix calculations.
+     * 
+     * @return reverse of a multivector
+     */
+    private static CGASymbolicFunction createReverseFunction(){
+        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+        SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
+        SX sxres = SX.mtimes(CasADiUtil.toSX(revm), sxarg);
+        return new CGASymbolicFunction("reverse", 
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+    }
     @Override
+    public CGASymbolicFunction getReverseFunction(){
+        return reverseFunction.get();
+    }
+    
+    /*public iMultivectorSymbolic reverse(){
+        return getReverseFunction().callSymbolic(Collections.singletonList(
+                (iMultivectorSymbolic) this)).iterator().next();
+    }
+    public iMultivectorSymbolic reverse_(){
+        SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
+        SX result = SX.mtimes(CasADiUtil.toSX(revm), sx);
+        return new SparseCGASymbolicMultivector(result);
+    }*/
+    
+         
+    
+    private static final List<Supplier<CGASymbolicFunction>> gradeSelectionFunctions  = 
+            createGradeSelectionList();
+    private static List<Supplier<CGASymbolicFunction>> createGradeSelectionList(){
+        List<Supplier<CGASymbolicFunction>> result = new ArrayList<>();
+        int length = baseCayleyTable.getPseudoscalarGrade()+1;
+        for (int i=0;i<length;i++){
+            final int grade = i;
+            result.add(new Lazy(() -> createGradeSelectionFunction(grade)));
+        }
+        return result;
+    } 
+    private static CGASymbolicFunction createGradeSelectionFunction(int grade){
+        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+        SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
+        SX gradeSelectionMatrix  = CasADiUtil.toSX(m); // bestimmt sparsity
+        SX sxres = SX.mtimes(gradeSelectionMatrix, sxarg);
+        return new CGASymbolicFunction("grade"+String.valueOf(grade)+"Selection", 
+           Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
+           Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres))); 
+    }
+    
+    @Override
+    public iFunctionSymbolic getGradeSelectionFunction(int grade){
+        if (grade >= gradeSelectionFunctions.size()) throw new IllegalArgumentException("grade "+String.valueOf(grade)+
+                " does not exist! Max grade == "+String.valueOf(gradeSelectionFunctions.size()-1));
+        return gradeSelectionFunctions.get(grade).get();
+    }
+    /*@Override
     public iMultivectorSymbolic gradeSelection(int grade){
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
         SX gradeSelectionMatrix  = CasADiUtil.toSX(m); // bestimmt sparsity
         return new SparseCGASymbolicMultivector(SX.mtimes(gradeSelectionMatrix, sx));
-    }
+    }*/
 
     /**
      * Dual.
      *
-     * Poincare duality operator based on matrix based implementation of left contraction
-     * 
-     * TODO
-     * CGACayleyTableLeftContractionProduct muss noch implementiert werden
+     * Poincare duality operator based on matrix based implementation of left 
+     * contraction.
      *
      * @param a
      * @return !a
@@ -466,7 +535,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
 
     @Override
-    public iMultivectorSymbolic atan2(iMultivectorSymbolic y) {
+    public iMultivectorSymbolic scalarAtan2(iMultivectorSymbolic y) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
