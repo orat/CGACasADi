@@ -87,6 +87,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         }
         return pseudoscalar;
     }
+    
+    //TODO
+    // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
+    // vieleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
+    // geht nur für CGA?
     private static SparseCGASymbolicMultivector inversePseudoscalar;
     public SparseCGASymbolicMultivector inversePseudoscalar(){
         if (inversePseudoscalar == null){
@@ -124,7 +129,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         private Lazy(Supplier<CGASymbolicFunction> supplier) {
             this.supplier = supplier;
         }
-
         @Override
         public CGASymbolicFunction get() {
             if (supplier == null) {
@@ -140,9 +144,11 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     
     // operators
     
+    
+    // reverse
+    
     private static final Supplier<CGASymbolicFunction> reverseFunction = 
             new Lazy(() -> createReverseFunction());
-      
     /**
      * Generic GA reverse function implementation based on matrix calculations.
      * 
@@ -158,20 +164,27 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     @Override
     public CGASymbolicFunction getReverseFunction(){
-        return reverseFunction.get();
+        // Absturz
+        //return reverseFunction.get();
+        //TEST
+        // de.dhbw.rahmlab.dsl4ga.common.parsing.ValidationException: PIc_parallel := PIc* + (P5⋅PIc*)εᵢ
+        // Caused by: java.lang.NullPointerException: Cannot invoke 
+        // "de.orat.math.gacalc.spi.iMultivectorSymbolic.init(de.orat.math.gacalc.api.MultivectorSymbolic$Callback)" 
+        // because "impl" is null
+        return createReverseFunction();
     }
-    
-    /*public iMultivectorSymbolic reverse(){
-        return getReverseFunction().callSymbolic(Collections.singletonList(
-                (iMultivectorSymbolic) this)).iterator().next();
-    }
-    public iMultivectorSymbolic reverse_(){
+    //TODO
+    // um die Wiederverwertung der Functions zu aktivieren die Methode einfach auskommentieren,
+    // dann greift die default impl im Interface die obige getGradeSelectionFunction() Methode verwendet
+    /*@Override
+    public iMultivectorSymbolic reverse(){
         SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
         SX result = SX.mtimes(CasADiUtil.toSX(revm), sx);
         return new SparseCGASymbolicMultivector(result);
     }*/
     
-         
+    
+    // grade selection
     
     private static final List<Supplier<CGASymbolicFunction>> gradeSelectionFunctions  = 
             createGradeSelectionList();
@@ -193,19 +206,21 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
            Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
            Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres))); 
     }
-    
     @Override
     public iFunctionSymbolic getGradeSelectionFunction(int grade){
         if (grade >= gradeSelectionFunctions.size()) throw new IllegalArgumentException("grade "+String.valueOf(grade)+
                 " does not exist! Max grade == "+String.valueOf(gradeSelectionFunctions.size()-1));
         return gradeSelectionFunctions.get(grade).get();
     }
-    /*@Override
+    //TODO
+    // um die Wiederverwertung der Functions zu aktivieren die Methode einfach auskommentieren,
+    // dann greift die default impl im Interface die obige getGradeSelectionFunction() Methode verwendet
+    @Override
     public iMultivectorSymbolic gradeSelection(int grade){
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
         SX gradeSelectionMatrix  = CasADiUtil.toSX(m); // bestimmt sparsity
         return new SparseCGASymbolicMultivector(SX.mtimes(gradeSelectionMatrix, sx));
-    }*/
+    }
 
     /**
      * Dual.
