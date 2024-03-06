@@ -24,3 +24,12 @@ fn ipns_round_to_euclidian(ipns_sphere){
     rSquared := -(ipns_sphere ipns_sphere˜)/(εᵢ⌋ipns_sphere)²
     position, rSquared
 }
+
+// https://discourse.bivector.net/t/extracting-euclidean-points-from-conformal-points/186/2
+fn split_point_pair(ipns_pp){
+    denominator = sqrt(-<ipns_pp* ipns_pp˜>₀)
+    A = (-1+ipns_pp/denominator) (ipns_pp⋅εᵢ)
+    // Note that B is equivalent to A but with ipns_pp˜ rather than ipns_pp
+    B = (1+ipns_pp/denominator) (ipns_pp⋅εᵢ)
+    A, B
+}
