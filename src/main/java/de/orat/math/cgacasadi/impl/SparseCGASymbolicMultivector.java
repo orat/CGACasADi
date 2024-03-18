@@ -1,8 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
-//import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-//import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -17,6 +15,7 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import util.CayleyTable;
@@ -164,14 +163,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     @Override
     public CGASymbolicFunction getReverseFunction(){
-        // Absturz
-        //return reverseFunction.get();
-        //TEST
-        // de.dhbw.rahmlab.dsl4ga.common.parsing.ValidationException: PIc_parallel := PIc* + (P5⋅PIc*)εᵢ
-        // Caused by: java.lang.NullPointerException: Cannot invoke 
-        // "de.orat.math.gacalc.spi.iMultivectorSymbolic.init(de.orat.math.gacalc.api.MultivectorSymbolic$Callback)" 
-        // because "impl" is null
-        return createReverseFunction();
+        return reverseFunction.get();
     }
     //TODO
     // um die Wiederverwertung der Functions zu aktivieren die Methode einfach auskommentieren,
@@ -215,13 +207,16 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     //TODO
     // um die Wiederverwertung der Functions zu aktivieren die Methode einfach auskommentieren,
     // dann greift die default impl im Interface die obige getGradeSelectionFunction() Methode verwendet
-    @Override
+    /*@Override
     public iMultivectorSymbolic gradeSelection(int grade){
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
         SX gradeSelectionMatrix  = CasADiUtil.toSX(m); // bestimmt sparsity
         return new SparseCGASymbolicMultivector(SX.mtimes(gradeSelectionMatrix, sx));
-    }
+    }*/
 
+    
+    // dual
+    
     /**
      * Dual.
      *
@@ -237,6 +232,42 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(SX.mtimes(lcm, 
                 ((SparseCGASymbolicMultivector) inversePseudoscalar()).getSX()));
     }*/
+
+    
+    // undual
+    
+    //TODO
+    // undual zu implmentieren muss ich erst gp() implementieren damit ich createGPFuncition() zur Verfügung habe
+    //private static final Supplier<CGASymbolicFunction> undualFunction = 
+    //        new Lazy(() -> createUndualFunction());
+    /**
+     * 
+     * @return undual of a multivector
+     */
+    /*private static CGASymbolicFunction createUndualFunction(){
+        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+        SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
+        SX sxres = SX.mtimes(CasADiUtil.toSX(revm), sxarg);
+        return new CGASymbolicFunction("undual", 
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+    }*/
+    /*@Override
+    public CGASymbolicFunction getUndualFunction(){
+        
+    }*/
+    
+    /**
+     * Undual cga specific implementation based on dual and fix sign changed.
+     * 
+     * @return 
+     */
+    @Override
+    public iMultivectorSymbolic undual() {
+         //return gp(exprGraphFac.createPseudoscalar()).gp(-1); // -1 wird gebraucht
+         return dual().gp(-1);
+    }
+
 
     /**
      * Conjugate.
@@ -268,14 +299,41 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(SX.mtimes(CasADiUtil.toSX(m), sx));
     }
     
+    
+    // geometric product
+    
+    private static final Supplier<CGASymbolicFunction> gpFunction = 
+            new Lazy(() -> createGPFunction());
+    /**
+     * 
+     * @return reverse of a multivector
+     */
+    private static CGASymbolicFunction createGPFunction(){
+        SX sxarga = SX.sym("a",baseCayleyTable.getBladesCount());
+        SX sxargb = SX.sym("b",baseCayleyTable.getBladesCount());
+        
+        SX opm = CasADiUtil.toSXProductMatrix(new SparseCGASymbolicMultivector(sxargb), CGACayleyTableGeometricProduct.instance());
+        SX sxres = SX.mtimes(opm.T(), sxarga);
+        
+        List<iMultivectorSymbolic> args = Arrays.asList(new SparseCGASymbolicMultivector(sxarga),
+                new SparseCGASymbolicMultivector(sxargb));
+        return new CGASymbolicFunction("gp", args,
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+    }
     @Override
+    public CGASymbolicFunction getGPFunction(){
+        return gpFunction.get();
+    }
+    
+    // uncomment to deactivate function cache
+    /*@Override
     public iMultivectorSymbolic gp(iMultivectorSymbolic b){
-        System.out.println("---gp---");
+        //System.out.println("---gp---");
         SX opm = CasADiUtil.toSXProductMatrix((SparseCGASymbolicMultivector) b, CGACayleyTableGeometricProduct.instance());
-        System.out.println("--- end of gp matrix creation ---");
+        //System.out.println("--- end of gp matrix creation ---");
         SX result = SX.mtimes(opm.T(), ((SparseCGASymbolicMultivector) this).getSX());
         return new SparseCGASymbolicMultivector(result);
-    }
+    }*/
     
     /*@Override
     public iMultivectorSymbolic op(iMultivectorSymbolic b){
@@ -479,18 +537,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(result);
     }
     
-    /**
-     * Undual cga specific implementation based on dual and fix sign changed.
-     * 
-     * @return 
-     */
-    @Override
-    public iMultivectorSymbolic undual() {
-         //return gp(exprGraphFac.createPseudoscalar()).gp(-1); // -1 wird gebraucht
-         return dual().gp(-1);
-    }
-
-
     
     //---- non symbolic functions
     

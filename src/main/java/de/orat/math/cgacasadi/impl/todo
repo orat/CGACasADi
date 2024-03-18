@@ -1,3 +1,6 @@
 cache für Sparsity und allen Operatoren als Function-Objects
 
 https://stackoverflow.com/questions/61719589/do-you-need-to-override-hashcode-and-equals-for-records
+
+Tests für unterschiedliche sparsity, vermutlich am einfachsten für k-vectoren unterschiedlichen
+grades implementieren
