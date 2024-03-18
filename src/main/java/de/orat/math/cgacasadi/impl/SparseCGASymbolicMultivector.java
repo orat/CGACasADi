@@ -268,7 +268,26 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
          return dual().gp(-1);
     }
 
-
+    
+    // conjugate
+    
+    private static final Supplier<CGASymbolicFunction> conjugateFunction = 
+            new Lazy(() -> createConjugateFunction());
+    private static CGASymbolicFunction createConjugateFunction(){
+        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+        SparseDoubleMatrix conjm = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
+        SX sxres = SX.mtimes(CasADiUtil.toSX(conjm), sxarg);
+        return new CGASymbolicFunction("conjugate", 
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+    }
+    /**
+     * Clifford Conjugation.
+     */
+    @Override
+    public CGASymbolicFunction getConjugateFunction(){
+        return conjugateFunction.get();
+    }
     /**
      * Conjugate.
      *
@@ -277,13 +296,14 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @param a
      * @return a.Conjugate()
      */
-    @Override
+    /*@Override
     public iMultivectorSymbolic conjugate(){
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
         SX result = SX.mtimes(CasADiUtil.toSX(m), sx);
         return new SparseCGASymbolicMultivector(result);
-    }
+    }*/
 
+    
     /**
      * Involute.
      *
