@@ -17,7 +17,9 @@ import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import util.CayleyTable;
 //import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
@@ -121,7 +123,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     protected final static class Lazy implements Supplier<CGASymbolicFunction> {
-
         private Supplier<CGASymbolicFunction> supplier;
         private CGASymbolicFunction value;
 
@@ -325,8 +326,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     private static final Supplier<CGASymbolicFunction> gpFunction = 
             new Lazy(() -> createGPFunction());
     /**
-     * 
-     * @return reverse of a multivector
+      * @return gp between two multivectors
      */
     private static CGASymbolicFunction createGPFunction(){
         SX sxarga = SX.sym("a",baseCayleyTable.getBladesCount());
@@ -344,7 +344,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     public CGASymbolicFunction getGPFunction(){
         return gpFunction.get();
     }
-    
     // uncomment to deactivate function cache
     /*@Override
     public iMultivectorSymbolic gp(iMultivectorSymbolic b){
@@ -352,6 +351,33 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SX opm = CasADiUtil.toSXProductMatrix((SparseCGASymbolicMultivector) b, CGACayleyTableGeometricProduct.instance());
         //System.out.println("--- end of gp matrix creation ---");
         SX result = SX.mtimes(opm.T(), ((SparseCGASymbolicMultivector) this).getSX());
+        return new SparseCGASymbolicMultivector(result);
+    }*/
+    
+    // geometric product with scalar
+    
+    private static final Map<Double, CGASymbolicFunction> gpWithScalarFunctions  = 
+            new HashMap<>();
+    private static CGASymbolicFunction createGPWithScalarFunction(double s){
+        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
+        SX sxres = SX.mtimes(CasADiUtil.toSX(m), sxarg);
+        return new CGASymbolicFunction("gp", Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
+                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+    }
+    @Override
+    public CGASymbolicFunction getGPWithScalarFunction(double s){
+        CGASymbolicFunction result =  gpWithScalarFunctions.get(s);
+        if (result == null){
+            result = createGPWithScalarFunction(s);
+            gpWithScalarFunctions.put(s, result);
+        }
+        return result;
+    }
+    /*@Override
+    public iMultivectorSymbolic gp(double s) {
+        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
+        SX result = SX.mtimes(CasADiUtil.toSX(m), sx);
         return new SparseCGASymbolicMultivector(result);
     }*/
     
@@ -549,14 +575,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(mysx);
     }
 
-    //TODO brauche ich hier nicht statt double ein symbolic scalar?
-    @Override
-    public iMultivectorSymbolic gp(double s) {
-        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
-        SX result = SX.mtimes(CasADiUtil.toSX(m), sx);
-        return new SparseCGASymbolicMultivector(result);
-    }
-    
     
     //---- non symbolic functions
     
