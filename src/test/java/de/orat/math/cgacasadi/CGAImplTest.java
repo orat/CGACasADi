@@ -1089,6 +1089,38 @@ public class CGAImplTest {
         } catch (Exception e){}
     }
     
+    
+    @Test
+    public void testNormalizeRandom(){
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv");
+        MultivectorSymbolic result = mv.normalize();
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mv);
+        
+        List<MultivectorSymbolic> res = new ArrayList<>();
+        res.add(result);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        double[] randomValues = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        arguments.add(arg);
+        
+        try {
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric out = result2.iterator().next();
+            System.out.println("normalize(a)="+out.toString());
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
+            double[] test = normalize(randomValues);
+            DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+            System.out.println("test normalize(a)="+testMatrix.toString());
+            double eps = 0.00001;
+            assertTrue(equals(values, test,eps));
+        } catch (Exception e){}
+    }
+    
     @Test
     public void testScalarInverseRandom(){
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -1120,6 +1152,7 @@ public class CGAImplTest {
     private double scalarInverse(double[] mv){
         return 1d/mv[0];
     }
+    
     @Test
     public void testConjugateRandom(){
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -1158,7 +1191,7 @@ public class CGAImplTest {
      * @param a
      * @return a.Conjugate()
      */
-    private double[] conjugate(double[] _mVec){
+    private static double[] conjugate(double[] _mVec){
         double[] res = new double[32];
         
 	res[0]=_mVec[0];
@@ -1467,6 +1500,54 @@ public class CGAImplTest {
         return res;
     }
 
+    /**
+     * Multiplication with an scalar. 
+     *
+     * @param a multivector
+     * @param b scalar
+     * @return a * b
+     */
+    private static double[] muls (double[] a, double b){
+        double[] res = new double[a.length];
+        res[0] = a[0]*b;
+	res[1] = a[1]*b;
+	res[2] = a[2]*b;
+	res[3] = a[3]*b;
+	res[4] = a[4]*b;
+	res[5] = a[5]*b;
+	res[6] = a[6]*b;
+	res[7] = a[7]*b;
+	res[8] = a[8]*b;
+	res[9] = a[9]*b;
+	res[10] = a[10]*b;
+	res[11] = a[11]*b;
+	res[12] = a[12]*b;
+	res[13] = a[13]*b;
+	res[14] = a[14]*b;
+	res[15] = a[15]*b;
+	res[16] = a[16]*b;
+	res[17] = a[17]*b;
+	res[18] = a[18]*b;
+	res[19] = a[19]*b;
+	res[20] = a[20]*b;
+	res[21] = a[21]*b;
+	res[22] = a[22]*b;
+	res[23] = a[23]*b;
+	res[24] = a[24]*b;
+	res[25] = a[25]*b;
+	res[26] = a[26]*b;
+	res[27] = a[27]*b;
+	res[28] = a[28]*b;
+	res[29] = a[29]*b;
+	res[30] = a[30]*b;
+	res[31] = a[31]*b;
+        return res;
+    }
+    
+    private static double[] normalize(double[] R){
+         return muls(R, 1d / norm(R));
+    }
+    
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // renormalization in R41 (CGA)
     // needed to calculate square roots
@@ -1518,7 +1599,7 @@ public class CGAImplTest {
      * 
      * Implementation following ganja.js generated code.
      */
-    public double norm(double[] mv) {
+    private static double norm(double[] mv) {
         return Math.sqrt(Math.abs(gp(mv, conjugate(mv))[0]));
     }
     

@@ -477,7 +477,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     public SparseCGASymbolicMultivector norm() {
         SX sx1 = ((SparseCGASymbolicMultivector) gp(conjugate()).gradeSelection(0)).getSX();
         return new SparseCGASymbolicMultivector(SX.sqrt(SX.abs(sx1)));
-        //return Math.sqrt(Math.abs(binop_Mul(this, this.Conjugate())._mVec[0]));
     }
     
     /**
@@ -521,26 +520,45 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * Elementwise division with a scalar.
      * 
      * @param s scalar
-     * @return 
+     * @throws IllegalArgumentException if the argument is no structural scalar
+     * @return a multivector for which each component of the given multivector is divided by the given scalar
      */
     private SparseCGASymbolicMultivector divs(SparseCGASymbolicMultivector s){
-        if (s.getSX().is_scalar_()) throw new IllegalArgumentException("The argument of divs() must be a scalar!");
-        return new SparseCGASymbolicMultivector(SX.rdivide(sx, s.getSX()));
+        // test allowed because it is a test against structural beeing a scalar
+        if (!s.isScalar()) throw new IllegalArgumentException("The argument of divs() must be a scalar!");
+        SX svec = SX.repmat(s.getSX().at(0),sx.sparsity().rows(),1);
+        return new SparseCGASymbolicMultivector(SX.rdivide(sx, svec));
     }
     
     /**
-     * normalized.
+     * Normalize.
      *
      * TODO
      * no test available
      * encapsulation into cached function
      * 
-     * Returns a normalized (Euclidean) element.
+     * damit wird die default impl im interface überschrieben
+     * 
+     * FIXME
+     * vermutlich kann ich eine IllegalArgumentException gefeuert werden, wenn der
+     * Multivector 0 ist, also die länge 0 hat.
+     * 
+     * Runtime exception possible if the used norm() is zero 
+     * 
+     * FIXME
+     * test failed
+     * scalar stimmt bis aufs Vorzeichen überein mit der Vergleichs-Implementierung
+     * alle anderen Werte sind NaN
+     * @return a normalized (Euclidean) element.
      */
     @Override
     public SparseCGASymbolicMultivector normalize() {
         //return binop_muls(this, 1d / norm());
-        return divs(norm());
+        SparseCGASymbolicMultivector norm = norm();
+        // tests only possible during runtime
+        //if (norm.isZero()) throw new IllegalArgumentException("norm is zero!");
+        //if (!norm.isScalar()) throw new IllegalArgumentException("norm is no scalar!");
+        return divs(norm);
     }
     
     // CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
@@ -635,8 +653,14 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return CGAOperations.generalInverse(this);
     }
     
+    /**
+     * @throws IllegalArgumentException if the multivector is null.
+     * 
+     * @return scalar inverse
+     */
     @Override
     public iMultivectorSymbolic scalarInverse(){
+       if (isZero()) throw new IllegalArgumentException("zero is not allowed!");
        //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(sx.sparsity()).toString());
        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
        SX resultSX = new SX(sx.sparsity());
@@ -883,6 +907,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     
     public boolean isEven(){
         return getSparsity().isEven();
+    }
+    
+    public boolean isZero(){
+        return sx.is_zero();
     }
     
     @Override
