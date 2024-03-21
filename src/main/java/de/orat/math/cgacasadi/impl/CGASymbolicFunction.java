@@ -35,6 +35,12 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
         this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
     }
     
+    // schwierig zu implementieren
+    /*public boolean equals(List<iMultivectorSymbolic> parameters, 
+                                     List<iMultivectorSymbolic> returns){
+        
+    }*/
+    
     protected static StdVectorSX transformImpl(List<iMultivectorSymbolic> mvs) {
             List<SX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getSX()).toList();
             return new StdVectorSX(mxs);

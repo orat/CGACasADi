@@ -72,6 +72,9 @@ public class CasADiUtil {
         return new SX(new StdVectorVectorDouble(new StdVectorDouble[]{toStdVectorDouble(values)}));
     }
     
+    public static SX createScalar(){
+        return new SX(toCasADiSparsity(CGAMultivectorSparsity.scalar()));
+    }
     
     /**
      * Create a corresponding matrix for geometric product calculation, considering

@@ -766,8 +766,6 @@ public class CGAImplTest {
     }
     
     /**
-     * Mul.
-     *
      * The geometric product.
      *
      * @param a
@@ -1059,6 +1057,35 @@ public class CGAImplTest {
             DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
             System.out.println(testMatrix.toString());
             assertTrue(equals(values, test, ColumnVectorSparsity.instance(mv.getSparsity())));
+        } catch (Exception e){}
+    }
+    
+    @Test
+    public void testNormRandom(){
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv");
+        MultivectorSymbolic result = mv.norm();
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mv);
+        
+        List<MultivectorSymbolic> res = new ArrayList<>();
+        res.add(result);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        double[] randomValues = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        arguments.add(arg);
+        
+        try {
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric out = result2.iterator().next();
+            System.out.println("norm(a)="+out.toString());
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
+            double test = norm(randomValues);
+            System.out.println("test norm(a)="+String.valueOf(test));
+            assertTrue(equals(values, new double[]{test}));
         } catch (Exception e){}
     }
     
@@ -1443,7 +1470,7 @@ public class CGAImplTest {
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // renormalization in R41 (CGA)
     // needed to calculate square roots
-    private static double[] normalize(double[] R){
+    private static double[] normalizeEvenElement(double[] R){
         var S  = R[0]*R[0]-R[10]*R[10]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]+R[1]*R[1]
                 +R[2]*R[2]+R[3]*R[3]-R[4]*R[4]+R[5]*R[5]+R[6]*R[6]-R[7]*R[7]+R[8]*R[8]-R[9]*R[9];
         var T1 = 2*(R[0]*R[11]-R[10]*R[12]+R[13]*R[9]-R[14]*R[7]+R[15]*R[4]-R[1]*R[8]+R[2]*R[6]-R[3]*R[5]);
@@ -1482,6 +1509,17 @@ public class CGAImplTest {
         result[29] = C*R[14]+D1*R[7]-D2*R[6]+D3*R[5]+D4*R[0]-D5*R[1];
         result[30] = C*R[15]-D1*R[4]+D2*R[3]-D3*R[2]+D4*R[1]+D5*R[0];
         return result;
+    }
+    
+    /**
+     * Euclidean norm.
+     *
+     * Calculate the Euclidean norm. (strict positive).
+     * 
+     * Implementation following ganja.js generated code.
+     */
+    public double norm(double[] mv) {
+        return Math.sqrt(Math.abs(gp(mv, conjugate(mv))[0]));
     }
     
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
