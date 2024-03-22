@@ -525,6 +525,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      */
     private SparseCGASymbolicMultivector divs(SparseCGASymbolicMultivector s){
         // test allowed because it is a test against structural beeing a scalar
+        // test against structural 0 not useful
+        // runtime can fail if scalar == 0
         if (!s.isScalar()) throw new IllegalArgumentException("The argument of divs() must be a scalar!");
         SX svec = SX.repmat(s.getSX().at(0),sx.sparsity().rows(),1);
         return new SparseCGASymbolicMultivector(SX.rdivide(sx, svec));
@@ -539,26 +541,15 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * 
      * damit wird die default impl im interface überschrieben
      * 
-     * FIXME
-     * vermutlich kann ich eine IllegalArgumentException gefeuert werden, wenn der
-     * Multivector 0 ist, also die länge 0 hat.
-     * 
      * Runtime exception possible if the used norm() is zero 
      * 
-     * FIXME
-     * test failed
-     * scalar stimmt bis aufs Vorzeichen überein mit der Vergleichs-Implementierung
-     * alle anderen Werte sind NaN
+     * @throws IllegalArgumentException if the arguments norm is no structural scalar
      * @return a normalized (Euclidean) element.
      */
     @Override
     public SparseCGASymbolicMultivector normalize() {
         //return binop_muls(this, 1d / norm());
-        SparseCGASymbolicMultivector norm = norm();
-        // tests only possible during runtime
-        //if (norm.isZero()) throw new IllegalArgumentException("norm is zero!");
-        //if (!norm.isScalar()) throw new IllegalArgumentException("norm is no scalar!");
-        return divs(norm);
+        return divs(norm());
     }
     
     // CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
@@ -660,6 +651,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      */
     @Override
     public iMultivectorSymbolic scalarInverse(){
+       //FIXME unklar ob isZero überhaupt korrekt implementiert ist, das muss nach
+       // structural zero testen... also nicht erst zur Laufzeit
        if (isZero()) throw new IllegalArgumentException("zero is not allowed!");
        //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(sx.sparsity()).toString());
        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
@@ -910,6 +903,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     public boolean isZero(){
+        //TODO unklar ob das so korrekt ist, hier muss auf struktural zero getestet werden
+        // nicht erst auf zero zur Laufzeit
         return sx.is_zero();
     }
     
