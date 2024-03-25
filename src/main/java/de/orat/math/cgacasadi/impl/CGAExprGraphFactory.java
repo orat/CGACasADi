@@ -57,7 +57,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
     public double[] createRandomKVector(int grade){
         double[] result = new double[baseCayleyTable.getRows()];
         Random random = new Random();
-        int[] indizes = baseCayleyTable.getIndizes(grade);
+        int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grade);
         double[] values = random.doubles(-1, 1).
                 limit(indizes.length).toArray();
         for (int i=0;i<indizes.length;i++){
@@ -66,7 +66,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory {
         return result;
     }
 
-
+    
     // create numeric multivectors
     
     /**

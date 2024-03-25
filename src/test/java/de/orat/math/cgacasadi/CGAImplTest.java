@@ -11,6 +11,8 @@ import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.PrimitiveIterator.OfDouble;
+import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -315,6 +317,55 @@ public class CGAImplTest {
         } catch (Exception e){}
     }
     
+    
+    @Test
+    public void testScalarProductRandom() {
+       
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mva = exprGraphFactory.createMultivectorSymbolic("a"/*, 1*/);
+        MultivectorSymbolic mvb = exprGraphFactory.createMultivectorSymbolic("b"/*, 1*/); 
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        parameters.add(mvb); 
+        
+        MultivectorSymbolic res = mva.scalarProduct(mvb);
+        System.out.println("scprandom: "+res.toString());
+        
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        
+        double[] values_A = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+        
+        double[] values_B = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        arguments.add(arg_b);
+       
+        double test = scp(values_A, values_B);
+        double[] testMatrix = new double[32];
+        testMatrix[0] = test;
+        
+        try {
+            System.out.println("a="+arg_a.toString());
+            System.out.println("b="+arg_b.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("random (scp): a*b="+mv.toString());
+            System.out.println("test="+String.valueOf(test));
+           
+            //TODO
+            // Wie kann ich überprüfen, ob mv (MultivectorNumeric) ein scalar ist?
+            
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), testMatrix, eps));
+        } catch (Exception e){}
+    }
+    
     @Test
     public void testAbsRandom() {
        
@@ -351,6 +402,40 @@ public class CGAImplTest {
             double eps = 0.00001;
             assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
+    }
+    
+    /**
+     * A versor is a multivector that can be expressed as the geometric product 
+     * of a number of non-null 1-vectors. 
+     * 
+     * A sum of two versors does not in general result in a versor!<p>
+     * 
+     * @return inverse of this (assuming, it is a versor, no check is made!)
+     * @throws java.lang.ArithmeticException if the multivector is not invertable
+     */
+    private static double[] versorInverse(double[] mv) {
+        double[] rev = reverse(mv);
+        double s = scp(mv, rev);
+        if (s == 0.0) throw new java.lang.ArithmeticException("non-invertible multivector");
+        return muls(mv,  1.0 / s); 
+        
+        //iMultivectorSymbolic rev = reverse();
+        //return rev.gp(gp(rev).scalarInverse());
+        // wo kommt diese Implementierung her?
+        // im Test wird reverse mit ip() verwendet
+    }
+    
+     
+        
+    
+    /**
+     * Scalar product.
+     * 
+     * @param x 
+     * @return scalar product of this with a 'x' but without respecting a metric.
+     */
+    private static double scp(double[] a, double[] b) {
+	return dot(a, b)[0];
     }
     
     private double[] abs(double[] values_A){
@@ -1121,6 +1206,51 @@ public class CGAImplTest {
         } catch (Exception e){}
     }
     
+    
+    /**
+     * Vergleich java reference impl mit versorInverse 
+     */
+    /*@Test
+    public void testVersorInverseRandom(){
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorSymbolic mv = exprGraphFactory.createMultivectorSymbolic("mv");
+        // casadi impl
+        MultivectorSymbolic result = mv.versorInverse();
+        
+        // testweise mit generalInverse vergleichen
+        // versorInverse(a)=[-1.74761, 0, 0, 0, 0, 0, 0, 0, -1.04514, -1.04514, 0, -2.52022, -2.52022, 2.18542, 2.18542, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        // test versorInverse(a)={-1.7476078159237676, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0451355056345772, 1.0451355056345772, 0.0, 2.520224457151371, 2.520224457151371, -2.185420835978317, -2.185420835978317, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+        //--> Vorzeichenfehler
+        result = mv.generalInverse();
+        
+        List<MultivectorSymbolic> parameters = new ArrayList<>();
+        parameters.add(mv);
+        
+        List<MultivectorSymbolic> res = new ArrayList<>();
+        res.add(result);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+        double[] randomValues = createRandomTranslator();//createRandomVersor();
+        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        arguments.add(arg);
+        
+        try {
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric out = result2.iterator().next();
+            System.out.println("versorInverse(a)="+out.toString());
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
+            
+            // java reference impl
+            double[] test = versorInverse(randomValues);
+            
+            DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+            System.out.println("test versorInverse(a)="+testMatrix.toString());
+            double eps = 0.00001;
+            assertTrue(equals(values, test,eps));
+        } catch (Exception e){}
+    }*/
+    
     @Test
     public void testScalarInverseRandom(){
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -1694,5 +1824,57 @@ public class CGAImplTest {
             if (a[rows[i]] != b[rows[i]]) return false;
         }
         return true;
+    }
+    
+    
+    /**
+     * A versor is a multivector that can be expressed as the geometric product of 
+     * invertable vectors, especially of non-null 1-vectors. 
+     * 
+     * [Dorst2007 p.365]
+     * 
+     * [Dorst2007 p.391] translator, rotor, scalar
+     * 
+     * @return components of a random versor
+     */
+    /*public double[] createRandomVersor(){
+        //ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        //double[] vec1 = exprGraphFactory.createRandomMultivector(1);
+    }*/
+    
+    private static double[] createRandomTranslator(){
+        double[] result =  new double[32];
+        Random random = new Random();
+        OfDouble rand = random.doubles(-1, 1).iterator();
+        //scalar, e1inf, e2inf, e3inf konstruieren, d.h. die betreffenden blades
+        result[0] = rand.next();
+        result[8] = rand.next();
+        result[9] = result[8];
+        result[11] = rand.next();
+        result[12] = result[11];
+        result[13] = rand.next();
+        result[14] = result[13];
+        //0,8,9,11,12,13,14
+        return result;
+    }
+    
+    private static double[] createRandomRotor(){
+        double[] result =  new double[32];
+        Random random = new Random();
+        OfDouble rand = random.doubles(-1, 1).iterator();
+        //TODO scalar, e12, e23, e31 konstruieren, d.h. die betreffenden blades
+        result[0] = rand.next();
+        // 6, 10, 7
+        result[6] = rand.next();
+        result[10] = rand.next();
+        result[7] = rand.next();
+        // beschaffen und random werte hineinsetzen
+        return result;
+    }
+    private static double[] createRandomScalor(){
+        double[] result =  new double[32];
+        //TODO scalar, eoinf konstruieren, d.h. die betreffenden blades
+        // beschaffen und random werte hineinsetzen
+        return result;
     }
 }

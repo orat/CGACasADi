@@ -459,7 +459,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     /**
-     * Calculate the Euclidean norm. (strict positive).
+     * Calculate the Euclidean norm. (strict positive, from squared norm).
      * 
      * The Euclidean norm is just the regular 2-norm over the 2n dimensional linear
      * space of blades.<p>
@@ -536,18 +536,16 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * Normalize.
      *
      * TODO
-     * no test available
-     * encapsulation into cached function
+     * encapsulation into cached function<p>
      * 
-     * damit wird die default impl im interface überschrieben
+     * overwrites the default implementation in the interface.<p>
      * 
-     * Runtime exception possible if the used norm() is zero 
-     * 
+     * @throws ArithmeticException if the used norm() is 0.
      * @throws IllegalArgumentException if the arguments norm is no structural scalar
      * @return a normalized (Euclidean) element.
      */
     @Override
-    public SparseCGASymbolicMultivector normalize() {
+    public SparseCGASymbolicMultivector normalizeBySquaredNorm() {
         //return binop_muls(this, 1d / norm());
         return divs(norm());
     }
@@ -585,6 +583,35 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         // -X[3]*X[5]);
         SXScalar T1 = SXScalar.sumProd(X, new int[]{0,13,15,2}, new int[]{11,9,4,6});
         T1 = T1.sub(SXScalar.sumProd(X, new int[]{10,14,1,3}, new int[]{12,7,8,5}));
+        
+        // var T2 = 2*(X[0]*X[12]-X[10]*X[11]+X[13]*X[8]-X[14]*X[6]+X[15]*X[3]-X[1]*X[9]+X[2]*X[7]-X[4]*X[5]);
+        SXScalar T2 = SXScalar.sumProd(X, new int[]{0,13,15,2}, new int[]{12,8,3,7});
+        T2 = T2.sub(SXScalar.sumProd(X, new int[]{10,14,1,4}, new int[]{11,6,9,5}));
+        
+        //var T3 = 2*(X[0]*X[13]-X[10]*X[1]+X[11]*X[9]-X[12]*X[8]+X[14]*X[5]-X[15]*X[2]+X[3]*X[7]-X[4]*X[6]);
+        SXScalar T3 = SXScalar.sumProd(X, new int[]{0,11,14,3}, new int[]{13,9,5,7});
+        T3 = T3.sub(SXScalar.sumProd(X, new int[]{10,12,15,4}, new int[]{1,8,2,6})).muls(2);
+        
+        //var T4 = 2*(X[0]*X[14]-X[10]*X[2]-X[11]*X[7]+X[12]*X[6]-X[13]*X[5]+X[15]*X[1]+X[3]*X[9]-X[4]*X[8]);
+        SXScalar T4 = SXScalar.sumProd(X, new int[]{0,12,15,3}, new int[]{14,6,1,9});
+        T4 = T4.sub(SXScalar.sumProd(X, new int[]{10,11,13,4}, new int[]{2,7,5,8})).muls(2d);
+        
+        //var T5 = 2*(X[0]*X[15]-X[10]*X[5]+X[11]*X[4]-X[12]*X[3]+X[13]*X[2]-X[14]*X[1]+X[6]*X[9]-X[7]*X[8]);
+        SXScalar T5 = SXScalar.sumProd(X, new int[]{0,11,13,6}, new int[]{15,4,2,9});
+        T5 = T5.sub(SXScalar.sumProd(X, new int[]{10,12,14,7}, new int[]{5,3,1,8})).muls(2d);
+        
+        //var TT = -T1*T1+T2*T2+T3*T3+T4*T4+T5*T5;
+        SXScalar TT = T1.sq().add(T2.sq()).add(T3.sq()).add(T4.sq()).add(T5.sq()).negate();
+        
+        //var N = ((S*S+TT)**0.5+S)**0.5, N2 = N*N;
+        SXScalar N = S.sq().add(TT).pow(0.5);
+        SXScalar NN = N.sq();
+        
+        //var M = 2**0.5*N/(N2*N2+TT);
+        //SXScalar M =
+        
+        //var A = N2*M, [B1,B2,B3,B4,B5] = [-T1*M,-T2*M,-T3*M,-T4*M,-T5*M];
+        
         
         //TODO
         throw new RuntimeException("not yet implemented!");
@@ -624,7 +651,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * General inverse implemented in an efficient cga specific way.
      * 
      * Typically a versor inverse can be implemented more efficient than a general
-     * inverse operation. 
+     * inverse operation.<p>
      * 
      * TODO
      * Kann die derzeitige cga spezifische Implementierung auch versors gut
@@ -645,8 +672,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     /**
-     * @throws IllegalArgumentException if the multivector is null.
+     * Scalar inverse.
      * 
+     * @throws IllegalArgumentException if the multivector is null.
      * @return scalar inverse
      */
     @Override
@@ -656,6 +684,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
        if (isZero()) throw new IllegalArgumentException("zero is not allowed!");
        //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(sx.sparsity()).toString());
        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
+       //TODO
+       // das sollte aber einfacher gehen
        SX resultSX = new SX(sx.sparsity());
        resultSX.at(0).assign(SX.inv(sx.at(0)));
        SparseCGASymbolicMultivector result =  new SparseCGASymbolicMultivector(resultSX);
@@ -688,9 +718,15 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         // exception werfen, wenn kein Bivector
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
+    // exponential of a bivector only for CGA (R41)
+    // kann aus CGAImplTest.exp() abgeleitet werden
     @Override
     public iMultivectorSymbolic sqrt(){
-        return add(scalar(1d)).normalize();
+        if (isEven()){
+            return add(scalar(1d)).normalizeEvenElement();
+        }
+        throw new RuntimeException("sqrt() not yet implemented for non even elements.");
     }
     @Override
     public iMultivectorSymbolic log() {
@@ -923,7 +959,4 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
                 ColumnVectorSparsity.dense(baseCayleyTable.getRows())));
         return new SparseCGASymbolicMultivector(mysx);
     }
-
-    
-
 }
