@@ -260,16 +260,30 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         
     }*/
     
+    private static final Supplier<CGASymbolicFunction> undualFunction = 
+            new Lazy(() -> createUndualFunction());
+    @Override
+    public CGASymbolicFunction getUndualFunction(){
+        return undualFunction.get();
+    }
     /**
      * Undual cga specific implementation based on dual and fix sign changed.
      * 
-     * @return 
+     * @return undual function
      */
-    @Override
+    private static CGASymbolicFunction createUndualFunction(){
+        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+        iMultivectorSymbolic mv = new SparseCGASymbolicMultivector(sxarg);
+        iMultivectorSymbolic res = mv.dual().gp(-1d);
+         return new CGASymbolicFunction("undual", 
+                Collections.singletonList(mv),
+                Collections.singletonList(res));    
+    }
+    /*@Override
     public iMultivectorSymbolic undual() {
         //return gp(exprGraphFac.createPseudoscalar()).gp(-1); // -1 wird gebraucht
         return dual().gp(-1);
-    }
+    }*/
 
     
     // conjugate
@@ -339,7 +353,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * zu implementieren
      */
     @Override
-    public iMultivectorSymbolic asCachedSymbolicFunction(String name, 
+    public iMultivectorSymbolic _asCachedSymbolicFunction(String name, 
         List<iMultivectorSymbolic> args, iMultivectorSymbolic res) {
         CGASymbolicFunction fun = functions.get(name);
         if (fun == null){
@@ -464,7 +478,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * The Euclidean norm is just the regular 2-norm over the 2n dimensional linear
      * space of blades.<p>
      * 
-     * It must be computed using a Euclidean metric.<p>
+     * It must be computed using an Euclidean metric.<p>
      * 
      * We also use the squared Euclidean norm, which is just:<br>
      * again with the geometric product evaluated using a Euclidean metric.<p>
@@ -472,6 +486,8 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * TODO<br>
      * ist das mit conjugate so richtig? Muss das nicht reverse() sein?<br>
      * Bei ganja ist das conjugate im impl paper normalization/sqrt/pow ist das reverse
+     * 
+     * https://math.stackexchange.com/questions/1128844/about-the-definition-of-norm-in-clifford-algebra?rq=1
      */
     @Override
     public SparseCGASymbolicMultivector norm() {
@@ -490,6 +506,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         //return unop_Dual(this).norm();
     }
 
+    //TODO
+    // sollte reverseNorm() nicht default norm() sein? Aber hier gibts ja ein 
+    // Vorzeichen, d.h. ist das dann nicht ideal-norm?
+    
     // When a non-positive-definite metric is used, the reverse norm is not a norm in
     // the strict mathematical sense as defined above, since kXkR may have a negative
     // value. However, in practice the reverse norm is useful, especially due to its possible
@@ -497,10 +517,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     // a sphere indicates whether the sphere is real or imaginary. Hence we will (ab-)use
     // the term “norm” for it throughout this thesis.
     public SparseCGASymbolicMultivector reverseNorm(){
-        iMultivectorSymbolic squaredReverseNorm = this.gp(reverse()).gradeSelection(0);
+        iMultivectorSymbolic squaredReverseNorm = gp(reverse()).gradeSelection(0);
         SX scalar = ((SparseCGASymbolicMultivector) squaredReverseNorm).sx;
         SX sign = SX.sign(scalar);
-        SX sqrt = SX.sqrt(scalar);
+        SX sqrt = SX.sqrt(SX.abs(scalar));
         return new SparseCGASymbolicMultivector(SX.mtimes(sign, sqrt));
     }
     
@@ -551,8 +571,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     }
     
     // CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
-    // Normalize an even element X = [1,e12,e13,e14,e15,e23,e24,e25,e34,e35,e45,e1234,e1235,e1245,e1345,e2345]
-    // Normalization, Square Roots, and the Exponential and Logarithmic Maps in Geometric Algebras of Less than 6D
+    // Normalize an even element X = [1,e12,e13,e14,e15,e23,e24,e25,e34,e35,e45,
+    //                                e1234,e1235,e1245,e1345,e2345]
+    // Normalization, Square Roots, and the Exponential and Logarithmic Maps in 
+    // Geometric Algebras of Less than 6D
     // S de. Keninck, M. Roelfs, 2022
     public SparseCGASymbolicMultivector normalizeEvenElement(){
         if (!isEven()) throw new IllegalArgumentException("Element must be an even element!");
@@ -604,14 +626,39 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SXScalar TT = T1.sq().add(T2.sq()).add(T3.sq()).add(T4.sq()).add(T5.sq()).negate();
         
         //var N = ((S*S+TT)**0.5+S)**0.5, N2 = N*N;
-        SXScalar N = S.sq().add(TT).pow(0.5);
-        SXScalar NN = N.sq();
+        SXScalar N = S.sq().add(TT).pow(0.5).add(S);
+        SXScalar N2 = N.sq();
         
         //var M = 2**0.5*N/(N2*N2+TT);
-        //SXScalar M =
+        SXScalar M = SXScalar.pow(2d, N.muls(0.5d).div(N2.sq().add(TT)));
         
         //var A = N2*M, [B1,B2,B3,B4,B5] = [-T1*M,-T2*M,-T3*M,-T4*M,-T5*M];
+        SXScalar A = N2.mul(M);
+        //TODO
+        // neue Methode mit function als argument um negate().mul(M) übergeben zu können
+        // damit die nachfolgenden Zeilen in eine zusammengezogen werden können
+        SXScalar B1 = T1.negate().mul(M);
+        SXScalar B2 = T2.negate().mul(M);
+        SXScalar B3 = T3.negate().mul(M);
+        SXScalar B4 = T4.negate().mul(M);
+        SXScalar B5 = T5.negate().mul(M);
         
+        /*return rotor(A*X[0] + B1*X[11] - B2*X[12] - B3*X[13] - B4*X[14] - B5*X[15],
+        A*X[1] - B1*X[8] + B2*X[9] + B3*X[10] - B4*X[15] + B5*X[14],
+        A*X[2] + B1*X[6] - B2*X[7] + B3*X[15] + B4*X[10] - B5*X[13],
+        A*X[3] - B1*X[5] - B2*X[15] - B3*X[7] - B4*X[9] + B5*X[12],
+        A*X[4] - B1*X[15] - B2*X[5] - B3*X[6] - B4*X[8] + B5*X[11],
+        A*X[5] - B1*X[3] + B2*X[4] - B3*X[14] + B4*X[13] + B5*X[10],
+        A*X[6] + B1*X[2] + B2*X[14] + B3*X[4] - B4*X[12] - B5*X[9],
+        A*X[7] + B1*X[14] + B2*X[2] + B3*X[3] - B4*X[11] - B5*X[8],
+        A*X[8] - B1*X[1] - B2*X[13] + B3*X[12] + B4*X[4] + B5*X[7],
+        A*X[9] - B1*X[13] - B2*X[1] + B3*X[11] + B4*X[3] + B5*X[6],
+        A*X[10] + B1*X[12] - B2*X[11] - B3*X[1] - B4*X[2] - B5*X[5],
+        A*X[11] + B1*X[0] + B2*X[10] - B3*X[9] + B4*X[7] - B5*X[4],
+        A*X[12] + B1*X[10] + B2*X[0] - B3*X[8] + B4*X[6] - B5*X[3],
+        A*X[13] - B1*X[9] + B2*X[8] + B3*X[0] - B4*X[5] + B5*X[2],
+        A*X[14] + B1*X[7] - B2*X[6] + B3*X[5] + B4*X[0] - B5*X[1],
+        A*X[15] - B1*X[4] + B2*X[3] - B3*X[2] + B4*X[1] + B5*X[0]);*/
         
         //TODO
         throw new RuntimeException("not yet implemented!");
@@ -774,6 +821,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         return new SparseCGASymbolicMultivector(result);
     }
     
+    
+    //-------- voraussichtlich deprecated
+    
     private SparseCGASymbolicMultivector expSeries(SparseCGASymbolicMultivector mv, int order){
         
         long scale = 1;
@@ -857,6 +907,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         }
         return result;
     }*/
+    
+    //----------------------
+    
     
     public iMultivectorSymbolic meet(iMultivectorSymbolic b){
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

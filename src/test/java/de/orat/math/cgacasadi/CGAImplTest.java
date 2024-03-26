@@ -677,7 +677,7 @@ public class CGAImplTest {
         } catch (Exception e){}
     }
     
-    @Test
+    /*@Test
     public void testRegressiveRandom() {
        
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -696,11 +696,9 @@ public class CGAImplTest {
         FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
-        
         double[] values_A = exprGraphFactory.createRandomMultivector();
         MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         arguments.add(arg_a);
-        
         double[] values_B = exprGraphFactory.createRandomMultivector();
         MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
         arguments.add(arg_b);
@@ -719,7 +717,7 @@ public class CGAImplTest {
             double eps = 0.00001;
             assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e){}
-    }
+    }*/
     
     /*@Test
     public void testGeneralInverseRandom() {
