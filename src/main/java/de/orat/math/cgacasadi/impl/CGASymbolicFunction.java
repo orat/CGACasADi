@@ -13,19 +13,19 @@ import java.util.List;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGASymbolicFunction implements iFunctionSymbolic {
+public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicMultivector> {
 
     private final String name;
     private final int arity;
     private final int resultCount;
-    
+
     // available after plugging the impl into the api object
     private FunctionSymbolic.Callback callback;
 
     private final Function f_sym_casadi;
 
-    public CGASymbolicFunction(String name, List<iMultivectorSymbolic> parameters, 
-                                     List<iMultivectorSymbolic> returns){
+    public CGASymbolicFunction(String name, List<SparseCGASymbolicMultivector> parameters,
+        List<SparseCGASymbolicMultivector> returns) {
         var f_sym_in = transformImpl(parameters);
         var f_sym_out = transformImpl(returns);
         //String name = callback.getName();
@@ -34,30 +34,29 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
         resultCount = returns.size();
         this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
     }
-    
+
     // schwierig zu implementieren
     /*public boolean equals(List<iMultivectorSymbolic> parameters, 
                                      List<iMultivectorSymbolic> returns){
         
     }*/
-    
-    protected static StdVectorSX transformImpl(List<iMultivectorSymbolic> mvs) {
-            List<SX> mxs = mvs.stream().map(mv -> ((SparseCGASymbolicMultivector) mv).getSX()).toList();
-            return new StdVectorSX(mxs);
+    protected static StdVectorSX transformImpl(List<SparseCGASymbolicMultivector> mvs) {
+        List<SX> mxs = mvs.stream().map(mv -> (mv).getSX()).toList();
+        return new StdVectorSX(mxs);
     }
 
     @Override
-    public List<iMultivectorSymbolic> callSymbolic(List<iMultivectorSymbolic> arguments) {
-            var f_sym_in = transformImpl(arguments);
-            var f_sym_out = new StdVectorSX();
-            this.f_sym_casadi.call(f_sym_in, f_sym_out);
-            return f_sym_out.stream().map(mx -> ((iMultivectorSymbolic) new SparseCGASymbolicMultivector(mx))).toList();
+    public List<SparseCGASymbolicMultivector> callSymbolic(List<SparseCGASymbolicMultivector> arguments) {
+        var f_sym_in = transformImpl(arguments);
+        var f_sym_out = new StdVectorSX();
+        this.f_sym_casadi.call(f_sym_in, f_sym_out);
+        return f_sym_out.stream().map(mx -> (new SparseCGASymbolicMultivector(mx))).toList();
     }
 
     @Override
     public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
         var f_num_in = new StdVectorDM(arguments.stream().map(
-                imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
+            imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
         var f_num_out = new StdVectorDM();
         this.f_sym_casadi.call(f_num_in, f_num_out);
         return f_num_out.stream().map(dm -> ((iMultivectorNumeric) new SparseCGANumericMultivector(dm))).toList();
@@ -72,16 +71,19 @@ public class CGASymbolicFunction implements iFunctionSymbolic {
     public void init(FunctionSymbolic.Callback callback) {
         this.callback = callback;
     }
+
     @Override
-    public int getArity(){
+    public int getArity() {
         return arity;
     }
+
     @Override
-    public int getResultCount(){
+    public int getResultCount() {
         return resultCount;
     }
+
     @Override
-    public String getName(){
+    public String getName() {
         return name;
     }
 }

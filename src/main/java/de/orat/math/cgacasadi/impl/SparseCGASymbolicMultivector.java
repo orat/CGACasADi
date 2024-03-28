@@ -1,7 +1,5 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.dhbw.rahmlab.casadi.api.SXColVec;
-import de.dhbw.rahmlab.casadi.api.SXScalar;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
@@ -22,66 +20,70 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import util.CayleyTable;
 //import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
-   
+public class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
+
     private MultivectorSymbolic.Callback callback;
-    private String name;
-    
+    private final String name;
+
     final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
     final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils = new CGAOperatorMatrixUtils(baseCayleyTable);
-    
+
     final static CGAExprGraphFactory fac = new CGAExprGraphFactory();
-    
+
     // a multivector is represented by a sparse column vector
     private final SX sx;
-    
+
     // zum Erzeugen von symbolischen Konstanten
-    public static SparseCGASymbolicMultivector instance(String name, SparseDoubleMatrix vector){
+    public static SparseCGASymbolicMultivector instance(String name, SparseDoubleMatrix vector) {
         return new SparseCGASymbolicMultivector(name, vector);
     }
-    protected SparseCGASymbolicMultivector(String name, SparseDoubleMatrix vector){
+
+    protected SparseCGASymbolicMultivector(String name, SparseDoubleMatrix vector) {
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
-        sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()), 
-                new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
+        sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
+            new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
         //FIXME
         // warum kann ich den Namen nicht im SX speichern?
         this.name = name;
     }
-   
-    public static SparseCGASymbolicMultivector instance(String name, int grade){
+
+    public static SparseCGASymbolicMultivector instance(String name, int grade) {
         return new SparseCGASymbolicMultivector(name, grade);
     }
+
     /**
      * Creates a k-Vector.
-     * 
+     *
      * @param name
-     * @param grade 
+     * @param grade
      */
-    protected SparseCGASymbolicMultivector(String name, int grade){
+    protected SparseCGASymbolicMultivector(String name, int grade) {
         CGAMultivectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
         sx = SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         this.name = null;
     }
-    
+
     @Override
     public void init(MultivectorSymbolic.Callback callback) {
         this.callback = callback;
     }
 
-    public iMultivectorSymbolic scalar(double value){
-            SparseDoubleMatrix sca = fac.createScalar(value);
-            String scalar_name = baseCayleyTable.getBasisBladeName(0);
-            return fac.createMultivectorSymbolic(scalar_name, sca);
+    public SparseCGASymbolicMultivector scalar(double value) {
+        SparseDoubleMatrix sca = fac.createScalar(value);
+        String scalar_name = baseCayleyTable.getBasisBladeName(0);
+        return fac.createMultivectorSymbolic(scalar_name, sca);
     }
-    private static iMultivectorSymbolic pseudoscalar;
-    public iMultivectorSymbolic pseudoscalar(){
-        if (pseudoscalar == null){
+    private static SparseCGASymbolicMultivector pseudoscalar;
+
+    @Override
+    public SparseCGASymbolicMultivector pseudoscalar() {
+        if (pseudoscalar == null) {
             SparseDoubleMatrix pseudo = fac.createPseudoscalar();
             String pseudoscalar_name = baseCayleyTable.getPseudoscalarName();
             pseudoscalar = fac.createMultivectorSymbolic(pseudoscalar_name, pseudo);
@@ -90,47 +92,55 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         }
         return pseudoscalar;
     }
-    
+
     //TODO
     // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
     // vieleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
     // geht nur für CGA?
     private static SparseCGASymbolicMultivector inversePseudoscalar;
-    public SparseCGASymbolicMultivector inversePseudoscalar(){
-        if (inversePseudoscalar == null){
+
+    @Override
+    public SparseCGASymbolicMultivector inversePseudoscalar() {
+        if (inversePseudoscalar == null) {
             inversePseudoscalar = (SparseCGASymbolicMultivector) pseudoscalar().reverse();
         }
         return inversePseudoscalar;
     }
-    
-    public static SparseCGASymbolicMultivector instance(String name, ColumnVectorSparsity sparsity){
+
+    public static SparseCGASymbolicMultivector instance(String name, ColumnVectorSparsity sparsity) {
         return new SparseCGASymbolicMultivector(name, sparsity);
     }
-    protected SparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity){
+
+    protected SparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity) {
         sx = SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         this.name = null;
     }
-    public static SparseCGASymbolicMultivector instance(String name){
+
+    public static SparseCGASymbolicMultivector instance(String name) {
         return new SparseCGASymbolicMultivector(name);
     }
-    protected SparseCGASymbolicMultivector(String name){
+
+    protected SparseCGASymbolicMultivector(String name) {
         //de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity = CasADiUtil.toCasADiSparsity(CGAKVectorSparsity.dense());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity2 = de.dhbw.rahmlab.casadi.impl.casadi.Sparsity.dense(32);
         sx = SX.sym(name, sparsity2);
         this.name = name;
     }
-    SparseCGASymbolicMultivector(SX sx){
+
+    SparseCGASymbolicMultivector(SX sx) {
         this.sx = sx;
         this.name = null;
     }
-    
+
     protected final static class Lazy implements Supplier<CGASymbolicFunction> {
+
         private Supplier<CGASymbolicFunction> supplier;
         private CGASymbolicFunction value;
 
         private Lazy(Supplier<CGASymbolicFunction> supplier) {
             this.supplier = supplier;
         }
+
         @Override
         public CGASymbolicFunction get() {
             if (supplier == null) {
@@ -142,109 +152,104 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
             }
         }
     }
-    
-    private static final Supplier<CGASymbolicFunction> reverseFunction = 
-            new Lazy(() -> createReverseFunction());
-   
-    
+
+    private static final Supplier<CGASymbolicFunction> reverseFunction
+        = new Lazy(() -> createReverseFunction());
+
     // operators
-    
     // reverse
-    
     /**
      * Generic GA reverse function implementation based on matrix calculations.
-     * 
+     *
      * @return reverse of a multivector
      */
-    private static CGASymbolicFunction createReverseFunction(){
-        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+    private static CGASymbolicFunction createReverseFunction() {
+        SX sxarg = SX.sym("mv", baseCayleyTable.getBladesCount());
         SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
         SX sxres = SX.mtimes(CasADiUtil.toSX(revm), sxarg);
-        return new CGASymbolicFunction("reverse", 
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+        return new CGASymbolicFunction("reverse",
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxarg)),
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxres)));
     }
+
     @Override
-    public CGASymbolicFunction getReverseFunction(){
+    public CGASymbolicFunction getReverseFunction() {
         return reverseFunction.get();
     }
     //TODO
     // um die Wiederverwertung der Functions zu aktivieren die Methode einfach auskommentieren,
     // dann greift die default impl im Interface die obige getGradeSelectionFunction() Methode verwendet
     /*@Override
-    public iMultivectorSymbolic reverse(){
+    public SparseCGASymbolicMultivector reverse(){
         SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
         SX result = SX.mtimes(CasADiUtil.toSX(revm), sx);
         return new SparseCGASymbolicMultivector(result);
     }*/
-    
-    
+
     // grade selection
-    
-    private static final List<Supplier<CGASymbolicFunction>> gradeSelectionFunctions  = 
-            createGradeSelectionList();
-    private static List<Supplier<CGASymbolicFunction>> createGradeSelectionList(){
+    private static final List<Supplier<CGASymbolicFunction>> gradeSelectionFunctions
+        = createGradeSelectionList();
+
+    private static List<Supplier<CGASymbolicFunction>> createGradeSelectionList() {
         List<Supplier<CGASymbolicFunction>> result = new ArrayList<>();
-        int length = baseCayleyTable.getPseudoscalarGrade()+1;
-        for (int i=0;i<length;i++){
+        int length = baseCayleyTable.getPseudoscalarGrade() + 1;
+        for (int i = 0; i < length; i++) {
             final int grade = i;
             result.add(new Lazy(() -> createGradeSelectionFunction(grade)));
         }
         return result;
-    } 
-    private static CGASymbolicFunction createGradeSelectionFunction(int grade){
-        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
-        SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
-        SX gradeSelectionMatrix  = CasADiUtil.toSX(m); // bestimmt sparsity
-        SX sxres = SX.mtimes(gradeSelectionMatrix, sxarg);
-        return new CGASymbolicFunction("grade"+String.valueOf(grade)+"Selection", 
-           Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
-           Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres))); 
     }
+
+    private static CGASymbolicFunction createGradeSelectionFunction(int grade) {
+        SX sxarg = SX.sym("mv", baseCayleyTable.getBladesCount());
+        SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
+        SX gradeSelectionMatrix = CasADiUtil.toSX(m); // bestimmt sparsity
+        SX sxres = SX.mtimes(gradeSelectionMatrix, sxarg);
+        return new CGASymbolicFunction("grade" + String.valueOf(grade) + "Selection",
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxarg)),
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxres)));
+    }
+
     @Override
-    public iFunctionSymbolic getGradeSelectionFunction(int grade){
-        if (grade >= gradeSelectionFunctions.size()) throw new IllegalArgumentException("grade "+String.valueOf(grade)+
-                " does not exist! Max grade == "+String.valueOf(gradeSelectionFunctions.size()-1));
+    public iFunctionSymbolic getGradeSelectionFunction(int grade) {
+        if (grade >= gradeSelectionFunctions.size()) {
+            throw new IllegalArgumentException("grade " + String.valueOf(grade)
+                + " does not exist! Max grade == " + String.valueOf(gradeSelectionFunctions.size() - 1));
+        }
         return gradeSelectionFunctions.get(grade).get();
     }
     //TODO
     // um die Wiederverwertung der Functions zu aktivieren die Methode einfach auskommentieren,
     // dann greift die default impl im Interface die obige getGradeSelectionFunction() Methode verwendet
     /*@Override
-    public iMultivectorSymbolic gradeSelection(int grade){
+    public SparseCGASymbolicMultivector gradeSelection(int grade){
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
         SX gradeSelectionMatrix  = CasADiUtil.toSX(m); // bestimmt sparsity
         return new SparseCGASymbolicMultivector(SX.mtimes(gradeSelectionMatrix, sx));
     }*/
 
-    
     // dual
-    
     /**
      * Dual.
      *
-     * Poincare duality operator based on matrix based implementation of left 
-     * contraction.
+     * Poincare duality operator based on matrix based implementation of left contraction.
      *
      * @param a
      * @return !a
      */
-    /*public iMultivectorSymbolic dual(){
+    /*public SparseCGASymbolicMultivector dual(){
         SX lcm = CasADiUtil.toSXProductMatrix(this,
                 CGACayleyTableLeftContractionProduct.instance());
         return new SparseCGASymbolicMultivector(SX.mtimes(lcm, 
                 ((SparseCGASymbolicMultivector) inversePseudoscalar()).getSX()));
     }*/
-
-    
     // undual
-    
     //TODO
     // undual zu implmentieren muss ich erst gp() implementieren damit ich createGPFuncition() zur Verfügung habe
     //private static final Supplier<CGASymbolicFunction> undualFunction = 
     //        new Lazy(() -> createUndualFunction());
     /**
-     * 
+     *
      * @return undual of a multivector
      */
     /*private static CGASymbolicFunction createUndualFunction(){
@@ -252,59 +257,61 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
         SX sxres = SX.mtimes(CasADiUtil.toSX(revm), sxarg);
         return new CGASymbolicFunction("undual", 
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+                Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxarg)),
+                Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxres)));
     }*/
-    /*@Override
+ /*@Override
     public CGASymbolicFunction getUndualFunction(){
         
     }*/
-    
-    private static final Supplier<CGASymbolicFunction> undualFunction = 
-            new Lazy(() -> createUndualFunction());
+    private static final Supplier<CGASymbolicFunction> undualFunction
+        = new Lazy(() -> createUndualFunction());
+
     @Override
-    public CGASymbolicFunction getUndualFunction(){
+    public CGASymbolicFunction getUndualFunction() {
         return undualFunction.get();
     }
+
     /**
      * Undual cga specific implementation based on dual and fix sign changed.
-     * 
+     *
      * @return undual function
      */
-    private static CGASymbolicFunction createUndualFunction(){
-        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
-        iMultivectorSymbolic mv = new SparseCGASymbolicMultivector(sxarg);
-        iMultivectorSymbolic res = mv.dual().gp(-1d);
-         return new CGASymbolicFunction("undual", 
-                Collections.singletonList(mv),
-                Collections.singletonList(res));    
+    private static CGASymbolicFunction createUndualFunction() {
+        SX sxarg = SX.sym("mv", baseCayleyTable.getBladesCount());
+        SparseCGASymbolicMultivector mv = new SparseCGASymbolicMultivector(sxarg);
+        SparseCGASymbolicMultivector res = mv.dual().gp(-1d);
+        return new CGASymbolicFunction("undual",
+            Collections.singletonList(mv),
+            Collections.singletonList(res));
     }
     /*@Override
-    public iMultivectorSymbolic undual() {
+    public SparseCGASymbolicMultivector undual() {
         //return gp(exprGraphFac.createPseudoscalar()).gp(-1); // -1 wird gebraucht
         return dual().gp(-1);
     }*/
 
-    
     // conjugate
-    
-    private static final Supplier<CGASymbolicFunction> conjugateFunction = 
-            new Lazy(() -> createConjugateFunction());
-    private static CGASymbolicFunction createConjugateFunction(){
-        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+    private static final Supplier<CGASymbolicFunction> conjugateFunction
+        = new Lazy(() -> createConjugateFunction());
+
+    private static CGASymbolicFunction createConjugateFunction() {
+        SX sxarg = SX.sym("mv", baseCayleyTable.getBladesCount());
         SparseDoubleMatrix conjm = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
         SX sxres = SX.mtimes(CasADiUtil.toSX(conjm), sxarg);
-        return new CGASymbolicFunction("conjugate", 
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+        return new CGASymbolicFunction("conjugate",
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxarg)),
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxres)));
     }
+
     /**
      * Clifford Conjugation.
      */
     @Override
-    public CGASymbolicFunction getConjugateFunction(){
+    public CGASymbolicFunction getConjugateFunction() {
         return conjugateFunction.get();
     }
+
     /**
      * Conjugate.
      *
@@ -314,118 +321,169 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @return a.Conjugate()
      */
     /*@Override
-    public iMultivectorSymbolic conjugate(){
+    public SparseCGASymbolicMultivector conjugate(){
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
         SX result = SX.mtimes(CasADiUtil.toSX(m), sx);
         return new SparseCGASymbolicMultivector(result);
     }*/
-
-    
     /**
      * Involute.
      *
      * Main involution - grade inversion<p>
-     * 
+     *
      * swapping the parity of each grade<p>
-     * 
+     *
      * @return involution/grade inversion
      */
     @Override
-    public iMultivectorSymbolic gradeInversion (){
+    public SparseCGASymbolicMultivector gradeInversion() {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createInvolutionOperatorMatrix(baseCayleyTable);
         return new SparseCGASymbolicMultivector(SX.mtimes(CasADiUtil.toSX(m), sx));
     }
-    
+
     private static final Map<String, CGASymbolicFunction> functions = new HashMap<>();
+
     /**
-     * 
+     *
      * @param name
      * @param args
      * @param res
-     * @return 
-     * 
-     * TODO
-     * wenn die Methode für verschiedene Funktionen aber mit gleichem name aufgerufen
-     * wird, dann wird immer die zuerst erzeugte Funktion zurückgeliefert. Dieser
-     * Fehlerfall ist nicht abgefangen. Theoretisch könnte res und args mit den
-     * korrespondierenden Parametern der zurückgegebenen Function verglichen werden
-     * und bei nicht-Übereinstimmung eine ex gefeuert werden. Das ist aber schwierig
-     * zu implementieren
+     * @return
+     *
+     * TODO wenn die Methode für verschiedene Funktionen aber mit gleichem name aufgerufen wird, dann wird
+     * immer die zuerst erzeugte Funktion zurückgeliefert. Dieser Fehlerfall ist nicht abgefangen. Theoretisch
+     * könnte res und args mit den korrespondierenden Parametern der zurückgegebenen Function verglichen
+     * werden und bei nicht-Übereinstimmung eine ex gefeuert werden. Das ist aber schwierig zu implementieren
      */
     @Override
-    public iMultivectorSymbolic _asCachedSymbolicFunction(String name, 
-        List<iMultivectorSymbolic> args, iMultivectorSymbolic res) {
+    public SparseCGASymbolicMultivector _asCachedSymbolicFunction(String name, List<SparseCGASymbolicMultivector> params,
+        List<SparseCGASymbolicMultivector> args, Supplier<SparseCGASymbolicMultivector> res) {
         CGASymbolicFunction fun = functions.get(name);
-        if (fun == null){
-            fun = new CGASymbolicFunction(name, args,
-                Collections.singletonList(res));  
+        if (fun == null) {
+            try {
+                fun = new CGASymbolicFunction(name, params, List.of(res.get()));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                SparseCGASymbolicMultivector arg0 = (SparseCGASymbolicMultivector) args.get(0);
+                SparseCGASymbolicMultivector arg1 = (SparseCGASymbolicMultivector) args.get(1);
+                SparseCGASymbolicMultivector param0 = (SparseCGASymbolicMultivector) params.get(0);
+                SparseCGASymbolicMultivector param1 = (SparseCGASymbolicMultivector) params.get(1);
+                throw ex;
+            }
             functions.put(name, fun);
         }
         return fun.callSymbolic(args).iterator().next();
     }
-    
+
+    @Override
+    public SparseCGASymbolicMultivector _asCachedSymbolicFunction(String name,
+        List<SparseCGASymbolicMultivector> args, SparseCGASymbolicMultivector res) {
+        // Set<String> uniqeParams = new HashSet<>();
+        List<SparseCGASymbolicMultivector> params = new ArrayList<>();
+        for (int i = 0; i < args.size(); ++i) {
+            SparseCGASymbolicMultivector arg = (SparseCGASymbolicMultivector) args.get(i);
+
+            /*
+				String argString = arg.toString();
+				if (uniqeParams.contains(argString)) {
+					throw new IllegalArgumentException("");
+				}
+             */
+            SX inner = arg.getSX();
+            System.out.println(String.format("arg #%s: %s", i, inner));
+            System.out.println(String.format("arg #%s name: %s", i, arg.getName()));
+            boolean isValidFunctionParam = inner.is_valid_input();
+            System.out.println(String.format("arg #%s isValidFunctionParam: %s", i, isValidFunctionParam));
+            if (isValidFunctionParam) {
+                params.add(arg);
+            } else {
+                String argName = arg.getName();
+                ///*
+                if (argName == null || argName.isEmpty()) {
+                    var symvars = SX.symvar(inner);
+                    for (var symvar : symvars) {
+                        // System.out.println(String.format("symvar: %s", symvar));
+                    }
+                }
+                //*/
+                SparseCGASymbolicMultivector symbolicParam = (SparseCGASymbolicMultivector) SparseCGASymbolicMultivector.instance(argName, ((SparseCGASymbolicMultivector) arg).getSparsity());
+                params.add(symbolicParam);
+            }
+        }
+        return _asCachedSymbolicFunction(name, params, args, () -> res);
+    }
+
+    @Override
+    public SparseCGASymbolicMultivector toSymbolic() {
+        // Todo: Sicherstellen, dass keine Collision bei UUID.
+        return (SparseCGASymbolicMultivector) SparseCGASymbolicMultivector.instance(UUID.randomUUID().toString(), this.getSparsity());
+    }
+
     // geometric product
-    
-    private static final Supplier<CGASymbolicFunction> gpFunction = 
-            new Lazy(() -> createGPFunction());
+    private static final Supplier<CGASymbolicFunction> gpFunction
+        = new Lazy(() -> createGPFunction());
+
     /**
-      * @return gp between two multivectors
+     * @return gp between two multivectors
      */
-    private static CGASymbolicFunction createGPFunction(){
-        SX sxarga = SX.sym("a",baseCayleyTable.getBladesCount());
-        SX sxargb = SX.sym("b",baseCayleyTable.getBladesCount());
-        
+    private static CGASymbolicFunction createGPFunction() {
+        SX sxarga = SX.sym("a", baseCayleyTable.getBladesCount());
+        SX sxargb = SX.sym("b", baseCayleyTable.getBladesCount());
+
         SX opm = CasADiUtil.toSXProductMatrix(new SparseCGASymbolicMultivector(sxargb), CGACayleyTableGeometricProduct.instance());
         SX sxres = SX.mtimes(opm.T(), sxarga);
-        
-        List<iMultivectorSymbolic> args = Arrays.asList(new SparseCGASymbolicMultivector(sxarga),
-                new SparseCGASymbolicMultivector(sxargb));
+
+        List<SparseCGASymbolicMultivector> args = Arrays.asList(new SparseCGASymbolicMultivector(sxarga),
+            new SparseCGASymbolicMultivector(sxargb));
         return new CGASymbolicFunction("gp", args,
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxres)));
     }
+
     @Override
-    public CGASymbolicFunction getGPFunction(){
+    public CGASymbolicFunction getGPFunction() {
         return gpFunction.get();
     }
     // uncomment to deactivate function cache
     /*@Override
-    public iMultivectorSymbolic gp(iMultivectorSymbolic b){
+    public SparseCGASymbolicMultivector gp(SparseCGASymbolicMultivector b){
         //System.out.println("---gp---");
         SX opm = CasADiUtil.toSXProductMatrix((SparseCGASymbolicMultivector) b, CGACayleyTableGeometricProduct.instance());
         //System.out.println("--- end of gp matrix creation ---");
         SX result = SX.mtimes(opm.T(), ((SparseCGASymbolicMultivector) this).getSX());
         return new SparseCGASymbolicMultivector(result);
     }*/
-    
+
     // geometric product with scalar
-    
-    private static final Map<Double, CGASymbolicFunction> gpWithScalarFunctions  = 
-            new HashMap<>();
-    private static CGASymbolicFunction createGPWithScalarFunction(double s){
-        SX sxarg = SX.sym("mv",baseCayleyTable.getBladesCount());
+    private static final Map<Double, CGASymbolicFunction> gpWithScalarFunctions
+        = new HashMap<>();
+
+    private static CGASymbolicFunction createGPWithScalarFunction(double s) {
+        SX sxarg = SX.sym("mv", baseCayleyTable.getBladesCount());
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
         SX sxres = SX.mtimes(CasADiUtil.toSX(m), sxarg);
-        return new CGASymbolicFunction("gp", Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxarg)),
-                Collections.singletonList((iMultivectorSymbolic) new SparseCGASymbolicMultivector(sxres)));    
+        return new CGASymbolicFunction("gp", Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxarg)),
+            Collections.singletonList((SparseCGASymbolicMultivector) new SparseCGASymbolicMultivector(sxres)));
     }
+
     @Override
-    public CGASymbolicFunction getGPWithScalarFunction(double s){
-        CGASymbolicFunction result =  gpWithScalarFunctions.get(s);
-        if (result == null){
+    public CGASymbolicFunction getGPWithScalarFunction(double s) {
+        CGASymbolicFunction result = gpWithScalarFunctions.get(s);
+        if (result == null) {
             result = createGPWithScalarFunction(s);
             gpWithScalarFunctions.put(s, result);
         }
         return result;
     }
+
     /*@Override
-    public iMultivectorSymbolic gp(double s) {
+    public SparseCGASymbolicMultivector gp(double s) {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
         SX result = SX.mtimes(CasADiUtil.toSX(m), sx);
         return new SparseCGASymbolicMultivector(result);
     }*/
-    
-    /*@Override
-    public iMultivectorSymbolic op(iMultivectorSymbolic b){
+
+ /*@Override
+    public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b){
         //TODO mit transponieren und vertauschen von a und b wirds völlig falsch
         // so wie es jetzt ist stimmen nur die ersten 5 Elemente
         System.out.println("---op---");
@@ -434,7 +492,6 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SX result = SX.mtimes(gpm, ((SparseCGASymbolicMultivector) b).getSX());
         return new SparseCGASymbolicMultivector(result);
     }*/
-
     /**
      * Add.
      *
@@ -445,7 +502,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @return a + b
      */
     @Override
-    public iMultivectorSymbolic add(iMultivectorSymbolic b){
+    public SparseCGASymbolicMultivector add(SparseCGASymbolicMultivector b) {
         //System.out.println("sparsity(a)="+sx.sparsity().toString(true));
         //System.out.println("sparsity(b)="+((SparseCGASymbolicMultivector) b).getSX().sparsity().toString(true));
         SX result = SX.plus(sx, ((SparseCGASymbolicMultivector) b).getSX());
@@ -460,33 +517,31 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
      * @param b
      * @return a - b
      */
-    /*public iMultivectorSymbolic sub (iMultivectorSymbolic b){
+    /*public SparseCGASymbolicMultivector sub (SparseCGASymbolicMultivector b){
         SX result = SX.minus(sx1, ((SparseCGASymbolicMultivector) b).getSX());
         return new SparseCGASymbolicMultivector(result);
     }*/
-
     // wer braucht das überhaupt?
     //FIXME
-    private iMultivectorSymbolic mul(iMultivectorSymbolic b){
+    private SparseCGASymbolicMultivector mul(SparseCGASymbolicMultivector b) {
         SX result = SX.mtimes(sx, ((SparseCGASymbolicMultivector) b).getSX());
         return new SparseCGASymbolicMultivector(result);
     }
-    
+
     /**
      * Calculate the Euclidean norm. (strict positive, from squared norm).
-     * 
-     * The Euclidean norm is just the regular 2-norm over the 2n dimensional linear
-     * space of blades.<p>
-     * 
+     *
+     * The Euclidean norm is just the regular 2-norm over the 2n dimensional linear space of blades.<p>
+     *
      * It must be computed using an Euclidean metric.<p>
-     * 
+     *
      * We also use the squared Euclidean norm, which is just:<br>
      * again with the geometric product evaluated using a Euclidean metric.<p>
-     * 
+     *
      * TODO<br>
      * ist das mit conjugate so richtig? Muss das nicht reverse() sein?<br>
      * Bei ganja ist das conjugate im impl paper normalization/sqrt/pow ist das reverse
-     * 
+     *
      * https://math.stackexchange.com/questions/1128844/about-the-definition-of-norm-in-clifford-algebra?rq=1
      */
     @Override
@@ -494,14 +549,14 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SX sx1 = ((SparseCGASymbolicMultivector) gp(conjugate()).gradeSelection(0)).getSX();
         return new SparseCGASymbolicMultivector(SX.sqrt(SX.abs(sx1)));
     }
-    
+
     /**
      * Calculate the Ideal norm. (signed)
-     * 
-     * standard euclidean vector space norm 
+     *
+     * standard euclidean vector space norm
      */
     @Override
-    public iMultivectorSymbolic inorm() {
+    public SparseCGASymbolicMultivector inorm() {
         return dual().norm();
         //return unop_Dual(this).norm();
     }
@@ -509,57 +564,58 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     //TODO
     // sollte reverseNorm() nicht default norm() sein? Aber hier gibts ja ein 
     // Vorzeichen, d.h. ist das dann nicht ideal-norm?
-    
     // When a non-positive-definite metric is used, the reverse norm is not a norm in
     // the strict mathematical sense as defined above, since kXkR may have a negative
     // value. However, in practice the reverse norm is useful, especially due to its possible
     // negative sign. E.g., in the conformal model the sign of the reverse norm squared of
     // a sphere indicates whether the sphere is real or imaginary. Hence we will (ab-)use
     // the term “norm” for it throughout this thesis.
-    public SparseCGASymbolicMultivector reverseNorm(){
-        iMultivectorSymbolic squaredReverseNorm = gp(reverse()).gradeSelection(0);
+    public SparseCGASymbolicMultivector reverseNorm() {
+        SparseCGASymbolicMultivector squaredReverseNorm = gp(reverse()).gradeSelection(0);
         SX scalar = ((SparseCGASymbolicMultivector) squaredReverseNorm).sx;
         SX sign = SX.sign(scalar);
         SX sqrt = SX.sqrt(SX.abs(scalar));
         return new SparseCGASymbolicMultivector(SX.mtimes(sign, sqrt));
     }
-    
-    
-    
+
     /**
      * Elementwise multiplication with a scalar.
-     * 
+     *
      * @param s scalar
-     * @return 
+     * @return
      */
-    private SparseCGASymbolicMultivector muls(SparseCGASymbolicMultivector s){
-        if (s.getSX().is_scalar_()) throw new IllegalArgumentException("The argument of muls() must be a scalar!");
+    private SparseCGASymbolicMultivector muls(SparseCGASymbolicMultivector s) {
+        if (s.getSX().is_scalar_()) {
+            throw new IllegalArgumentException("The argument of muls() must be a scalar!");
+        }
         return new SparseCGASymbolicMultivector(SX.times(sx, s.getSX()));
     }
+
     /**
      * Elementwise division with a scalar.
-     * 
+     *
      * @param s scalar
      * @throws IllegalArgumentException if the argument is no structural scalar
      * @return a multivector for which each component of the given multivector is divided by the given scalar
      */
-    private SparseCGASymbolicMultivector divs(SparseCGASymbolicMultivector s){
+    private SparseCGASymbolicMultivector divs(SparseCGASymbolicMultivector s) {
         // test allowed because it is a test against structural beeing a scalar
         // test against structural 0 not useful
         // runtime can fail if scalar == 0
-        if (!s.isScalar()) throw new IllegalArgumentException("The argument of divs() must be a scalar!");
-        SX svec = SX.repmat(s.getSX().at(0),sx.sparsity().rows(),1);
+        if (!s.isScalar()) {
+            throw new IllegalArgumentException("The argument of divs() must be a scalar!");
+        }
+        SX svec = SX.repmat(s.getSX().at(0), sx.sparsity().rows(), 1);
         return new SparseCGASymbolicMultivector(SX.rdivide(sx, svec));
     }
-    
+
     /**
      * Normalize.
      *
-     * TODO
-     * encapsulation into cached function<p>
-     * 
+     * TODO encapsulation into cached function<p>
+     *
      * overwrites the default implementation in the interface.<p>
-     * 
+     *
      * @throws ArithmeticException if the used norm() is 0.
      * @throws IllegalArgumentException if the arguments norm is no structural scalar
      * @return a normalized (Euclidean) element.
@@ -569,15 +625,17 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         //return binop_muls(this, 1d / norm());
         return divs(norm());
     }
-    
+
     // CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
     // Normalize an even element X = [1,e12,e13,e14,e15,e23,e24,e25,e34,e35,e45,
     //                                e1234,e1235,e1245,e1345,e2345]
     // Normalization, Square Roots, and the Exponential and Logarithmic Maps in 
     // Geometric Algebras of Less than 6D
     // S de. Keninck, M. Roelfs, 2022
-    public SparseCGASymbolicMultivector normalizeEvenElement(){
-        if (!isEven()) throw new IllegalArgumentException("Element must be an even element!");
+    public SparseCGASymbolicMultivector normalizeEvenElement() {
+        if (!isEven()) {
+            throw new IllegalArgumentException("Element must be an even element!");
+        }
         // var S = X[0]*X[0]-X[10]*X[10]+X[11]*X[11]-X[12]*X[12]-X[13]*X[13]-X[14]*X[14]-X[15]*X[15]+X[1]*X[1]
         // +X[2]*X[2]+X[3]*X[3]-X[4]*X[4]+X[5]*X[5]+X[6]*X[6]-X[7]*X[7]+X[8]*X[8]-X[9]*X[9];
         /*SX S = CasADiUtil.createScalar();
@@ -597,6 +655,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         S = SX.minus(S, SX.sq(sx.at(7)));
         S = SX.plus(S, SX.sq(sx.at(8)));
         S = SX.minus(S, SX.sq(sx.at(9)));*/
+ /*
         SXColVec X = new SXColVec(sx);
         SXScalar S = SXScalar.sumSq(X, new int[]{0,11,1,2,3,5,6,8});
         S = S.sub(SXScalar.sumSq(X, new int[]{10,12,13,14,15,4,7,9}));
@@ -642,8 +701,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         SXScalar B3 = T3.negate().mul(M);
         SXScalar B4 = T4.negate().mul(M);
         SXScalar B5 = T5.negate().mul(M);
-        
-        /*return rotor(A*X[0] + B1*X[11] - B2*X[12] - B3*X[13] - B4*X[14] - B5*X[15],
+         */
+
+ /*return rotor(A*X[0] + B1*X[11] - B2*X[12] - B3*X[13] - B4*X[14] - B5*X[15],
         A*X[1] - B1*X[8] + B2*X[9] + B3*X[10] - B4*X[15] + B5*X[14],
         A*X[2] + B1*X[6] - B2*X[7] + B3*X[15] + B4*X[10] - B5*X[13],
         A*X[3] - B1*X[5] - B2*X[15] - B3*X[7] - B4*X[9] + B5*X[12],
@@ -659,10 +719,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         A*X[13] - B1*X[9] + B2*X[8] + B3*X[0] - B4*X[5] + B5*X[2],
         A*X[14] + B1*X[7] - B2*X[6] + B3*X[5] + B4*X[0] - B5*X[1],
         A*X[15] - B1*X[4] + B2*X[3] - B3*X[2] + B4*X[1] + B5*X[0]);*/
-        
         //TODO
         throw new RuntimeException("not yet implemented!");
     }
+
     /*
     function Normalize(X) {
         var S = X[0]*X[0]-X[10]*X[10]+X[11]*X[11]-X[12]*X[12]-X[13]*X[13]-X[14]*X[14]-X[15]*X[15]+X[1]*X[1]
@@ -693,66 +753,65 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         A*X[14] + B1*X[7] - B2*X[6] + B3*X[5] + B4*X[0] - B5*X[1],
         A*X[15] - B1*X[4] + B2*X[3] - B3*X[2] + B4*X[1] + B5*X[0]);
     }
-    */
+     */
     /**
      * General inverse implemented in an efficient cga specific way.
-     * 
-     * Typically a versor inverse can be implemented more efficient than a general
-     * inverse operation.<p>
-     * 
-     * TODO
-     * Kann die derzeitige cga spezifische Implementierung auch versors gut
-     * invertieren? Wenn ja, dann sollte ich hier die Methode versorInverse()
-     * so implementieren, dass die gleiche generalInverse() Methode aufgerufen wird.
-     * 
-     * TODO
-     * Eine Implementierung basierend auf der Invertierung der Cayley-Table des
-     * geometrischen Produkts ist auch möglich. Das solle ich auch ausprobieren.
-     * 
+     *
+     * Typically a versor inverse can be implemented more efficient than a general inverse operation.<p>
+     *
+     * TODO Kann die derzeitige cga spezifische Implementierung auch versors gut invertieren? Wenn ja, dann
+     * sollte ich hier die Methode versorInverse() so implementieren, dass die gleiche generalInverse()
+     * Methode aufgerufen wird.
+     *
+     * TODO Eine Implementierung basierend auf der Invertierung der Cayley-Table des geometrischen Produkts
+     * ist auch möglich. Das solle ich auch ausprobieren.
+     *
      * https://pure.uva.nl/ws/files/4375498/52687_fontijne.pdf
-     * 
-     * @return 
+     *
+     * @return
      */
     @Override
-    public iMultivectorSymbolic generalInverse(){
+    public SparseCGASymbolicMultivector generalInverse() {
         return CGAOperations.generalInverse(this);
     }
-    
+
     /**
      * Scalar inverse.
-     * 
+     *
      * @throws IllegalArgumentException if the multivector is null.
      * @return scalar inverse
      */
     @Override
-    public iMultivectorSymbolic scalarInverse(){
-       //FIXME unklar ob isZero überhaupt korrekt implementiert ist, das muss nach
-       // structural zero testen... also nicht erst zur Laufzeit
-       if (isZero()) throw new IllegalArgumentException("zero is not allowed!");
-       //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(sx.sparsity()).toString());
-       //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
-       //TODO
-       // das sollte aber einfacher gehen
-       SX resultSX = new SX(sx.sparsity());
-       resultSX.at(0).assign(SX.inv(sx.at(0)));
-       SparseCGASymbolicMultivector result =  new SparseCGASymbolicMultivector(resultSX);
-       //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
-       return result;
+    public SparseCGASymbolicMultivector scalarInverse() {
+        //FIXME unklar ob isZero überhaupt korrekt implementiert ist, das muss nach
+        // structural zero testen... also nicht erst zur Laufzeit
+        if (isZero()) {
+            throw new IllegalArgumentException("zero is not allowed!");
+        }
+        //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(sx.sparsity()).toString());
+        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
+        //TODO
+        // das sollte aber einfacher gehen
+        SX resultSX = new SX(sx.sparsity());
+        resultSX.at(0).assign(SX.inv(sx.at(0)));
+        SparseCGASymbolicMultivector result = new SparseCGASymbolicMultivector(resultSX);
+        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
+        return result;
     }
-    
+
     /**
-     * Negates the signs of the vector and 4-vector parts of an multivector. 
-     * 
+     * Negates the signs of the vector and 4-vector parts of an multivector.
+     *
      * @return multivector with changed signs for vector and 4-vector parts
      */
     @Override
-    public iMultivectorSymbolic negate14() {
+    public SparseCGASymbolicMultivector negate14() {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createNegate14MultiplicationMatrix(baseCayleyTable);
         return new SparseCGASymbolicMultivector(SX.mtimes(CasADiUtil.toSX(m), sx));
     }
-    
+
     @Override
-    public iMultivectorSymbolic scalarAtan2(iMultivectorSymbolic y) {
+    public SparseCGASymbolicMultivector scalarAtan2(SparseCGASymbolicMultivector y) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -760,37 +819,39 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     // exponential of a bivector only for CGA (R41)
     // kann aus CGAImplTest.exp() abgeleitet werden
     @Override
-    public iMultivectorSymbolic exp() {
+    public SparseCGASymbolicMultivector exp() {
         //TODO
         // exception werfen, wenn kein Bivector
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector only for CGA (R41)
     // kann aus CGAImplTest.exp() abgeleitet werden
     @Override
-    public iMultivectorSymbolic sqrt(){
-        if (isEven()){
+    public SparseCGASymbolicMultivector sqrt() {
+        if (isEven()) {
             return add(scalar(1d)).normalizeEvenElement();
         }
         throw new RuntimeException("sqrt() not yet implemented for non even elements.");
     }
+
     @Override
-    public iMultivectorSymbolic log() {
+    public SparseCGASymbolicMultivector log() {
         //TODO
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
+
     /**
      * Scalar product.
-     * 
-     * TODO
-     * alternativ via gradeSelection() implementieren?
-     * 
+     *
+     * TODO alternativ via gradeSelection() implementieren?
+     *
      * @param rhs
      * @return scalar product of this with a 'rhs'
      */
-    private SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector rhs) {
+    @Override
+    public SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector rhs) {
         // eventuell sollte ich ip() explizit implementieren und hier verwenden,
         // damit scp() unabhängig von der Reihenfolge der Argumente wird
         // return ip(x, LEFT_CONTRACTION).scalarPart();
@@ -798,8 +859,9 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         CGAMultivectorSparsity scalarSparsity = new CGAMultivectorSparsity(new int[]{0});
         SX result = new SX(CasADiUtil.toCasADiSparsity(scalarSparsity));
         result.assign(sxres);
-	return new SparseCGASymbolicMultivector(sxres);
+        return new SparseCGASymbolicMultivector(sxres);
     }
+
     // strict positive?
     private static SparseCGASymbolicMultivector norm_e(SparseCGASymbolicMultivector a) {
         SX norme = SX.sqrt(norm_e2(a).getSX().at(0));
@@ -809,23 +871,22 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         result.assign(norme);
         return new SparseCGASymbolicMultivector(norme);
     }
+
     private static SparseCGASymbolicMultivector norm_e2(SparseCGASymbolicMultivector a) {
-        iMultivectorSymbolic s = a.scp((SparseCGASymbolicMultivector) a.reverse());
+        SparseCGASymbolicMultivector s = a.scp((SparseCGASymbolicMultivector) a.reverse());
         CGAMultivectorSparsity scalarSparsity = new CGAMultivectorSparsity(new int[]{0});
         SX result = new SX(CasADiUtil.toCasADiSparsity(scalarSparsity));
-        SX norme2 = SX.times(SX.gt(((SparseCGASymbolicMultivector) s).getSX(), new SX(0d)), 
-                ((SparseCGASymbolicMultivector) s).getSX());
+        SX norme2 = SX.times(SX.gt(((SparseCGASymbolicMultivector) s).getSX(), new SX(0d)),
+            ((SparseCGASymbolicMultivector) s).getSX());
         //double s = scp(reverse());
         //if (s < 0.0) return 0.0; // avoid FP round off causing negative 's'
         result.assign(norme2);
         return new SparseCGASymbolicMultivector(result);
     }
-    
-    
+
     //-------- voraussichtlich deprecated
-    
-    private SparseCGASymbolicMultivector expSeries(SparseCGASymbolicMultivector mv, int order){
-        
+    private SparseCGASymbolicMultivector expSeries(SparseCGASymbolicMultivector mv, int order) {
+
         long scale = 1;
         //TODO
         // first scale by power of 2 so that its norm is ~ 1
@@ -838,17 +899,18 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
             }
         }*/
 
-        iMultivectorSymbolic scaled = mv.gp(1.0 / scale);
-        
+        SparseCGASymbolicMultivector scaled = mv.gp(1.0 / scale);
+
         //TODO
         return null;
     }
-    /** 
+
+    /**
      * evaluates exp(this) using special cases if possible, using series otherwise.
-     * 
+     *
      * @param M
      * @param order
-     * @return  
+     * @return
      */
     /*protected Multivector exp(Object M, int order) {
         // check out this^2 for special cases
@@ -870,13 +932,12 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
             }
         } else return expSeries(M, order);
     }*/
-
-    /** 
+    /**
      * Evaluates exp using series ...(== SLOW & INPRECISE!)
-     * 
+     *
      * @param M metric
      * @param order typicall 12
-     * @return  
+     * @return
      */
     /*protected Multivector expSeries(Object M, int order) {
         // first scale by power of 2 so that its norm is ~ 1
@@ -907,35 +968,32 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
         }
         return result;
     }*/
-    
     //----------------------
-    
-    
-    public iMultivectorSymbolic meet(iMultivectorSymbolic b){
+    public SparseCGASymbolicMultivector meet(SparseCGASymbolicMultivector b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
- 
+
     }
-    public iMultivectorSymbolic join(iMultivectorSymbolic b){
+
+    public SparseCGASymbolicMultivector join(SparseCGASymbolicMultivector b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public iMultivectorSymbolic scalarAbs() {
+    public SparseCGASymbolicMultivector scalarAbs() {
         return new SparseCGASymbolicMultivector(SX.abs(sx));
     }
+
     @Override
-    public iMultivectorSymbolic scalarSqrt(){
+    public SparseCGASymbolicMultivector scalarSqrt() {
         return new SparseCGASymbolicMultivector(SX.sqrt(sx));
     }
-    
-    
+
     //---- non symbolic functions
-    
     @Override
     public CayleyTable getCayleyTable() {
-       return baseCayleyTable;
+        return baseCayleyTable;
     }
-    
+
     @Override
     public int grade() {
         CGAMultivectorSparsity sparsity = CasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
@@ -946,70 +1004,80 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic {
     public int[] grades() {
         return CasADiUtil.toCGAMultivectorSparsity(sx.sparsity()).getGrades();
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(sx);
         return stringMatrix.toString(true);
     }
-    
+
     @Override
-    public CGAMultivectorSparsity/*ColumnVectorSparsity*/ getSparsity(){
+    public CGAMultivectorSparsity/*ColumnVectorSparsity*/ getSparsity() {
         return CasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
     }
-    
-    public SX getSX(){
+
+    public SX getSX() {
         return sx;
     }
 
     /**
      * Get SX representation of a blade.
-     * 
+     *
      * @param bladeName pseudoscalar_name of the blade
      * @return null, if blade is structurel null else the SX representing the blade
-     * @throws IllegalArgumentException if the given blade pseudoscalar_name does not exist in the cayley-table
+     * @throws IllegalArgumentException if the given blade pseudoscalar_name does not exist in the
+     * cayley-table
      */
-    SX getSX(String bladeName){
+    SX getSX(String bladeName) {
         int row = baseCayleyTable.getBasisBladeRow(bladeName);
-        if (row == -1) throw new IllegalArgumentException("The given bladeName ="+
-                bladeName+" does not exist in the cayley table!");
+        if (row == -1) {
+            throw new IllegalArgumentException("The given bladeName ="
+                + bladeName + " does not exist in the cayley table!");
+        }
         //if (sparsity.isNonZero(row,0)) return sx1.at(row, 0);
-        if (sx.sparsity().has_nz(row, 0)) return sx.at(row, 0);
+        if (sx.sparsity().has_nz(row, 0)) {
+            return sx.at(row, 0);
+        }
         return null;
     }
-    
-    public String getName(){
-        if (name != null) return name;
-        return sx.name();
+
+    public String getName() {
+        if (name != null) {
+            return name;
+        }
+        if (sx.is_scalar_()) {
+            return sx.name();
+        }
+        return "";
     }
-    
-    public int getBladesCount(){
+
+    public int getBladesCount() {
         return baseCayleyTable.getBladesCount();
     }
-    
-    public boolean isEven(){
+
+    public boolean isEven() {
         return getSparsity().isEven();
     }
-    
-    public boolean isZero(){
+
+    public boolean isZero() {
         //TODO unklar ob das so korrekt ist, hier muss auf struktural zero getestet werden
         // nicht erst auf zero zur Laufzeit
         return sx.is_zero();
     }
-    
+
     @Override
-    public iMultivectorSymbolic sparseEmptyInstance() {
+    public SparseCGASymbolicMultivector sparseEmptyInstance() {
         // empty vector implementation
         SX mysx = new SX(CasADiUtil.toCasADiSparsity(
-                ColumnVectorSparsity.empty(baseCayleyTable.getRows())), 
-                new SX(new StdVectorVectorDouble(new StdVectorDouble[]{new StdVectorDouble()})));
+            ColumnVectorSparsity.empty(baseCayleyTable.getRows())),
+            new SX(new StdVectorVectorDouble(new StdVectorDouble[]{new StdVectorDouble()})));
         return new SparseCGASymbolicMultivector(mysx);
     }
-    
+
     @Override
-    public SparseCGASymbolicMultivector denseEmptyInstance(){
+    public SparseCGASymbolicMultivector denseEmptyInstance() {
         SX mysx = new SX(CasADiUtil.toCasADiSparsity(
-                ColumnVectorSparsity.dense(baseCayleyTable.getRows())));
+            ColumnVectorSparsity.dense(baseCayleyTable.getRows())));
         return new SparseCGASymbolicMultivector(mysx);
     }
 }

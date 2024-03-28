@@ -10,16 +10,17 @@ import java.util.Random;
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class TestExprGraphFactory extends ExprGraphFactory {
+
     public static CGAExprGraphFactory impl_ = new CGAExprGraphFactory();
-    
-    public static ExprGraphFactory instance(){
+
+    public static ExprGraphFactory instance() {
         return get(impl_);
     }
-    
+
     protected TestExprGraphFactory(iExprGraphFactory impl) {
         super(impl);
     }
-    
+
     /*public static double[] createRandomKVector(int basisBladesCount) {
         return impl_.createRandomKVector(basisBladesCount);
     }
