@@ -6,14 +6,12 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
-import de.orat.math.gacalc.spi.iMultivectorNumeric;
-import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import java.util.List;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicMultivector> {
+public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicMultivector, SparseCGANumericMultivector> {
 
     private final String name;
     private final int arity;
@@ -54,12 +52,12 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     }
 
     @Override
-    public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
+    public List<SparseCGANumericMultivector> callNumeric(List<SparseCGANumericMultivector> arguments) {
         var f_num_in = new StdVectorDM(arguments.stream().map(
-            imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
+            imvn -> (imvn).dm).toList());
         var f_num_out = new StdVectorDM();
         this.f_sym_casadi.call(f_num_in, f_num_out);
-        return f_num_out.stream().map(dm -> ((iMultivectorNumeric) new SparseCGANumericMultivector(dm))).toList();
+        return f_num_out.stream().map(dm -> (new SparseCGANumericMultivector(dm))).toList();
     }
 
     @Override

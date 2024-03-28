@@ -77,17 +77,18 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
      * @return double[32] elements corresponding to the underlaying implementation specific coordindate
      * system.
      */
+    @Override
     public SparseDoubleMatrix elements() {
         return CasADiUtil.elements(dm);
     }
 
     /*@Override
-    public iMultivectorNumeric op(iMultivectorNumeric mv) {
+    public SparseCGANumericMultivector op(SparseCGANumericMultivector mv) {
         return new SparseCGANumericMultivector(op(elements(), mv.elements()));
     }
     
     @Override
-    public iMultivectorNumeric add(iMultivectorNumeric mv) {
+    public SparseCGANumericMultivector add(SparseCGANumericMultivector mv) {
         return new SparseCGANumericMultivector(add(elements(), mv.elements()));
     }*/
     /**

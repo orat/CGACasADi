@@ -9,7 +9,6 @@ import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
-import de.orat.math.gacalc.spi.iFunctionSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -211,7 +210,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic<Sparse
     }
 
     @Override
-    public iFunctionSymbolic getGradeSelectionFunction(int grade) {
+    public CGASymbolicFunction getGradeSelectionFunction(int grade) {
         if (grade >= gradeSelectionFunctions.size()) {
             throw new IllegalArgumentException("grade " + String.valueOf(grade)
                 + " does not exist! Max grade == " + String.valueOf(gradeSelectionFunctions.size() - 1));

@@ -5,6 +5,12 @@
 	<artifactId>CGACasADi</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<!--exec.mainClass>de.orat.math.cga.sym.cgacasadi.CGACasADi</exec.mainClass-->
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>de.dhbw.rahmlab</groupId>
@@ -46,10 +52,4 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-		<!--exec.mainClass>de.orat.math.cga.sym.cgacasadi.CGACasADi</exec.mainClass-->
-	</properties>
 </project>

@@ -1,57 +1,33 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.caching.iCachedSymbolicMultivector;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
-import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.MatrixSparsity;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import util.CayleyTable;
 
-public final class CachedSymbolicMultivector implements iMultivectorSymbolic<CachedSymbolicMultivector> {
+public final class CachedSparseCGASymbolicMultivector implements iCachedSymbolicMultivector<SparseCGASymbolicMultivector, CachedSparseCGASymbolicMultivector> {
 
-    // Besser wäre: Eigene Klasse für den Cache. Instanz wird in CGAExprGraphFactory gehalten. Und den CachedSymbolicMultivector übergeben. "CacheFactory". Nur die CacheFactory darf den CachedSymbolicMultivector bauen. .
-    private static final Map<String, CGASymbolicFunction> functionCache = new HashMap<>();
-
-    // Evtl. Erzeugung und Aufruf trennen.
-    // Alternative für res wäre Function<List<iMultivectorSymbolic>, iMultivectorSymbolic>
-    //   Dann könnte ich dem res die params übergeben.
-    //   Und ich könnte die Params direkt übergeben und in der Funktion selbst toSymbolic() aufrufen.
-    //   Dann spare ich mit das Lazy.
-    private CachedSymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<SparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
-        CGASymbolicFunction fun = functionCache.get(name);
-        if (fun == null) {
-            final int size = args.size();
-            List<SparseCGASymbolicMultivector> params = new ArrayList<>(size);
-            for (int i = 0; i < size; ++i) {
-                SparseCGASymbolicMultivector arg = args.get(i);
-                // Convert to purely symbolic multivector.
-                SparseCGASymbolicMultivector param = fac.createMultivectorSymbolic(Integer.toString(i), arg.getSparsity());
-                params.add(param);
-            }
-            fun = fac.createFunctionSymbolic(name, params, List.of(res.apply(params)));
-            functionCache.put(name, fun);
-        }
-        return new CachedSymbolicMultivector(fun.callSymbolic(args).get(0));
-    }
-
-    private final static CGAExprGraphFactory fac = new CGAExprGraphFactory();
-
+    private final CGASymbolicFunctionCache cache;
     private final SparseCGASymbolicMultivector delegate;
 
-    public CachedSymbolicMultivector(SparseCGASymbolicMultivector delegate) {
+    public CachedSparseCGASymbolicMultivector(CGASymbolicFunctionCache cache, SparseCGASymbolicMultivector delegate) {
+        this.cache = cache;
         this.delegate = delegate;
     }
 
     @Override
-    public CachedSymbolicMultivector op(CachedSymbolicMultivector b) {
-        // _createBipedFuncName gibt es nicht in jeder Methode.
-        String funName = _createBipedFuncName("op", grades(), b.grades());
-        return getOrCreateSymbolicFunction(funName, List.of(this.delegate, b.delegate), (List<SparseCGASymbolicMultivector> params) -> params.get(0).op(params.get(1)));
+    public SparseCGASymbolicMultivector getDelegate() {
+        return this.delegate;
+    }
+
+    @Override
+    public CachedSparseCGASymbolicMultivector op(CachedSparseCGASymbolicMultivector b) {
+        // createBipedFuncName gibt es nicht in jeder Methode.
+        String funName = this.cache.createBipedFuncName("op", this.delegate.grades(), b.delegate.grades());
+        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this.delegate, b.delegate), (List<SparseCGASymbolicMultivector> params) -> params.get(0).op(params.get(1)));
     }
 
     @Override
@@ -80,12 +56,12 @@ public final class CachedSymbolicMultivector implements iMultivectorSymbolic<Cac
     }
 
     @Override
-    public CachedSymbolicMultivector _asCachedSymbolicFunction(String name, List<CachedSymbolicMultivector> args, CachedSymbolicMultivector res) {
+    public CachedSparseCGASymbolicMultivector _asCachedSymbolicFunction(String name, List<CachedSparseCGASymbolicMultivector> args, CachedSparseCGASymbolicMultivector res) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector _asCachedSymbolicFunction(String name, List<CachedSymbolicMultivector> params, List<CachedSymbolicMultivector> args, Supplier<CachedSymbolicMultivector> res) {
+    public CachedSparseCGASymbolicMultivector _asCachedSymbolicFunction(String name, List<CachedSparseCGASymbolicMultivector> params, List<CachedSparseCGASymbolicMultivector> args, Supplier<CachedSparseCGASymbolicMultivector> res) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -120,12 +96,12 @@ public final class CachedSymbolicMultivector implements iMultivectorSymbolic<Cac
     }
 
     @Override
-    public CachedSymbolicMultivector pseudoscalar() {
+    public CachedSparseCGASymbolicMultivector pseudoscalar() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector inversePseudoscalar() {
+    public CachedSparseCGASymbolicMultivector inversePseudoscalar() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -135,7 +111,7 @@ public final class CachedSymbolicMultivector implements iMultivectorSymbolic<Cac
     }
 
     @Override
-    public CachedSymbolicMultivector scalarInverse() {
+    public CachedSparseCGASymbolicMultivector scalarInverse() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -145,88 +121,87 @@ public final class CachedSymbolicMultivector implements iMultivectorSymbolic<Cac
     }
 
     @Override
-    public CachedSymbolicMultivector toSymbolic() {
+    public CachedSparseCGASymbolicMultivector toSymbolic() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector add(CachedSymbolicMultivector b) {
+    public CachedSparseCGASymbolicMultivector add(CachedSparseCGASymbolicMultivector b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector negate14() {
+    public CachedSparseCGASymbolicMultivector negate14() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector scalarAbs() {
+    public CachedSparseCGASymbolicMultivector scalarAbs() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector scalarAtan2(CachedSymbolicMultivector y) {
+    public CachedSparseCGASymbolicMultivector scalarAtan2(CachedSparseCGASymbolicMultivector y) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector scalarSqrt() {
+    public CachedSparseCGASymbolicMultivector scalarSqrt() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector denseEmptyInstance() {
+    public CachedSparseCGASymbolicMultivector denseEmptyInstance() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector sparseEmptyInstance() {
+    public CachedSparseCGASymbolicMultivector sparseEmptyInstance() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector exp() {
+    public CachedSparseCGASymbolicMultivector exp() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector sqrt() {
+    public CachedSparseCGASymbolicMultivector sqrt() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector log() {
+    public CachedSparseCGASymbolicMultivector log() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector meet(CachedSymbolicMultivector b) {
+    public CachedSparseCGASymbolicMultivector meet(CachedSparseCGASymbolicMultivector b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector join(CachedSymbolicMultivector b) {
+    public CachedSparseCGASymbolicMultivector join(CachedSparseCGASymbolicMultivector b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector inorm() {
+    public CachedSparseCGASymbolicMultivector inorm() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector normalizeBySquaredNorm() {
+    public CachedSparseCGASymbolicMultivector normalizeBySquaredNorm() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector normalizeEvenElement() {
+    public CachedSparseCGASymbolicMultivector normalizeEvenElement() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public CachedSymbolicMultivector generalInverse() {
+    public CachedSparseCGASymbolicMultivector generalInverse() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
 }

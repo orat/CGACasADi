@@ -14,7 +14,7 @@ import util.cga.CGAMultivectorSparsity;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector> {
+public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, SparseCGANumericMultivector> {
 
     final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
@@ -41,6 +41,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     // helper methods
+    @Override
     public double[] createRandomMultivector() {
         return createRandomMultivector(baseCayleyTable.getBladesCount());
     }
@@ -86,8 +87,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     // create function objects
     @Override
-    public CGASymbolicFunction createFunctionSymbolic(String name, List<SparseCGASymbolicMultivector> parameters,
-        List<SparseCGASymbolicMultivector> returns) {
+    public CGASymbolicFunction createFunctionSymbolic(String name, List<SparseCGASymbolicMultivector> parameters, List<SparseCGASymbolicMultivector> returns) {
         return new CGASymbolicFunction(name, parameters, returns);
     }
 
