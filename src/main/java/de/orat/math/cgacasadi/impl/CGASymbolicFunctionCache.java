@@ -7,23 +7,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import de.orat.math.gacalc.caching.iFunctionSymbolicCache;
+//import de.orat.math.gacalc.caching.iFunctionSymbolicCache;
 
-public class CGASymbolicFunctionCache implements iFunctionSymbolicCache<SparseCGASymbolicMultivector, CachedSparseCGASymbolicMultivector> {
+public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<SparseCGASymbolicMultivector, CachedSparseCGASymbolicMultivector>
+{
 
     private final Map<String, CGASymbolicFunction> functionCache = new HashMap<>();
 
-    @Override
-    public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<SparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
+    //@Override
+    public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
         CGASymbolicFunction fun = functionCache.get(name);
         if (fun == null) {
             final int size = args.size();
-            List<SparseCGASymbolicMultivector> params = new ArrayList<>(size);
+            List<CachedSparseCGASymbolicMultivector> params = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {
                 SparseCGASymbolicMultivector arg = args.get(i);
                 // Convert to purely symbolic multivector.
                 SparseCGASymbolicMultivector param = new SparseCGASymbolicMultivector(Integer.toString(i), arg.getSparsity());
-                params.add(param);
+                params.add(new CachedSparseCGASymbolicMultivector(this, param));
             }
             fun = new CGASymbolicFunction(name, params, List.of(res.apply(params)));
             functionCache.put(name, fun);
@@ -32,13 +33,13 @@ public class CGASymbolicFunctionCache implements iFunctionSymbolicCache<SparseCG
         return new CachedSparseCGASymbolicMultivector(this, retVal);
     }
 
-    @Override
+    //@Override
     public Set<String> getCachedFunktionNames() {
         return Collections.unmodifiableSet(this.functionCache.keySet());
     }
 
     // special characters like ._-[]{} are not allowed as function names
-    @Override
+    //@Override
     public String createBipedFuncName(String name, int[] arg1Grades, int[] arg2Grades) {
         StringBuilder sb = new StringBuilder();
         sb.append(name);

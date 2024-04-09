@@ -23,8 +23,8 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
 
     private final Function f_sym_casadi;
 
-    public CGASymbolicFunction(String name, List<SparseCGASymbolicMultivector> parameters,
-        List<SparseCGASymbolicMultivector> returns) {
+    public CGASymbolicFunction(String name, List<? extends SparseCGASymbolicMultivector> parameters,
+        List<? extends SparseCGASymbolicMultivector> returns) {
         var f_sym_in = transformImpl(parameters);
         var f_sym_out = transformImpl(returns);
         //String name = callback.getName();
@@ -39,17 +39,17 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
                                      List<iMultivectorSymbolic> returns){
         
     }*/
-    protected static StdVectorSX transformImpl(List<SparseCGASymbolicMultivector> mvs) {
-        List<SX> mxs = mvs.stream().map(mv -> (mv).getSX()).toList();
-        return new StdVectorSX(mxs);
+    protected static StdVectorSX transformImpl(List<? extends SparseCGASymbolicMultivector> mvs) {
+        List<SX> sxs = mvs.stream().map(mv -> (mv).getSX()).toList();
+        return new StdVectorSX(sxs);
     }
 
     @Override
-    public List<SparseCGASymbolicMultivector> callSymbolic(List<SparseCGASymbolicMultivector> arguments) {
+    public List<? extends SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
         var f_sym_in = transformImpl(arguments);
         var f_sym_out = new StdVectorSX();
         this.f_sym_casadi.call(f_sym_in, f_sym_out);
-        return f_sym_out.stream().map(mx -> (new SparseCGASymbolicMultivector(mx))).toList();
+        return f_sym_out.stream().map(sx -> (new SparseCGASymbolicMultivector(sx))).toList();
     }
 
     @Override

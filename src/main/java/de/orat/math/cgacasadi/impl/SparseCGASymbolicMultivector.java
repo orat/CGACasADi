@@ -43,6 +43,14 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic<Sparse
         return new SparseCGASymbolicMultivector(name, vector);
     }
 
+    /**
+     * Shallow-copy constructor.
+     */
+    protected SparseCGASymbolicMultivector(SparseCGASymbolicMultivector other) {
+        this.name = other.name;
+        this.sx = other.sx;
+    }
+
     protected SparseCGASymbolicMultivector(String name, SparseDoubleMatrix vector) {
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
         sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
