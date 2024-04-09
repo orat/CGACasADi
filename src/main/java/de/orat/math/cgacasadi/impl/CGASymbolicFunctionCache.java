@@ -34,7 +34,7 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
     }
 
     //@Override
-    public Set<String> getCachedFunktionNames() {
+    public Set<String> getCachedFunctionNames() {
         return Collections.unmodifiableSet(this.functionCache.keySet());
     }
 
