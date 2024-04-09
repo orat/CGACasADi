@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,40 +39,34 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
         return Collections.unmodifiableSet(this.functionCache.keySet());
     }
 
-    // special characters like ._-[]{} are not allowed as function names
-    //@Override
-    public String createBipedFuncName(String name, int[] arg1Grades, int[] arg2Grades) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(name);
-        sb.append("a");
-        for (int i = 0; i < arg1Grades.length - 1; i++) {
-            sb.append(String.valueOf(arg1Grades[i]));
-            //sb.append("-");
-        }
-        sb.append(String.valueOf(arg1Grades[arg1Grades.length - 1]));
-        sb.append("b");
-        for (int i = 0; i < arg2Grades.length - 1; i++) {
-            sb.append(String.valueOf(arg2Grades[i]));
-            //sb.append("-");
-        }
-        sb.append(String.valueOf(arg2Grades[arg2Grades.length - 1]));
-        //sb.append("_");
-        return sb.toString();
-    }
+    private static final String PARAM_NAMES = "abcdef";
 
-    // @Override
-    public String createBipedFuncName(String name, int[] arg1Grades, String constName) {
+    /**
+     * special characters like ._-[]{} are not allowed as function names
+     *
+     * @param params Either iMultivectorSymbolic or int
+     */
+    public String createFuncName(String name, Object... params) {
         StringBuilder sb = new StringBuilder();
         sb.append(name);
-        sb.append("a");
-        for (int i = 0; i < arg1Grades.length - 1; i++) {
-            sb.append(String.valueOf(arg1Grades[i]));
-            //sb.append("-");
+        if (params.length > PARAM_NAMES.length()) {
+            throw new RuntimeException("Too many params given.");
         }
-        sb.append(String.valueOf(arg1Grades[arg1Grades.length - 1]));
-        sb.append("b");
-        sb.append(constName);
-        //sb.append("_");
+        for (int paramIndex = 0; paramIndex < params.length; ++paramIndex) {
+            sb.append(PARAM_NAMES.charAt(paramIndex));
+            Object param = params[paramIndex];
+            if (param instanceof iMultivectorSymbolic mv) {
+                int[] grades = mv.grades();
+                for (int i = 0; i < grades.length; i++) {
+                    sb.append(grades[i]);
+                    //sb.append("-");
+                }
+            } else if (param instanceof Integer intParam) {
+                sb.append(intParam);
+            } else {
+                throw new RuntimeException("Param of unexpected type.");
+            }
+        }
         return sb.toString();
     }
 }
