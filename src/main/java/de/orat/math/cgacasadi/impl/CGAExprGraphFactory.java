@@ -14,7 +14,7 @@ import util.cga.CGAMultivectorSparsity;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, SparseCGANumericMultivector> {
+public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector> {
 
     final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
