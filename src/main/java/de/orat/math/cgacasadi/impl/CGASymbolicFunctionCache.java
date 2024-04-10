@@ -13,17 +13,17 @@ import java.util.function.Function;
 
 public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<SparseCGASymbolicMultivector, CachedSparseCGASymbolicMultivector>
 {
-    
+
     public static CGASymbolicFunctionCache instance() {
         return INSTANCE;
     }
-    
+
     private static final CGASymbolicFunctionCache INSTANCE = new CGASymbolicFunctionCache();
-    
+
     private CGASymbolicFunctionCache() {
-        
+
     }
-    
+
     private final Map<String, CGASymbolicFunction> functionCache = new HashMap<>();
     private final Map<String, Integer> usageCache = new HashMap<>();
 
@@ -55,12 +55,12 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
     public Map<String, Integer> getCachedFunctionUsage() {
         return Collections.unmodifiableMap(this.usageCache);
     }
-    
+
     private static final String PARAM_NAMES = "abcdef";
 
     /**
-     * A valid function name is a std::string starting with a letter followed by letters, numbers or
-     * non-consecutive underscores.
+     * A valid CasADi function name starts with a letter followed by letters, numbers or non-consecutive
+     * underscores. The cache names and CadADi function names do not need to be the same, but currently are.
      *
      * @param params Either iMultivectorSymbolic or int
      */
