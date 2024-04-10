@@ -6,8 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Function;
 //import de.orat.math.gacalc.caching.iFunctionSymbolicCache;
 
@@ -25,7 +26,7 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
     }
 
     private final Map<String, CGASymbolicFunction> functionCache = new HashMap<>();
-    private final Map<String, Integer> usageCache = new HashMap<>();
+    private final Map<String, Integer> cachedFunctionsUsage = new HashMap<>();
 
     //@Override
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
@@ -44,16 +45,19 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
             }
             func = new CGASymbolicFunction(name, params, List.of(res.apply(params)));
             functionCache.put(name, func);
-            usageCache.put(name, 0);
+            cachedFunctionsUsage.put(name, 0);
         }
         SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0);
-        usageCache.compute(name, (k, v) -> ++v);
+        cachedFunctionsUsage.compute(name, (k, v) -> ++v);
         return new CachedSparseCGASymbolicMultivector(retVal);
     }
 
-    //@Override
-    public Map<String, Integer> getCachedFunctionUsage() {
-        return Collections.unmodifiableMap(this.usageCache);
+    public Map<String, Integer> getUnmodifiableCachedFunctionsUsage() {
+        return Collections.unmodifiableMap(this.cachedFunctionsUsage);
+    }
+
+    public SortedMap<String, Integer> getSortedUnmodifiableCachedFunctionsUsage() {
+        return new TreeMap<>(getUnmodifiableCachedFunctionsUsage());
     }
 
     private static final String PARAM_NAMES = "abcdef";
