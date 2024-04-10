@@ -18,10 +18,6 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
-    public Map<String, Integer> getCachedFunctionUsage() {
-        return CGASymbolicFunctionCache.instance().getCachedFunctionUsage();
-    }
-
     // create symbolic multivectors
     @Override
     public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, MatrixSparsity sparsity) {
