@@ -50,8 +50,6 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
         SX sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
             new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
-        //FIXME
-        // warum kann ich den Namen nicht im SX speichern?
         return new CachedSparseCGASymbolicMultivector(name, sx);
     }
 
@@ -118,7 +116,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     public SX getSX() {
-        return sx;
+        return this.sx;
     }
 
     /**
@@ -142,14 +140,9 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return null;
     }
 
+    @Override
     public String getName() {
-        if (name != null) {
-            return name;
-        }
-        if (sx.is_scalar_()) {
-            return sx.name();
-        }
-        return "";
+        return this.name;
     }
 
     public int getBladesCount() {
