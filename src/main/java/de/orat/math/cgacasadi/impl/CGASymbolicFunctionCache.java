@@ -33,10 +33,13 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
         if (func == null) {
             final int size = args.size();
             List<CachedSparseCGASymbolicMultivector> params = new ArrayList<>(size);
+            if (args.size() > PARAM_NAMES.length()) {
+                throw new RuntimeException("Too many args given.");
+            }
             for (int i = 0; i < size; ++i) {
                 SparseCGASymbolicMultivector arg = args.get(i);
                 // Convert to purely symbolic multivector.
-                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(Integer.toString(i), arg.getSparsity());
+                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
                 params.add(new CachedSparseCGASymbolicMultivector(param));
             }
             func = new CGASymbolicFunction(name, params, List.of(res.apply(params)));
