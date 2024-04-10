@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import java.util.List;
 
 public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicMultivector {
@@ -7,7 +8,11 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     private static final CGASymbolicFunctionCache CACHE = CGASymbolicFunctionCache.instance();
 
     public CachedSparseCGASymbolicMultivector(SparseCGASymbolicMultivector mv) {
-        super(mv);
+        super(mv.getName(), mv.getSX());
+    }
+
+    public CachedSparseCGASymbolicMultivector(String name, SX sx) {
+        super(name, sx);
     }
 
     //======================================================

@@ -25,8 +25,8 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
 
     }
 
-    private final Map<String, CGASymbolicFunction> functionCache = new HashMap<>();
-    private final Map<String, Integer> cachedFunctionsUsage = new HashMap<>();
+    private final Map<String, CGASymbolicFunction> functionCache = new HashMap<>(1024, 0.5f);
+    private final Map<String, Integer> cachedFunctionsUsage = new HashMap<>(1024, 0.5f);
 
     //@Override
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
@@ -40,7 +40,8 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
             for (int i = 0; i < size; ++i) {
                 SparseCGASymbolicMultivector arg = args.get(i);
                 // Convert to purely symbolic multivector.
-                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
+                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
+                    String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
                 params.add(new CachedSparseCGASymbolicMultivector(param));
             }
             func = new CGASymbolicFunction(name, params, List.of(res.apply(params)));
@@ -52,7 +53,7 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
         return new CachedSparseCGASymbolicMultivector(retVal);
     }
 
-    public void resetCache() {
+    public void clearCache() {
         this.functionCache.clear();
         this.cachedFunctionsUsage.clear();
     }

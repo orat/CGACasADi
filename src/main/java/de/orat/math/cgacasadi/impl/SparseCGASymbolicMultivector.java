@@ -18,7 +18,10 @@ import util.CayleyTable;
 //import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
 
-public class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
+/**
+ * abstract to prevent advertently instantiation.
+ */
+public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
 
     private MultivectorSymbolic.Callback callback;
     private final String name;
@@ -33,19 +36,10 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic<Sparse
 
     //======================================================
     // Constructors and static creators.
-    // -> Constructors must be private and only used within creators.
-    // -> creators return Cached instances.
+    // -> Constructors must only used within creators or subclasses.
+    // -> creators return cached instances.
     //======================================================
-    /**
-     * Shallow-copy constructor. Only for use in child classes.
-     */
-    protected SparseCGASymbolicMultivector(SparseCGASymbolicMultivector other) {
-        Objects.requireNonNull(other);
-        this.name = other.name;
-        this.sx = other.sx;
-    }
-
-    private SparseCGASymbolicMultivector(String name, SX sx) {
+    protected SparseCGASymbolicMultivector(String name, SX sx) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(sx);
         this.name = name;
@@ -58,8 +52,7 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic<Sparse
             new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
         //FIXME
         // warum kann ich den Namen nicht im SX speichern?
-        SparseCGASymbolicMultivector uncachedVec = new SparseCGASymbolicMultivector(name, sx);
-        return new CachedSparseCGASymbolicMultivector(uncachedVec);
+        return new CachedSparseCGASymbolicMultivector(name, sx);
     }
 
     /**
@@ -75,21 +68,18 @@ public class SparseCGASymbolicMultivector implements iMultivectorSymbolic<Sparse
 
     public static SparseCGASymbolicMultivector create(String name, ColumnVectorSparsity sparsity) {
         SX sx = SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
-        SparseCGASymbolicMultivector uncachedVec = new SparseCGASymbolicMultivector("", sx);
-        return new CachedSparseCGASymbolicMultivector(uncachedVec);
+        return new CachedSparseCGASymbolicMultivector("", sx);
     }
 
     public static SparseCGASymbolicMultivector create(String name) {
         //de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity = CasADiUtil.toCasADiSparsity(CGAKVectorSparsity.dense());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity2 = de.dhbw.rahmlab.casadi.impl.casadi.Sparsity.dense(32);
         SX sx = SX.sym(name, sparsity2);
-        SparseCGASymbolicMultivector uncachedVec = new SparseCGASymbolicMultivector(name, sx);
-        return new CachedSparseCGASymbolicMultivector(uncachedVec);
+        return new CachedSparseCGASymbolicMultivector(name, sx);
     }
 
     public static SparseCGASymbolicMultivector create(SX sx) {
-        SparseCGASymbolicMultivector uncachedVec = new SparseCGASymbolicMultivector("", sx);
-        return new CachedSparseCGASymbolicMultivector(uncachedVec);
+        return new CachedSparseCGASymbolicMultivector("", sx);
     }
 
     //======================================================
