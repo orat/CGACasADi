@@ -4,11 +4,10 @@ import java.util.List;
 
 public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicMultivector {
 
-    private final CGASymbolicFunctionCache cache;
+    private static final CGASymbolicFunctionCache CACHE = CGASymbolicFunctionCache.instance();
 
-    public CachedSparseCGASymbolicMultivector(CGASymbolicFunctionCache cache, SparseCGASymbolicMultivector mv) {
+    public CachedSparseCGASymbolicMultivector(SparseCGASymbolicMultivector mv) {
         super(mv);
-        this.cache = cache;
     }
 
     //======================================================
@@ -17,8 +16,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // Fall: Binärer Operator
     @Override
     public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("op", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("op", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).op_super(params.get(1))
         );
     }
@@ -32,8 +31,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // Wichtig: grade ist Parameter, landet im Namen.
     @Override
     public SparseCGASymbolicMultivector gradeSelection(int grade) {
-        String funName = this.cache.createFuncName("gradeSelection", this, grade);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("gradeSelection", this, grade);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).gradeSelection_super(grade)
         );
     }
@@ -45,8 +44,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // Fall: Unärer Operator
     @Override
     public SparseCGASymbolicMultivector reverse() {
-        String funName = this.cache.createFuncName("reverse", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("reverse", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).reverse_super()
         );
     }
@@ -89,8 +88,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector gp(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("gp", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("gp", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).gp_super(params.get(1))
         );
     }
@@ -102,8 +101,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector gradeInversion() {
-        String funName = this.cache.createFuncName("gradeInversion", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("gradeInversion", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).gradeInversion_super()
         );
     }
@@ -115,8 +114,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector dual() {
-        String funName = this.cache.createFuncName("dual", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("dual", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).dual_super()
         );
     }
@@ -128,8 +127,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector undual() {
-        String funName = this.cache.createFuncName("undual", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("undual", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).undual_super()
         );
     }
@@ -141,21 +140,21 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector conjugate() {
-        String funName = this.cache.createFuncName("conjugate", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("conjugate", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).conjugate_super()
         );
     }
 
     private SparseCGASymbolicMultivector conjugate_super() {
-        return super.dual();
+        return super.conjugate();
     }
 
     // BinOp
     @Override
     public SparseCGASymbolicMultivector lc(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("lc", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("lc", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).lc_super(params.get(1))
         );
     }
@@ -167,8 +166,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector rc(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("rc", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("rc", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).rc_super(params.get(1))
         );
     }
@@ -180,8 +179,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("scp", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("scp", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).scp_super(params.get(1))
         );
     }
@@ -193,8 +192,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector dot(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("dot", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("dot", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).dot_super(params.get(1))
         );
     }
@@ -206,8 +205,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector ip(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("ip", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("ip", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).ip_super(params.get(1))
         );
     }
@@ -219,8 +218,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector vee(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("vee", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("vee", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).vee_super(params.get(1))
         );
     }
@@ -232,8 +231,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector add(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("add", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("add", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).add_super(params.get(1))
         );
     }
@@ -245,8 +244,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector sub(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("sub", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("sub", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).sub_super(params.get(1))
         );
     }
@@ -258,8 +257,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector negate14() {
-        String funName = this.cache.createFuncName("negate14", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("negate14", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).negate14_super()
         );
     }
@@ -271,8 +270,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector scalarAbs() {
-        String funName = this.cache.createFuncName("scalarAbs", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("scalarAbs", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).scalarAbs_super()
         );
     }
@@ -284,8 +283,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector scalarSqrt() {
-        String funName = this.cache.createFuncName("scalarSqrt", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("scalarSqrt", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).scalarSqrt_super()
         );
     }
@@ -297,8 +296,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector sqrt() {
-        String funName = this.cache.createFuncName("sqrt", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("sqrt", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).sqrt_super()
         );
     }
@@ -310,8 +309,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector norm() {
-        String funName = this.cache.createFuncName("norm", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("norm", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).norm_super()
         );
     }
@@ -323,8 +322,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector inorm() {
-        String funName = this.cache.createFuncName("inorm", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("inorm", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).inorm_super()
         );
     }
@@ -336,8 +335,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector normalizeBySquaredNorm() {
-        String funName = this.cache.createFuncName("normalizeBySquaredNorm", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("normalizeBySquaredNorm", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).normalizeBySquaredNorm_super()
         );
     }
@@ -349,8 +348,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // BinOp
     @Override
     public SparseCGASymbolicMultivector div(SparseCGASymbolicMultivector b) {
-        String funName = this.cache.createFuncName("div", this, b);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this, b),
+        String funName = CACHE.createFuncName("div", this, b);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).div_super(params.get(1))
         );
     }
@@ -363,8 +362,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector generalInverse() {
-        String funName = this.cache.createFuncName("generalInverse", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("generalInverse", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).generalInverse_super()
         );
     }
@@ -376,8 +375,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector scalarInverse() {
-        String funName = this.cache.createFuncName("scalarInverse", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("scalarInverse", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).scalarInverse_super()
         );
     }
@@ -389,8 +388,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     // UnOp
     @Override
     public SparseCGASymbolicMultivector versorInverse() {
-        String funName = this.cache.createFuncName("versorInverse", this);
-        return this.cache.getOrCreateSymbolicFunction(funName, List.of(this),
+        String funName = CACHE.createFuncName("versorInverse", this);
+        return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
             (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).versorInverse_super()
         );
     }

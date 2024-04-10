@@ -1,12 +1,12 @@
 package de.orat.math.cgacasadi.impl;
 
-import util.cga.CGAKVectorSparsity;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
@@ -16,28 +16,31 @@ import util.cga.CGAMultivectorSparsity;
  */
 public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector> {
 
-    final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+
+    public Map<String, Integer> getCachedFunctionUsage() {
+        return CGASymbolicFunctionCache.instance().getCachedFunctionUsage();
+    }
 
     // create symbolic multivectors
     @Override
     public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, MatrixSparsity sparsity) {
-        return new SparseCGASymbolicMultivector(name, ColumnVectorSparsity.instance(sparsity));
+        return SparseCGASymbolicMultivector.create(name, ColumnVectorSparsity.instance(sparsity));
     }
 
     @Override
     public SparseCGASymbolicMultivector createMultivectorSymbolic(String name) {
-        return new SparseCGASymbolicMultivector(name);
+        return SparseCGASymbolicMultivector.create(name);
     }
 
     @Override
     public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, int grade) {
-        CGAKVectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
-        return new SparseCGASymbolicMultivector(name, sparsity);
+        return SparseCGASymbolicMultivector.create(name, grade);
     }
 
     @Override
     public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, SparseDoubleMatrix sparseVector) {
-        return SparseCGASymbolicMultivector.instance(name, sparseVector);
+        return SparseCGASymbolicMultivector.create(name, sparseVector);
     }
 
     // helper methods

@@ -49,7 +49,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
         var f_sym_in = transformImpl(arguments);
         var f_sym_out = new StdVectorSX();
         this.f_sym_casadi.call(f_sym_in, f_sym_out);
-        return f_sym_out.stream().map(sx -> (new SparseCGASymbolicMultivector(sx))).toList();
+        return f_sym_out.stream().map(sx -> (SparseCGASymbolicMultivector.create(sx))).toList();
     }
 
     @Override
