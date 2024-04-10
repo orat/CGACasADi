@@ -64,7 +64,7 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
      * <pre>
      * Anmerkung von Fabian:
      * - Cache ich erst mal nicht.
-     * - Würde ich sogar gerne entfernen.
+     * - Würde ich sogar eventuell entfernen.
      * - Sparsities werden beim Caching beachtet. Falls CasADi die Sparsities beachtet, sollte es zur Laufzeit
      *      keinen Unterschied geben zwischen gp mit einem Scalar Multivector und gpWithScalar.
      *      Man könnte dann einfach gp verwenden.
