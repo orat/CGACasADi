@@ -13,17 +13,17 @@ import java.util.function.Function;
 
 public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<SparseCGASymbolicMultivector, CachedSparseCGASymbolicMultivector>
 {
-
+    
     public static CGASymbolicFunctionCache instance() {
         return INSTANCE;
     }
-
+    
     private static final CGASymbolicFunctionCache INSTANCE = new CGASymbolicFunctionCache();
-
+    
     private CGASymbolicFunctionCache() {
-
+        
     }
-
+    
     private final Map<String, CGASymbolicFunction> functionCache = new HashMap<>();
     private final Map<String, Integer> usageCache = new HashMap<>();
 
@@ -55,17 +55,19 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
     public Map<String, Integer> getCachedFunctionUsage() {
         return Collections.unmodifiableMap(this.usageCache);
     }
-
+    
     private static final String PARAM_NAMES = "abcdef";
 
     /**
-     * special characters like ._-[]{} are not allowed as function names
+     * A valid function name is a std::string starting with a letter followed by letters, numbers or
+     * non-consecutive underscores.
      *
      * @param params Either iMultivectorSymbolic or int
      */
     public String createFuncName(String name, Object... params) {
         StringBuilder sb = new StringBuilder();
         sb.append(name);
+        sb.append("_");
         if (params.length > PARAM_NAMES.length()) {
             throw new RuntimeException("Too many params given.");
         }
@@ -76,14 +78,15 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
                 int[] grades = mv.grades();
                 for (int i = 0; i < grades.length; i++) {
                     sb.append(grades[i]);
-                    //sb.append("-");
                 }
             } else if (param instanceof Integer intParam) {
                 sb.append(intParam);
             } else {
                 throw new RuntimeException("Param of unexpected type.");
             }
+            sb.append("_");
         }
+        sb.setLength(sb.length() - 1);
         return sb.toString();
     }
 }
