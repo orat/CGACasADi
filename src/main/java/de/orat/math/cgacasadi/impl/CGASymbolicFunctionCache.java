@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 //import de.orat.math.gacalc.caching.iFunctionSymbolicCache;
 
 public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<SparseCGASymbolicMultivector, CachedSparseCGASymbolicMultivector>
@@ -52,12 +52,28 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
         return new CachedSparseCGASymbolicMultivector(retVal);
     }
 
+    public void resetCache() {
+        this.functionCache.clear();
+        this.cachedFunctionsUsage.clear();
+    }
+
     public Map<String, Integer> getUnmodifiableCachedFunctionsUsage() {
         return Collections.unmodifiableMap(this.cachedFunctionsUsage);
     }
 
     public SortedMap<String, Integer> getSortedUnmodifiableCachedFunctionsUsage() {
         return new TreeMap<>(getUnmodifiableCachedFunctionsUsage());
+    }
+
+    public String cachedFunctionUsageToString() {
+        SortedMap<String, Integer> cachedFunctionUsage = CGASymbolicFunctionCache.instance().getSortedUnmodifiableCachedFunctionsUsage();
+        int maxKeyLength = cachedFunctionUsage.entrySet().stream()
+            .mapToInt(entry -> entry.getKey().length())
+            .max().getAsInt();
+        String format = String.format("%%-%ss : %%s", maxKeyLength);
+        return cachedFunctionUsage.entrySet().stream()
+            .map(entry -> String.format(format, entry.getKey(), entry.getValue()))
+            .collect(Collectors.joining("\n"));
     }
 
     private static final String PARAM_NAMES = "abcdef";
