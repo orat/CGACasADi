@@ -30,6 +30,9 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
 
     //@Override
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
+        if (name.equals("gradeSelection_a0_b2")) {
+            throw new RuntimeException();
+        }
         CGASymbolicFunction func = functionCache.get(name);
         if (func == null) {
             final int size = args.size();
@@ -41,7 +44,7 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
                 SparseCGASymbolicMultivector arg = args.get(i);
                 // Convert to purely symbolic multivector.
                 SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
-                    String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
+                    String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
                 params.add(new CachedSparseCGASymbolicMultivector(param));
             }
             func = new CGASymbolicFunction(name, params, List.of(res.apply(params)));

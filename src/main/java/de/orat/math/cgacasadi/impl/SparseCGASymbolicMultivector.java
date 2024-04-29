@@ -54,6 +54,22 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     /**
+     * Does not check for the same grade given more then once!
+     */
+    public static SparseCGASymbolicMultivector create(String name, int[] grades) {
+        if (grades.length < 1) {
+            throw new RuntimeException("At least one grade must be given.");
+        }
+
+        SparseCGASymbolicMultivector mv = create(name, grades[0]);
+        for (int i = 1; i < grades.length; ++i) {
+            mv = mv.add(create(name, grades[i]));
+        }
+
+        return mv;
+    }
+
+    /**
      * Creates a k-Vector.
      *
      * @param name
