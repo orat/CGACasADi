@@ -71,12 +71,14 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
      * - Falls es doch einen Unterschied gibt, Vorschlag:
      *      - In gp (ohne "withScalar") ein if-else machen, welches prüft, ob b ein Scalar ist.
      *      - Dann den Code aus gpWithScalar rein kopieren mit folgender Anpassung:
-     *      - getScalarMultiplicationOperatorMatrix anstatt dem double eine 1x1 symbolic SX Variable übergeben.
-     *          Entsprechend darf auch keine SparseDoubleMatrix zurück geliefert werden.
+     *      - getScalarMultiplicationOperatorMatrix anstatt dem double eine 1x1 symbolic SX Variable    
+     *        übergeben.
+     *        Entsprechend darf auch keine SparseDoubleMatrix zurück geliefert werden.
      * - Grund:
      *      - Wird momentan nur intern an wenigen Stellen verwendet.
      *      - Funktioniert nur mit Scalar rechts.
-     *      - Numerische Double Parameter zu cachen führt schnell zu einer Explosion an gecached'ten Functions.
+     *      - Numerische Double Parameter zu cachen führt schnell zu einer Explosion an gecached-ten  
+     *        Functions.
      *      - Bei den Doubles muss man eine Genauigkeit festlegen, wann sie als gleich gelten sollen.
      *      - Ich vermute, dass es keinen großen Geschwindigkeitsvorteil gibt gegenüber der Variante mit einem
      *          symbolischen Scalar.
@@ -95,7 +97,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector gp(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("gp", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).gp_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).gp_super(params.get(1))
         );
     }
 
@@ -108,7 +111,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector gradeInversion() {
         String funName = CACHE.createFuncName("gradeInversion", this);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).gradeInversion_super()
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).gradeInversion_super()
         );
     }
 
@@ -160,7 +164,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector lc(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("lc", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).lc_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) -> 
+                params.get(0).lc_super(params.get(1))
         );
     }
 
@@ -173,7 +178,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector rc(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("rc", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).rc_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).rc_super(params.get(1))
         );
     }
 
@@ -186,7 +192,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("scp", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).scp_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).scp_super(params.get(1))
         );
     }
 
@@ -199,7 +206,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector dot(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("dot", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).dot_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).dot_super(params.get(1))
         );
     }
 
@@ -212,7 +220,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector ip(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("ip", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).ip_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).ip_super(params.get(1))
         );
     }
 
@@ -225,7 +234,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector vee(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("vee", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).vee_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).vee_super(params.get(1))
         );
     }
 
@@ -238,7 +248,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector add(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("add", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).add_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).add_super(params.get(1))
         );
     }
 
@@ -251,7 +262,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector sub(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("sub", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).sub_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) -> 
+                params.get(0).sub_super(params.get(1))
         );
     }
 
@@ -342,7 +354,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector normalizeBySquaredNorm() {
         String funName = CACHE.createFuncName("normalizeBySquaredNorm", this);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).normalizeBySquaredNorm_super()
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).normalizeBySquaredNorm_super()
         );
     }
 
@@ -355,7 +368,8 @@ public final class CachedSparseCGASymbolicMultivector extends SparseCGASymbolicM
     public SparseCGASymbolicMultivector div(SparseCGASymbolicMultivector b) {
         String funName = CACHE.createFuncName("div", this, b);
         return CACHE.getOrCreateSymbolicFunction(funName, List.of(this, b),
-            (List<CachedSparseCGASymbolicMultivector> params) -> params.get(0).div_super(params.get(1))
+            (List<CachedSparseCGASymbolicMultivector> params) 
+                -> params.get(0).div_super(params.get(1))
         );
     }
 
