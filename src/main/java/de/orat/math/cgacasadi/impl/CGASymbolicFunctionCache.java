@@ -30,9 +30,6 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
 
     //@Override
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
-        if (name.equals("gradeSelection_a0_b2")) {
-            throw new RuntimeException();
-        }
         CGASymbolicFunction func = functionCache.get(name);
         if (func == null) {
             final int size = args.size();
