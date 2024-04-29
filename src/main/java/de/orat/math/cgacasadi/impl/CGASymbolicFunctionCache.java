@@ -70,7 +70,7 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
         SortedMap<String, Integer> cachedFunctionUsage = CGASymbolicFunctionCache.instance().getSortedUnmodifiableCachedFunctionsUsage();
         int maxKeyLength = cachedFunctionUsage.entrySet().stream()
             .mapToInt(entry -> entry.getKey().length())
-            .max().getAsInt();
+            .max().orElse(0);
         String format = String.format("%%-%ss : %%s", maxKeyLength);
         return cachedFunctionUsage.entrySet().stream()
             .map(entry -> String.format(format, entry.getKey(), entry.getValue()))

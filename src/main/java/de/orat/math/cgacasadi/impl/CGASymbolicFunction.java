@@ -4,6 +4,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
+import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
@@ -25,13 +26,17 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
 
     public CGASymbolicFunction(String name, List<? extends SparseCGASymbolicMultivector> parameters,
         List<? extends SparseCGASymbolicMultivector> returns) {
-        var f_sym_in = transformImpl(parameters);
-        var f_sym_out = transformImpl(returns);
-        //String name = callback.getName();
-        this.name = name;
-        arity = parameters.size();
-        resultCount = returns.size();
-        this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
+        try {
+            var f_sym_in = transformImpl(parameters);
+            var f_sym_out = transformImpl(returns);
+            //String name = callback.getName();
+            this.name = name;
+            arity = parameters.size();
+            resultCount = returns.size();
+            this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
+        } finally {
+            WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
+        }
     }
 
     protected static StdVectorSX transformImpl(List<? extends SparseCGASymbolicMultivector> mvs) {
@@ -41,19 +46,27 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
 
     @Override
     public List<? extends SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
-        var f_sym_in = transformImpl(arguments);
-        var f_sym_out = new StdVectorSX();
-        this.f_sym_casadi.call(f_sym_in, f_sym_out);
-        return f_sym_out.stream().map(sx -> (SparseCGASymbolicMultivector.create(sx))).toList();
+        try {
+            var f_sym_in = transformImpl(arguments);
+            var f_sym_out = new StdVectorSX();
+            this.f_sym_casadi.call(f_sym_in, f_sym_out);
+            return f_sym_out.stream().map(sx -> (SparseCGASymbolicMultivector.create(sx))).toList();
+        } finally {
+            WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
+        }
     }
 
     @Override
     public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
-        var f_num_in = new StdVectorDM(arguments.stream().map(
-            imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
-        var f_num_out = new StdVectorDM();
-        this.f_sym_casadi.call(f_num_in, f_num_out);
-        return f_num_out.stream().map(dm -> (iMultivectorNumeric) (new SparseCGANumericMultivector(dm))).toList();
+        try {
+            var f_num_in = new StdVectorDM(arguments.stream().map(
+                imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
+            var f_num_out = new StdVectorDM();
+            this.f_sym_casadi.call(f_num_in, f_num_out);
+            return f_num_out.stream().map(dm -> (iMultivectorNumeric) (new SparseCGANumericMultivector(dm))).toList();
+        } finally {
+            WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
+        }
     }
 
     @Override
