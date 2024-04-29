@@ -26,8 +26,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     private MultivectorSymbolic.Callback callback;
     private final String name;
 
-    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
-    private final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils = new CGAOperatorMatrixUtils(baseCayleyTable);
+    private final static CGACayleyTableGeometricProduct baseCayleyTable = 
+        CGACayleyTableGeometricProduct.instance();
+    private final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils = 
+        new CGAOperatorMatrixUtils(baseCayleyTable);
 
     private final static CGAExprGraphFactory fac = new CGAExprGraphFactory();
 
