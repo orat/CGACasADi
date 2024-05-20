@@ -8,6 +8,8 @@ import util.cga.CGAKVectorSparsity;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
+import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
+import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -21,15 +23,16 @@ import util.cga.CGAOperations;
 /**
  * abstract to prevent advertently instantiation.
  */
+@GenerateCached(supressWarnings = false)
 public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
 
     private MultivectorSymbolic.Callback callback;
     private final String name;
 
-    private final static CGACayleyTableGeometricProduct baseCayleyTable = 
-        CGACayleyTableGeometricProduct.instance();
-    private final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils = 
-        new CGAOperatorMatrixUtils(baseCayleyTable);
+    private final static CGACayleyTableGeometricProduct baseCayleyTable
+        = CGACayleyTableGeometricProduct.instance();
+    private final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils
+        = new CGAOperatorMatrixUtils(baseCayleyTable);
 
     private final static CGAExprGraphFactory fac = new CGAExprGraphFactory();
 

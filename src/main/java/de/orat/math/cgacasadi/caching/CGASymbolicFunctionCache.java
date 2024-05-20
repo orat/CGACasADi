@@ -1,5 +1,8 @@
-package de.orat.math.cgacasadi.impl;
+package de.orat.math.cgacasadi.caching;
 
+import de.orat.math.cgacasadi.impl.CGASymbolicFunction;
+import de.orat.math.cgacasadi.impl.CachedSparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.Collections;

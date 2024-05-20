@@ -9,6 +9,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<generatedSourcesDirectory>${project.build.directory}/generated-sources/annotation-processing</generatedSourcesDirectory>
+		<generatedTestSourcesDirectory>${project.build.directory}/generated-test-sources/annotation-processing</generatedTestSourcesDirectory>
 		<!--exec.mainClass>de.orat.math.cga.sym.cgacasadi.CGACasADi</exec.mainClass-->
 	</properties>
 	<dependencies>
@@ -51,5 +53,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>com.google.auto.service</groupId>
+			<artifactId>auto-service</artifactId>
+			<version>1.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup</groupId>
+			<artifactId>javapoet</artifactId>
+			<version>1.13.0</version>
+		</dependency>
 	</dependencies>
 </project>
+

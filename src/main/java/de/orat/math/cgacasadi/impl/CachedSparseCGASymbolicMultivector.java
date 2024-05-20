@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.orat.math.cgacasadi.caching.CGASymbolicFunctionCache;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import java.util.List;
 
