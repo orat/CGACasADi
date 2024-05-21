@@ -3,6 +3,7 @@ package de.orat.math.cgacasadi.caching.annotation.processor;
 import com.google.auto.service.AutoService;
 import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.ExceptionHandler;
+import de.orat.math.cgacasadi.caching.annotation.processor.generation.ClassesGenerator;
 import de.orat.math.cgacasadi.caching.annotation.processor.representation.Clazz;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,9 +26,9 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
 
     }
 
-    private Utils utils;
+    private volatile Utils utils;
 
-    private Filer filer;
+    private volatile Filer filer;
 
     private volatile boolean initialized = false;
 
@@ -69,7 +70,7 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
 
         this.utils.exceptionHandler().handle(() -> {
             List<Clazz> classes = GenerateCachedProcessor.computeClasses(roundEnv, this.utils);
-            // ClassesGenerator.generate(classes, this.filer);
+            ClassesGenerator.generate(classes, this.filer);
         });
 
         // The return boolean value should be true if your annotation processor has processed all the passed annotations, and you don't want them to be passed to other annotation processors down the list.

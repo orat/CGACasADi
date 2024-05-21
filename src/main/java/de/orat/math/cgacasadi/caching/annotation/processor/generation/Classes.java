@@ -1,21 +1,17 @@
 package de.orat.math.cgacasadi.caching.annotation.processor.generation;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeVariableName;
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.orat.math.cgacasadi.caching.CGASymbolicFunctionCache;
 
 public final class Classes {
 
-	private Classes() {
+    private Classes() {
 
-	}
+    }
 
-//	public static final TypeVariableName iProgram = TypeVariableName.get("T", iProgram.class);
-//	public static final ParameterizedTypeName iProgramFactory
-//		= ParameterizedTypeName.get(ClassName.get(iProgramFactory.class), iProgram);
-//	public static final ClassName list = ClassName.get(List.class);
-//	public static final ClassName sparseDoubleMatrix = ClassName.get(SparseDoubleMatrix.class);
-//	public static final ParameterizedTypeName listOfSparseDoubleMatrix
-//		= ParameterizedTypeName.get(list, sparseDoubleMatrix);
-
+    public static final ClassName T_CGASymbolicFunctionCache = ClassName.get(CGASymbolicFunctionCache.class);
+    public static final ClassName T_String = ClassName.get(String.class);
+    public static final ClassName T_SX = ClassName.get(SX.class);
+    public static final ClassName T_Override = ClassName.get(Override.class);
 }

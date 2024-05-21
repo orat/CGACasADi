@@ -18,6 +18,7 @@ public final class Method {
 
     public final String name;
     public final String returnType;
+    public final Set<Modifier> modifiers;
 
     /**
      * Unmodifiable
@@ -31,6 +32,7 @@ public final class Method {
 
         this.name = correspondingElement.getSimpleName().toString();
         this.returnType = correspondingElement.getReturnType().toString();
+        this.modifiers = correspondingElement.getModifiers();
 
         // Needs to be the first check.
         Uncached uncached = correspondingElement.getAnnotation(Uncached.class);
@@ -44,16 +46,15 @@ public final class Method {
                 "Return type \"%s\" was not the expected one \"%s\".", this.returnType, enclosingClassQualifiedName);
         }
 
-        Set<Modifier> modifiers = correspondingElement.getModifiers();
-        if (modifiers.contains(Modifier.PRIVATE)) {
+        if (this.modifiers.contains(Modifier.PRIVATE)) {
             throw WarningException.create(correspondingElement,
                 "private method \"%s\" will not be cached.", this.name);
         }
-        if (modifiers.contains(Modifier.STATIC)) {
+        if (this.modifiers.contains(Modifier.STATIC)) {
             throw WarningException.create(correspondingElement,
                 "static method \"%s\" will not be cached.", this.name);
         }
-        if (modifiers.contains(Modifier.ABSTRACT)) {
+        if (this.modifiers.contains(Modifier.ABSTRACT)) {
             throw WarningException.create(correspondingElement,
                 "abstract method \"%s\" will not be cached.", this.name);
         }
