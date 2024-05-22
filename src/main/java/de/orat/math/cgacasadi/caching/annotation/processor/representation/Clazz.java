@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -47,6 +48,10 @@ public class Clazz {
             throw ErrorException.create(correspondingElement,
                 "Expected \"%s\" to be a class, but was \"%s\".",
                 this.qualifiedName, kind);
+        }
+
+        if (correspondingElement.getModifiers().contains(Modifier.FINAL)) {
+            throw ErrorException.create(correspondingElement, "Has prohibited modfier \"final\".");
         }
 
         List<? extends TypeParameterElement> typeParamsList = correspondingElement.getTypeParameters();
