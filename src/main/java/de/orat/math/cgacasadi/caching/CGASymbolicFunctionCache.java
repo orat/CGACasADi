@@ -29,10 +29,10 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
 
     }
 
-    private final Map<String, CGASymbolicFunction> functionCache = 
-        new HashMap<>(1024, 0.5f);
-    private final Map<String, Integer> cachedFunctionsUsage = 
-        new HashMap<>(1024, 0.5f);
+    private final Map<String, CGASymbolicFunction> functionCache
+        = new HashMap<>(1024, 0.5f);
+    private final Map<String, Integer> cachedFunctionsUsage
+        = new HashMap<>(1024, 0.5f);
 
     //@Override
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
