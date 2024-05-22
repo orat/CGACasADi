@@ -9,8 +9,8 @@ public final class Parameter {
     public final String type;
     public final String identifier;
 
-    protected Parameter(VariableElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws ErrorException {
-        this.type = correspondingElement.asType().toString();
+    protected Parameter(VariableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException {
+        this.type = typeParametersToArguments.clearTypeParameterIfPresent(correspondingElement.asType().toString());
         this.identifier = correspondingElement.getSimpleName().toString();
 
         if (this.type.equals(enclosingClassQualifiedName)) {

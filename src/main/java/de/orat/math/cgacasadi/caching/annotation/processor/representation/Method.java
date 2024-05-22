@@ -8,6 +8,7 @@ import de.orat.math.cgacasadi.caching.annotation.processor.common.WarningExcepti
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -25,13 +26,13 @@ public final class Method {
      */
     public final List<Parameter> parameters;
 
-    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws ErrorException, IgnoreException, WarningException {
+    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException, IgnoreException, WarningException {
         assert correspondingElement.getKind() == ElementKind.METHOD : String.format(
             "Expected \"%s\" to be a method, but was \"%s\".",
             correspondingElement.getSimpleName(), correspondingElement.getKind());
 
         this.name = correspondingElement.getSimpleName().toString();
-        this.returnType = correspondingElement.getReturnType().toString();
+        this.returnType = typeParametersToArguments.clearTypeParameterIfPresent(correspondingElement.getReturnType().toString());
         this.modifiers = correspondingElement.getModifiers();
 
         // Needs to be the first check.
@@ -59,15 +60,15 @@ public final class Method {
                 "abstract method \"%s\" will not be cached.", this.name);
         }
 
-        this.parameters = computeParameters(correspondingElement, enclosingClassQualifiedName, utils);
+        this.parameters = computeParameters(correspondingElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
     }
 
-    private static List<Parameter> computeParameters(ExecutableElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws ErrorException {
+    private static List<Parameter> computeParameters(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException {
         List<VariableElement> parameterElements = (List<VariableElement>) correspondingElement.getParameters();
         List<Parameter> parameters = new ArrayList<>(parameterElements.size());
         for (VariableElement parameterElement : parameterElements) {
             utils.exceptionHandler().handle(() -> {
-                Parameter parameter = new Parameter(parameterElement, enclosingClassQualifiedName, utils);
+                Parameter parameter = new Parameter(parameterElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
                 parameters.add(parameter);
             });
         }
