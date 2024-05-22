@@ -4,8 +4,10 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_CGASymbolicFunctionCache;
+import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_List;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_Override;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_SX;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_String;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 
@@ -97,7 +100,7 @@ final class ClassGenerator {
     private static MethodSpec cacheMethod(Clazz c, Method m, ClassName genClass, ClassName T_c) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(m.name);
 
-        ClassName T_ret = ClassName.bestGuess(m.returnType);
+        TypeName T_ret = betterGuess(m.returnType);
 
         // Signature
         methodBuilder
@@ -106,14 +109,18 @@ final class ClassGenerator {
             .returns(T_ret);
 
         for (Parameter parameter : m.parameters) {
-            ClassName T_param = ClassName.bestGuess(parameter.type);
+            TypeName T_param = betterGuess(parameter.type);
             methodBuilder
                 .addParameter(T_param, parameter.identifier);
         }
 
         // Body
-        String args = "this, " + m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", "));
-        String superTypeArgs = "this, " + m.parameters.stream().filter(p -> p.type.equals(c.qualifiedName)).map(p -> p.identifier).collect(Collectors.joining(", "));
+        String args = Stream.concat(Stream.of("this"),
+            m.parameters.stream().map(p -> p.identifier))
+            .collect(Collectors.joining(", "));
+        String superTypeArgs = Stream.concat(Stream.of("this"),
+            m.parameters.stream().filter(p -> p.type.equals(c.qualifiedName)).map(p -> p.identifier))
+            .collect(Collectors.joining(", "));
 
         StringBuilder paramsBuilder = new StringBuilder();
         int paramPos = 1;
@@ -132,12 +139,11 @@ final class ClassGenerator {
         String params = paramsBuilder.toString();
 
         methodBuilder
-            .addStatement("String funName = CACHE.createFuncName($S, %L)", m.name, args)
-            .addStatement("""
-return CACHE.getOrCreateSymbolicFunction(funName, List.of($L),
-$>(List<$L> params) -> params.get(0).$L($L)
-$<);
-""", superTypeArgs, genClass, m.name + "_super", params);
+            .addStatement("String funName = CACHE.createFuncName($S, $L)", m.name, args)
+            .addCode("""
+                return CACHE.getOrCreateSymbolicFunction(funName, List.of($L),
+                    ($T<$T> params) -> params.get(0).$L($L));""",
+                superTypeArgs, T_List, genClass, m.name + "_super", params);
 
         //
         return methodBuilder.build();
@@ -146,7 +152,7 @@ $<);
     private static MethodSpec superMethod(Method m) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(m.name + "_super");
 
-        ClassName T_ret = ClassName.bestGuess(m.returnType);
+        TypeName T_ret = betterGuess(m.returnType);
 
         // Signature
         methodBuilder
@@ -154,7 +160,7 @@ $<);
             .returns(T_ret);
 
         for (Parameter parameter : m.parameters) {
-            ClassName T_param = ClassName.bestGuess(parameter.type);
+            TypeName T_param = betterGuess(parameter.type);
             methodBuilder
                 .addParameter(T_param, parameter.identifier);
         }
@@ -166,5 +172,15 @@ $<);
 
         //
         return methodBuilder.build();
+    }
+
+    private static TypeName betterGuess(String name) {
+        TypeName T_param;
+        if (name.equals("int")) {
+            T_param = TypeName.INT;
+        } else {
+            T_param = ClassName.bestGuess(name);
+        }
+        return T_param;
     }
 }

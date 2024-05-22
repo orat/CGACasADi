@@ -184,6 +184,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     //======================================================
     // Don't belong here
     //======================================================
+    @Uncached
     public SparseCGASymbolicMultivector scalar(double value) {
         SparseDoubleMatrix sca = fac.createScalar(value);
         String scalar_name = baseCayleyTable.getBasisBladeName(0);
@@ -289,6 +290,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * </pre>
      */
     @Override
+    @Uncached
     public SparseCGASymbolicMultivector gpWithScalar(double s) {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
         SX result = SX.mtimes(CasADiUtil.toSX(m), sx);
