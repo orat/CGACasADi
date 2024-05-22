@@ -44,20 +44,20 @@ public final class Method {
 
         if (!this.returnType.equals(enclosingClassQualifiedName)) {
             throw WarningException.create(correspondingElement,
-                "Return type \"%s\" was not the expected one \"%s\".", this.returnType, enclosingClassQualifiedName);
+                "\"%s\": Return type \"%s\" was not the expected one \"%s\".", this.name, this.returnType, enclosingClassQualifiedName);
         }
 
         if (this.modifiers.contains(Modifier.PRIVATE)) {
             throw WarningException.create(correspondingElement,
-                "private method \"%s\" will not be cached.", this.name);
+                "\"%s\": private method will not be cached.", this.name);
         }
         if (this.modifiers.contains(Modifier.STATIC)) {
             throw WarningException.create(correspondingElement,
-                "static method \"%s\" will not be cached.", this.name);
+                "\"%s\": static method will not be cached.", this.name);
         }
         if (this.modifiers.contains(Modifier.ABSTRACT)) {
             throw WarningException.create(correspondingElement,
-                "abstract method \"%s\" will not be cached.", this.name);
+                "\"%s\": abstract method will not be cached.", this.name);
         }
 
         this.parameters = computeParameters(correspondingElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
