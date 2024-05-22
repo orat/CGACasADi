@@ -51,7 +51,7 @@ public class Clazz {
         }
 
         if (correspondingElement.getModifiers().contains(Modifier.FINAL)) {
-            throw ErrorException.create(correspondingElement, "Has prohibited modfier \"final\".");
+            throw ErrorException.create(correspondingElement, "Has prohibited modifier \"final\".");
         }
 
         List<? extends TypeParameterElement> typeParamsList = correspondingElement.getTypeParameters();
