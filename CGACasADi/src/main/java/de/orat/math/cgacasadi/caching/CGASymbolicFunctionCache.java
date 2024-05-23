@@ -14,10 +14,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-//import de.orat.math.gacalc.caching.iFunctionSymbolicCache;
 
-public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<SparseCGASymbolicMultivector, CachedSparseCGASymbolicMultivector>
-{
+public class CGASymbolicFunctionCache {
 
     public static CGASymbolicFunctionCache instance() {
         return INSTANCE;
@@ -34,7 +32,6 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
     private final Map<String, Integer> cachedFunctionsUsage
         = new HashMap<>(1024, 0.5f);
 
-    //@Override
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
         CGASymbolicFunction func = functionCache.get(name);
         if (func == null) {
