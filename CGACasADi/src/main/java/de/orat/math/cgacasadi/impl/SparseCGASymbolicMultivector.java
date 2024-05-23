@@ -71,7 +71,8 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     /**
      * <pre>
      * Does not check for the same grade given more then once!
-     * </pre> ToDo: create fast implementation of this.
+     * ToDo: create fast implementation of this.
+     * </pre>
      */
     public static SparseCGASymbolicMultivector create(String name, int[] grades) {
         if (grades.length < 1) {
