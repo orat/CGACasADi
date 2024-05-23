@@ -10,7 +10,7 @@ import util.cga.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
-import de.orat.math.cgacasadi.impl.gen.sparsecgasymbolicmultivector.CachedSparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;

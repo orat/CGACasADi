@@ -31,7 +31,7 @@ final class ClassGenerator {
     }
 
     protected static void generate(Clazz c, Filer filer) throws IOException, ClassNotFoundException {
-        String packageName = String.format("%s.gen.%s", c.enclosingQualifiedName, c.simpleName.toLowerCase());
+        String packageName = String.format("%s.gen", c.enclosingQualifiedName);
         String className = "Cached" + c.simpleName;
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
