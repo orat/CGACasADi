@@ -12,8 +12,8 @@
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<generatedSourcesDirectory>${project.build.directory}/generated-sources/annotation-processing</generatedSourcesDirectory>
-		<generatedTestSourcesDirectory>${project.build.directory}/generated-test-sources/annotation-processing</generatedTestSourcesDirectory>
+		<generatedSourcesDirectory>${project.build.directory}/generated-sources/CGACasADi_SymbolicMultivectorCachingProcessor</generatedSourcesDirectory>
+		<generatedTestSourcesDirectory>${project.build.directory}/generated-test-sources/CGACasADi_SymbolicMultivectorCachingProcessor</generatedTestSourcesDirectory>
 		<maven.compiler.release>17</maven.compiler.release>
 	</properties>
 	<dependencies>
