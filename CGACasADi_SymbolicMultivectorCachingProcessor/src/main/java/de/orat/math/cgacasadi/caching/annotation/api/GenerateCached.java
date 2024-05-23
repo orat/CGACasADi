@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface GenerateCached {
 
-    boolean supressWarnings(); // default false
+    boolean showWarnings(); // default true
 }

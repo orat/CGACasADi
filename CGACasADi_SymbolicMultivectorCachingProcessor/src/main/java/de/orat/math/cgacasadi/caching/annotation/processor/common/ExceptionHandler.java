@@ -8,20 +8,20 @@ import javax.tools.Diagnostic;
 
 public class ExceptionHandler {
 
-    // If set, ignores suppressWarnings.
+    // If set, ignores showWarnings.
     static protected final boolean IS_DEBUG = false;
 
     protected final Messager messager;
-    protected final boolean suppressWarnings;
+    protected final boolean showWarnings;
 
     public ExceptionHandler(Messager messager) {
         this.messager = messager;
-        this.suppressWarnings = false;
+        this.showWarnings = false;
     }
 
     public ExceptionHandler(ExceptionHandler handler, boolean suppressWarnings) {
         this.messager = handler.messager;
-        this.suppressWarnings = suppressWarnings;
+        this.showWarnings = suppressWarnings;
     }
 
     public interface Executable {
@@ -47,7 +47,7 @@ public class ExceptionHandler {
             if (ExceptionHandler.IS_DEBUG) {
                 String message = extractStackTrace(ex);
                 warn(ex.element, message);
-            } else if (!this.suppressWarnings) {
+            } else if (this.showWarnings) {
                 warn(ex.element, ex.getMessage());
             }
         } catch (IgnoreException ex) {

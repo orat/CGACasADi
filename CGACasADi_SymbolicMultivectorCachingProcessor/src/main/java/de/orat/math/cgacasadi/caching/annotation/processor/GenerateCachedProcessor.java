@@ -83,9 +83,9 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
 
         List<Clazz> classes = new ArrayList<>(annotatedTypes.size());
         for (TypeElement annotatedType : annotatedTypes) {
-            boolean supressWarnings = annotatedType.getAnnotation(GenerateCached.class).supressWarnings();
+            boolean showWarnings = annotatedType.getAnnotation(GenerateCached.class).showWarnings();
 
-            Utils adjustedUtils = new Utils(new ExceptionHandler(utils.exceptionHandler(), supressWarnings),
+            Utils adjustedUtils = new Utils(new ExceptionHandler(utils.exceptionHandler(), showWarnings),
                 utils.elementUtils(),
                 utils.typeUtils());
 
