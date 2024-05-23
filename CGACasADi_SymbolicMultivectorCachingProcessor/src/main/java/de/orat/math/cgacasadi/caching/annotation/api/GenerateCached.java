@@ -10,4 +10,6 @@ import java.lang.annotation.Target;
 public @interface GenerateCached {
 
     boolean showWarnings(); // default true
+
+    boolean warnUncached(); // default false
 }

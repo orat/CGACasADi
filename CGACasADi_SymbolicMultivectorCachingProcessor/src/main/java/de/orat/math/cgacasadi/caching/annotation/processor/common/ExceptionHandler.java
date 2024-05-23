@@ -13,20 +13,23 @@ public class ExceptionHandler {
 
     protected final Messager messager;
     protected final boolean showWarnings;
+    protected final boolean warnUncached;
 
     public ExceptionHandler(Messager messager) {
         this.messager = messager;
-        this.showWarnings = false;
+        this.showWarnings = true;
+        this.warnUncached = false;
     }
 
-    public ExceptionHandler(ExceptionHandler handler, boolean suppressWarnings) {
+    public ExceptionHandler(ExceptionHandler handler, boolean showWarnings, boolean warnUncached) {
         this.messager = handler.messager;
-        this.showWarnings = suppressWarnings;
+        this.showWarnings = showWarnings;
+        this.warnUncached = warnUncached;
     }
 
     public interface Executable {
 
-        void execute() throws ErrorException, WarningException, IgnoreException, Exception;
+        void execute() throws ErrorException, WarningException, UncachedException, Exception;
     }
 
     /**
@@ -50,10 +53,12 @@ public class ExceptionHandler {
             } else if (this.showWarnings) {
                 warn(ex.element, ex.getMessage());
             }
-        } catch (IgnoreException ex) {
+        } catch (UncachedException ex) {
             if (ExceptionHandler.IS_DEBUG) {
                 String message = extractStackTrace(ex);
-                warn(ex.element, "Ignored: \n" + message);
+                warn(ex.element, message);
+            } else if (this.showWarnings && this.warnUncached) {
+                warn(ex.element, ex.getMessage());
             }
         } catch (Exception ex) {
             String message = extractStackTrace(ex);

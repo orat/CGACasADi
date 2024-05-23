@@ -3,7 +3,7 @@ package de.orat.math.cgacasadi.caching.annotation.processor.representation;
 import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
 import de.orat.math.cgacasadi.caching.annotation.processor.GenerateCachedProcessor.Utils;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException;
-import de.orat.math.cgacasadi.caching.annotation.processor.common.IgnoreException;
+import de.orat.math.cgacasadi.caching.annotation.processor.common.UncachedException;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.WarningException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +27,7 @@ public final class Method {
     public final List<Parameter> parameters;
     public final String enclosingType;
 
-    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException, IgnoreException, WarningException {
+    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException, UncachedException, WarningException {
         assert correspondingElement.getKind() == ElementKind.METHOD : String.format(
             "Expected \"%s\" to be a method, but was \"%s\".",
             correspondingElement.getSimpleName(), correspondingElement.getKind());
@@ -40,8 +40,8 @@ public final class Method {
         // Needs to be the first check.
         Uncached uncached = correspondingElement.getAnnotation(Uncached.class);
         if (uncached != null) {
-            throw IgnoreException.create(correspondingElement,
-                "Ignored.");
+            throw UncachedException.create(correspondingElement,
+                "\"%s\": @Uncached.", this.name);
         }
 
         if (!this.returnType.equals(enclosingClassQualifiedName)) {
