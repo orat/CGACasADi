@@ -69,7 +69,9 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     /**
+     * <pre>
      * Does not check for the same grade given more then once!
+     * </pre> ToDo: create fast implementation of this.
      */
     public static SparseCGASymbolicMultivector create(String name, int[] grades) {
         if (grades.length < 1) {
@@ -80,6 +82,8 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         for (int i = 1; i < grades.length; ++i) {
             mv = mv.add(create(name, grades[i]));
         }
+
+        mv = create(mv.name, mv.getSparsity());
 
         return mv;
     }
@@ -97,7 +101,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     public static SparseCGASymbolicMultivector create(String name, ColumnVectorSparsity sparsity) {
         SX sx = SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
-        return new CachedSparseCGASymbolicMultivector("", sx);
+        return new CachedSparseCGASymbolicMultivector(name, sx);
     }
 
     public static SparseCGASymbolicMultivector create(String name) {
