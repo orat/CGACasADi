@@ -1,4 +1,9 @@
-/nbproject
-/target
-#nb-configuration.xml
+*.log
+
+#Ignore temporary files
+**/.*.kate-swp
+**/.directory
+
+#Ignore generated folders
+**/target
 
