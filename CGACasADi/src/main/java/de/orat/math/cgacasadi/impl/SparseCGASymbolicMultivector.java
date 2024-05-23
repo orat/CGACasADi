@@ -45,11 +45,20 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     // -> Constructors must only used within creators or subclasses.
     // -> creators return cached instances.
     //======================================================
+    protected SparseCGASymbolicMultivector(SparseCGASymbolicMultivector other) {
+        this.name = other.getName();
+        this.sx = other.getSX();
+    }
+
     protected SparseCGASymbolicMultivector(String name, SX sx) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(sx);
         this.name = name;
         this.sx = sx;
+    }
+
+    public static SparseCGASymbolicMultivector create(SparseCGASymbolicMultivector other) {
+        return new CachedSparseCGASymbolicMultivector(other);
     }
 
     public static SparseCGASymbolicMultivector create(String name, SparseDoubleMatrix vector) {

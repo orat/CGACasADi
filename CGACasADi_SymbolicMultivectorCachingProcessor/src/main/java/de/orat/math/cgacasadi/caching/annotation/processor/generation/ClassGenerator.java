@@ -78,7 +78,7 @@ final class ClassGenerator {
 
         // Body
         constructorBuilder
-            .addStatement("super(mv.getName(), mv.getSX())");
+            .addStatement("super(mv)");
 
         return constructorBuilder.build();
     }
