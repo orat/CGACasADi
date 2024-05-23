@@ -5,6 +5,7 @@ import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,8 +46,16 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
             for (int i = 0; i < size; ++i) {
                 SparseCGASymbolicMultivector arg = args.get(i);
                 // Convert to purely symbolic multivector.
+                // grades
                 SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
                     String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
+                // sparsity
+//                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
+//                    String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
+                // dense
+//                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
+//                    String.valueOf(PARAM_NAMES.charAt(i)));
+                //
                 params.add(new CachedSparseCGASymbolicMultivector(param));
             }
             func = new CGASymbolicFunction(name, params, List.of(res.apply(params)));
@@ -101,10 +110,23 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
             sb.append(PARAM_NAMES.charAt(paramIndex));
             Object param = params[paramIndex];
             if (param instanceof iMultivectorSymbolic mv) {
+                // grades
                 int[] grades = mv.grades();
                 for (int i = 0; i < grades.length; i++) {
                     sb.append(grades[i]);
                 }
+                // sparsity
+//                String colind = Arrays.stream(mv.getSparsity().getcolind())
+//                    .mapToObj((int i) -> String.valueOf(i))
+//                    .collect(Collectors.joining("_"));
+//                String row = Arrays.stream(mv.getSparsity().getrow())
+//                    .mapToObj((int i) -> String.valueOf(i))
+//                    .collect(Collectors.joining("_"));
+//                sb.append("_colind_").append(colind);
+//                sb.append("_row_").append(row);
+                // dense
+                // Comment out: GACalcAPI::MultivectorSymbolic::scalarSqrt()::IllegalArgumentException
+                //
             } else if (param instanceof Integer intParam) {
                 sb.append(intParam);
             } else {
@@ -112,6 +134,7 @@ public class CGASymbolicFunctionCache //implements iFunctionSymbolicCache<Sparse
             }
             sb.append("_");
         }
+
         sb.setLength(sb.length() - 1);
         return sb.toString();
     }
