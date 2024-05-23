@@ -16,7 +16,9 @@ import de.orat.math.cgacasadi.caching.annotation.processor.representation.Method
 import de.orat.math.cgacasadi.caching.annotation.processor.representation.Parameter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
@@ -102,10 +104,14 @@ final class ClassGenerator {
 
         TypeName T_ret = betterGuess(m.returnType);
 
+        Set<Modifier> modifiers = new HashSet<>(m.modifiers);
+        modifiers.remove(Modifier.DEFAULT);
+
         // Signature
         methodBuilder
+            .addJavadoc("@see $L#$L", m.enclosingType, m.name)
             .addAnnotation(T_Override)
-            .addModifiers(m.modifiers)
+            .addModifiers(modifiers)
             .returns(T_ret);
 
         for (Parameter parameter : m.parameters) {

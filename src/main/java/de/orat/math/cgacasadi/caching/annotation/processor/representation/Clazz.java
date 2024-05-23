@@ -4,14 +4,11 @@ import de.orat.math.cgacasadi.caching.annotation.processor.GenerateCachedProcess
 import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.WarningException;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
-import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,9 +19,6 @@ import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 
 public class Clazz {
 
@@ -70,7 +64,7 @@ public class Clazz {
                 "Needs to implement \"%s\", but does not.", iMultivectorSymbolic.class.getCanonicalName());
         }
 
-        this.methods = Clazz.computeMethods(correspondingElement, this.qualifiedName, utils);
+        this.methods = Collections.unmodifiableList(Clazz.computeMethods(correspondingElement, this.qualifiedName, utils));
     }
 
     private static List<Method> computeMethods(TypeElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws WarningException, ErrorException {
@@ -82,45 +76,41 @@ public class Clazz {
             .filter(el -> el.getKind() == ElementKind.METHOD)
             .toList();
 
-        // Wenn überschrieben wurde, dann nicht nehmen.
+        Set<String> classMethodElementsNames = classMethodElements.stream()
+            .map(me -> me.getSimpleName().toString())
+            .collect(Collectors.toSet());
+
         List<ExecutableElement> interfaceDefaultMethodElements = correspondingElement.getInterfaces().stream()
             .map(i -> ((TypeElement) ((DeclaredType) i).asElement()).getEnclosedElements())
             .flatMap(Collection::stream)
             .filter(el -> el.getKind() == ElementKind.METHOD)
             .map(m -> (ExecutableElement) m)
             .filter(m -> m.isDefault())
+            // Remove overrides
+            .filter(m -> !classMethodElementsNames.contains(m.getSimpleName().toString()))
             .toList();
 
-//        if (true) {
-//            String asdfb = interfaceDefaultMethodElements.stream()
-//                // .map(i -> ((ExecutableType) i.asType()).getReturnType())
-//                .map(i -> i.getReturnType())
-//                .map(t -> t.toString())
-//                .collect(Collectors.joining(", "));
-//
-//            throw ErrorException.create(correspondingElement, asdfb);
-//        }
-//        var asdf = correspondingElement.getInterfaces().stream()
-//            // .map(i -> ((DeclaredType) i).getTypeArguments())
-//            .map(i -> ((TypeElement) ((DeclaredType) i).asElement()).getTypeParameters())
-//            .flatMap(Collection::stream)
-//            .map(t -> t.toString())
-//            .toList();
-//        if (true) {
-//            String asdfb = asdf.stream().collect(Collectors.joining(", "));
-//            throw ErrorException.create(correspondingElement, asdfb);
-//        }
+        List<ExecutableElement> allMethodElements
+            = Stream.concat(interfaceDefaultMethodElements.stream(), classMethodElements.stream())
+                .toList();
         TypeParametersToArguments typeParametersToArguments = new TypeParametersToArguments(correspondingElement);
+        List<Method> allMethods = checkCreateMethods(allMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
 
-        List<ExecutableElement> allMethodElements = Stream.concat(interfaceDefaultMethodElements.stream(), classMethodElements.stream()).toList();
+        return allMethods;
+    }
 
-        Set<String> methodNames = new HashSet<>();
-        Set<ExecutableElement> overloadedMethodElements = allMethodElements.stream()
-            .filter(el -> !methodNames.add(el.getSimpleName().toString()))
-            .collect(Collectors.toCollection(HashSet::new));
+    private static List<Method> checkCreateMethods(List<ExecutableElement> methodElements, Utils utils, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments) {
+        Set<ExecutableElement> overloadedMethodElements;
+        {
+            Set<String> methodNames = new HashSet<>();
+            overloadedMethodElements = methodElements.stream()
+                .filter(el -> !methodNames.add(el.getSimpleName().toString()))
+                .collect(Collectors.toSet());
+        }
 
-        List<Method> methods = new ArrayList<>(allMethodElements.size());
-        for (ExecutableElement methodElement : allMethodElements) {
+        List<Method> methods = new ArrayList<>(methodElements.size());
+
+        for (ExecutableElement methodElement : methodElements) {
             utils.exceptionHandler().handle(() -> {
                 Method methodRepr = new Method(methodElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
 
@@ -134,6 +124,6 @@ public class Clazz {
             });
         }
 
-        return Collections.unmodifiableList(methods);
+        return methods;
     }
 }

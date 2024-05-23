@@ -4,7 +4,6 @@ import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
