@@ -2,7 +2,7 @@ package de.orat.math.cgacasadi.caching.annotation.processor.representation;
 
 import de.orat.math.cgacasadi.caching.annotation.processor.GenerateCachedProcessor.Utils;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException;
-import de.orat.math.cgacasadi.caching.annotation.processor.common.WarningException;
+import de.orat.math.cgacasadi.caching.annotation.processor.common.FailedToCacheException;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_iMultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,7 +67,7 @@ public class Clazz {
         this.methods = Collections.unmodifiableList(Clazz.computeMethods(correspondingElement, this.qualifiedName, utils));
     }
 
-    private static List<Method> computeMethods(TypeElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws WarningException, ErrorException {
+    private static List<Method> computeMethods(TypeElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws FailedToCacheException, ErrorException {
         // Safe cast because
         // - filtered for Methods
         // - Methods are ExceutableElements.

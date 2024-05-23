@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface GenerateCached {
 
-    boolean showWarnings(); // default true
+    boolean warnFailedToCache() default true;
 
-    boolean warnUncached(); // default false
+    boolean warnUncached() default false;
 }

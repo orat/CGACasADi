@@ -12,24 +12,24 @@ public class ExceptionHandler {
     static protected final boolean IS_DEBUG = false;
 
     protected final Messager messager;
-    protected final boolean showWarnings;
+    protected final boolean warnFailedToCache;
     protected final boolean warnUncached;
 
     public ExceptionHandler(Messager messager) {
         this.messager = messager;
-        this.showWarnings = true;
+        this.warnFailedToCache = true;
         this.warnUncached = false;
     }
 
-    public ExceptionHandler(ExceptionHandler handler, boolean showWarnings, boolean warnUncached) {
+    public ExceptionHandler(ExceptionHandler handler, boolean warnFailedToCache, boolean warnUncached) {
         this.messager = handler.messager;
-        this.showWarnings = showWarnings;
+        this.warnFailedToCache = warnFailedToCache;
         this.warnUncached = warnUncached;
     }
 
     public interface Executable {
 
-        void execute() throws ErrorException, WarningException, UncachedException, Exception;
+        void execute() throws ErrorException, FailedToCacheException, UncachedException, Exception;
     }
 
     /**
@@ -46,18 +46,18 @@ public class ExceptionHandler {
             } else {
                 error(ex.element, ex.getMessage());
             }
-        } catch (WarningException ex) {
+        } catch (FailedToCacheException ex) {
             if (ExceptionHandler.IS_DEBUG) {
                 String message = extractStackTrace(ex);
                 warn(ex.element, message);
-            } else if (this.showWarnings) {
+            } else if (this.warnFailedToCache) {
                 warn(ex.element, ex.getMessage());
             }
         } catch (UncachedException ex) {
             if (ExceptionHandler.IS_DEBUG) {
                 String message = extractStackTrace(ex);
                 warn(ex.element, message);
-            } else if (this.showWarnings && this.warnUncached) {
+            } else if (this.warnUncached) {
                 warn(ex.element, ex.getMessage());
             }
         } catch (Exception ex) {

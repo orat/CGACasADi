@@ -4,7 +4,7 @@ import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
 import de.orat.math.cgacasadi.caching.annotation.processor.GenerateCachedProcessor.Utils;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.UncachedException;
-import de.orat.math.cgacasadi.caching.annotation.processor.common.WarningException;
+import de.orat.math.cgacasadi.caching.annotation.processor.common.FailedToCacheException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +27,7 @@ public final class Method {
     public final List<Parameter> parameters;
     public final String enclosingType;
 
-    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException, UncachedException, WarningException {
+    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException, UncachedException, FailedToCacheException {
         assert correspondingElement.getKind() == ElementKind.METHOD : String.format(
             "Expected \"%s\" to be a method, but was \"%s\".",
             correspondingElement.getSimpleName(), correspondingElement.getKind());
@@ -45,20 +45,20 @@ public final class Method {
         }
 
         if (!this.returnType.equals(enclosingClassQualifiedName)) {
-            throw WarningException.create(correspondingElement,
+            throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": Return type \"%s\" was not the expected one \"%s\".", this.name, this.returnType, enclosingClassQualifiedName);
         }
 
         if (this.modifiers.contains(Modifier.PRIVATE)) {
-            throw WarningException.create(correspondingElement,
+            throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": private method will not be cached.", this.name);
         }
         if (this.modifiers.contains(Modifier.STATIC)) {
-            throw WarningException.create(correspondingElement,
+            throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": static method will not be cached.", this.name);
         }
         if (this.modifiers.contains(Modifier.ABSTRACT)) {
-            throw WarningException.create(correspondingElement,
+            throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": abstract method will not be cached.", this.name);
         }
 
