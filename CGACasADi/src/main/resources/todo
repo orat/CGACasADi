@@ -1,0 +1,6 @@
+ocga-file wird nur im source-folder erkannt, nicht aber im etc folder wo die Dateien hingehören
+was ist im package netbeans-ocga falsch?
+
+Mir scheint:
+- die Operatoren werde nicht richtig dargestellt, erkannt
+- Funktionen werden nicht richtig dargestellt/erkannt

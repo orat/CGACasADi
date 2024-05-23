@@ -2,91 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.orat.math.cgacasadi</groupId>
-	<artifactId>CGACasADi</artifactId>
+	<artifactId>CGACasADi_Parent</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
+	<modules>
+		<module>CGACasADi_SymbolicMultivectorCachingProcessor</module>
+		<module>CGACasADi</module>
+	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-		<generatedSourcesDirectory>${project.build.directory}/generated-sources/annotation-processing</generatedSourcesDirectory>
-		<generatedTestSourcesDirectory>${project.build.directory}/generated-test-sources/annotation-processing</generatedTestSourcesDirectory>
-		<!--exec.mainClass>de.orat.math.cga.sym.cgacasadi.CGACasADi</exec.mainClass-->
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.release>17</maven.compiler.release>
 	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>de.dhbw.rahmlab</groupId>
-			<artifactId>JCasADi</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.orat.math.sparsematrix</groupId>
-			<artifactId>SparseMatrix</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.6.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-params</artifactId>
-			<version>5.6.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.6.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>de.orat.math.gacalc</groupId>
-			<artifactId>GACalcAPI</artifactId>
-			<version>1.0-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jogamp.java3d</groupId>
-					<artifactId>vecmath</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.google.auto.service</groupId>
-			<artifactId>auto-service</artifactId>
-			<version>1.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.squareup</groupId>
-			<artifactId>javapoet</artifactId>
-			<version>1.13.0</version>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.12.1</version>
-				<executions>
-					<execution>
-						<id>compile-generator</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>de/orat/math/cgacasadi/caching/annotation/processor/GenerateCachedProcessor.java</include>
-							</includes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>
-

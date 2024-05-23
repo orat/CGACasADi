@@ -1,0 +1,50 @@
+/* Create an ipns round point from an euclidian point */
+fn ipns_round_point(p){
+    p+0.5p²εᵢ+ε₀
+}
+/* Create an ipns sphere from an euclidian point and its radius (scalar) */
+fn ipns_sphere(p, r){
+    ipns_round(p)-0.5r²εᵢ
+}
+/* Create an ipns plane from an euclidian point and the planes normal vector */
+fn ipns_plane(p, nv){
+    ipns_round_point(p)⋅(nv εᵢ)
+}
+/*fn ipns_plane(nv, d){
+    nv+d εᵢ
+}*/
+fn ipns_circle(p, nv, r){
+    ε₀∧nv+(p⋅nv)E₀+p∧nv+((p⋅nv)p-0.5(p-r²)nv)∧εᵢ
+}
+fn ipns_circle(opns_sphere_1, opns_sphere_2){
+    opns_sphere_1*∧opns_sphere_2*
+}
+fn ipns_round_to_euclidian(ipns_sphere){
+    position :=-ipns_sphere/(εᵢ⌋ipns_sphere)
+    rSquared := -(ipns_sphere ipns_sphere˜)/(εᵢ⌋ipns_sphere)²
+    position, rSquared
+}
+
+// https://discourse.bivector.net/t/extracting-euclidean-points-from-conformal-points/186/2
+fn split_point_pair(ipns_pp){
+    denominator = sqrt(-<ipns_pp* ipns_pp˜>₀)
+    A = (-1+ipns_pp/denominator) (ipns_pp⋅εᵢ)
+    // Note that B is equivalent to A but with ipns_pp˜ rather than ipns_pp
+    B = (1+ipns_pp/denominator) (ipns_pp⋅εᵢ)
+    A, B
+}
+
+
+// forward kinematics
+
+// v: (euclidean) direction vector
+fn free_vector(v){
+    v∧εᵢ
+}
+
+// u: free vector (tralslation)
+// q: angle [rad]
+fn fk(u, q){
+    //(1+(εᵢv)/2)
+    (1+u/2) // TODO gp rotation(q)
+}
