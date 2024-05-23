@@ -84,7 +84,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
             mv = mv.add(create(name, grades[i]));
         }
 
-        mv = create(mv.name, mv.getSparsity());
+        mv = create(name, mv.getSparsity());
 
         return mv;
     }
