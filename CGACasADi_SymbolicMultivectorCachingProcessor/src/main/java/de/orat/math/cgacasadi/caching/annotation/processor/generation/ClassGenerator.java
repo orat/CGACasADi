@@ -36,9 +36,11 @@ final class ClassGenerator {
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
 
-        FieldSpec CACHE = FieldSpec.builder(T_CGASymbolicFunctionCache, "CACHE", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+        FieldSpec CACHE = FieldSpec.builder(T_CGASymbolicFunctionCache, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("new $T()", T_CGASymbolicFunctionCache)
             .build();
+
+        MethodSpec getCache = ClassGenerator.getCache();
 
         MethodSpec constructor1 = ClassGenerator.constructor1(T_c);
         MethodSpec constructor2 = ClassGenerator.constructor2();
@@ -55,6 +57,7 @@ final class ClassGenerator {
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(T_c)
             .addField(CACHE)
+            .addMethod(getCache)
             .addMethod(constructor1)
             .addMethod(constructor2)
             .addMethods(methods)
@@ -66,6 +69,21 @@ final class ClassGenerator {
             .build();
 
         javaFile.writeTo(filer);
+    }
+
+    private static MethodSpec getCache() {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getCache");
+
+        // Signature
+        methodBuilder
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(Classes.T_ISafePublicFunctionCache);
+
+        // Body
+        methodBuilder
+            .addStatement("return CACHE");
+
+        return methodBuilder.build();
     }
 
     private static MethodSpec constructor1(ClassName T_c) throws ClassNotFoundException {

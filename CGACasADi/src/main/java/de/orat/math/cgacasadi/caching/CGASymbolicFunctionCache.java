@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * No check for function name collisions. Especially hazardous if an instance is used by more than one class.
  */
-public class CGASymbolicFunctionCache {
+public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
 
     private final Map<String, CGASymbolicFunction> functionCache
         = new HashMap<>(1024, 0.5f);
@@ -56,19 +56,23 @@ public class CGASymbolicFunctionCache {
         return new CachedSparseCGASymbolicMultivector(retVal);
     }
 
+    @Override
     public void clearCache() {
         this.functionCache.clear();
         this.cachedFunctionsUsage.clear();
     }
 
+    @Override
     public Map<String, Integer> getUnmodifiableCachedFunctionsUsage() {
         return Collections.unmodifiableMap(this.cachedFunctionsUsage);
     }
 
+    @Override
     public SortedMap<String, Integer> getSortedUnmodifiableCachedFunctionsUsage() {
         return new TreeMap<>(getUnmodifiableCachedFunctionsUsage());
     }
 
+    @Override
     public String cachedFunctionUsageToString() {
         SortedMap<String, Integer> cachedFunctionUsage = getSortedUnmodifiableCachedFunctionsUsage();
         int maxKeyLength = cachedFunctionUsage.entrySet().stream()
