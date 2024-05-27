@@ -5,7 +5,6 @@ import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,17 +14,10 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * No check for function name collisions. Especially hazardous if an instance is used by more than one class.
+ */
 public class CGASymbolicFunctionCache {
-
-    public static CGASymbolicFunctionCache instance() {
-        return INSTANCE;
-    }
-
-    private static final CGASymbolicFunctionCache INSTANCE = new CGASymbolicFunctionCache();
-
-    private CGASymbolicFunctionCache() {
-
-    }
 
     private final Map<String, CGASymbolicFunction> functionCache
         = new HashMap<>(1024, 0.5f);
@@ -78,7 +70,7 @@ public class CGASymbolicFunctionCache {
     }
 
     public String cachedFunctionUsageToString() {
-        SortedMap<String, Integer> cachedFunctionUsage = CGASymbolicFunctionCache.instance().getSortedUnmodifiableCachedFunctionsUsage();
+        SortedMap<String, Integer> cachedFunctionUsage = getSortedUnmodifiableCachedFunctionsUsage();
         int maxKeyLength = cachedFunctionUsage.entrySet().stream()
             .mapToInt(entry -> entry.getKey().length())
             .max().orElse(0);

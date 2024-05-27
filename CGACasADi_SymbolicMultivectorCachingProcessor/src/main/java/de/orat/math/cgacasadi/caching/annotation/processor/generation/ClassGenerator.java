@@ -36,8 +36,8 @@ final class ClassGenerator {
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
 
-        FieldSpec CACHE = FieldSpec.builder(T_CGASymbolicFunctionCache, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("$T.instance()", T_CGASymbolicFunctionCache)
+        FieldSpec CACHE = FieldSpec.builder(T_CGASymbolicFunctionCache, "CACHE", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+            .initializer("new $T()", T_CGASymbolicFunctionCache)
             .build();
 
         MethodSpec constructor1 = ClassGenerator.constructor1(T_c);
