@@ -36,6 +36,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
                 SparseCGASymbolicMultivector arg = args.get(i);
                 // Convert to purely symbolic multivector.
                 // grades
+                // Is already a CachedSparseCGASymbolicMultivector.
                 SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
                     String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
                 // sparsity
@@ -51,6 +52,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
             functionCache.put(name, func);
             cachedFunctionsUsage.put(name, 0);
         }
+        // Is already a CachedSparseCGASymbolicMultivector.
         SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0);
         cachedFunctionsUsage.compute(name, (k, v) -> ++v);
         return new CachedSparseCGASymbolicMultivector(retVal);
