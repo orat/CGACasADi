@@ -76,6 +76,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * <pre>
      * Does not check for the same grade given more then once!
      * ToDo: create fast implementation of this.
+     * Purely symbolic.
      * </pre>
      */
     public static SparseCGASymbolicMultivector create(String name, int[] grades) {
@@ -94,7 +95,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     /**
+     * <pre>
      * Creates a k-Vector.
+     * Purely symbolic.
+     * </pre>
      *
      * @param name
      * @param grade
@@ -104,11 +108,17 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return create(name, sparsity);
     }
 
+    /**
+     * Purely symbolic.
+     */
     public static SparseCGASymbolicMultivector create(String name, ColumnVectorSparsity sparsity) {
         SX sx = SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
         return new CachedSparseCGASymbolicMultivector(name, sx);
     }
 
+    /**
+     * Purely symbolic.
+     */
     public static SparseCGASymbolicMultivector create(String name) {
         //de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity = CasADiUtil.toCasADiSparsity(CGAKVectorSparsity.dense());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity2 = de.dhbw.rahmlab.casadi.impl.casadi.Sparsity.dense(32);

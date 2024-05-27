@@ -27,6 +27,13 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     public CGASymbolicFunction(String name, List<? extends SparseCGASymbolicMultivector> parameters,
         List<? extends SparseCGASymbolicMultivector> returns) {
         try {
+            // Parameters are only correct, if purely symbolic. The following ensures that.
+            for (var param : parameters) {
+                if (!param.getSX().is_valid_input()) {
+                    throw new IllegalArgumentException("CGASymbolicFunction: got non-purely-symbolic parameter.");
+                }
+            }
+
             var f_sym_in = transformImpl(parameters);
             var f_sym_out = transformImpl(returns);
             //String name = callback.getName();
@@ -44,6 +51,9 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
         return new StdVectorSX(sxs);
     }
 
+    /**
+     * Caution: does not check for sparsity compatibility with the formal parameters given in the constructor.
+     */
     @Override
     public List<? extends SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
         try {
@@ -56,6 +66,9 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
         }
     }
 
+    /**
+     * Caution: does not check for sparsity compatibility with the formal parameters given in the constructor.
+     */
     @Override
     public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
         try {
