@@ -100,27 +100,21 @@ public class Clazz {
     }
 
     private static List<Method> checkCreateMethods(List<ExecutableElement> methodElements, Utils utils, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments) {
-        Set<ExecutableElement> overloadedMethodElements;
-        {
-            Set<String> methodNames = new HashSet<>();
-            overloadedMethodElements = methodElements.stream()
-                .filter(el -> !methodNames.add(el.getSimpleName().toString()))
-                .collect(Collectors.toSet());
-        }
-
         List<Method> methods = new ArrayList<>(methodElements.size());
+        Set<String> methodNames = new HashSet<>(methodElements.size());
 
         for (ExecutableElement methodElement : methodElements) {
             utils.exceptionHandler().handle(() -> {
                 Method methodRepr = new Method(methodElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
 
-                if (overloadedMethodElements.contains(methodElement)) {
+                if (methodNames.contains(methodRepr.name)) {
                     throw ErrorException.create(methodElement,
                         "Forbidden overloaded method: \"%s\".",
                         methodElement.getSimpleName());
                 }
 
                 methods.add(methodRepr);
+                methodNames.add(methodRepr.name);
             });
         }
 
