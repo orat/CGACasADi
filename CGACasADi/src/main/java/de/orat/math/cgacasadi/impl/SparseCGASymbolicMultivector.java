@@ -22,7 +22,11 @@ import util.CayleyTable;
 import util.cga.CGAOperations;
 
 /**
+ * <pre>
  * abstract to prevent inadvertent instantiation.
+ * Doc for @GenerateCached:
+ *    https://github.com/orat/CGACasADi/blob/master/CGACasADi_SymbolicMultivectorCachingProcessor/README.md
+ * </pre>
  */
 @GenerateCached(warnFailedToCache = true, warnUncached = true)
 public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
