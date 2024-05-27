@@ -57,13 +57,17 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
 
 ## Hint: `@Uncached` default methods
-To set the semantics of `@Uncached` for a default method of `iMultivectorSymbolic`, override the method, annotate it and delegate to the super method.
+To set the semantics of `@Uncached` for a default method of `iMultivectorSymbolic` in the annotated class, override the method, annotate it and delegate to the super method.
 
 Example:
 ```java
-@Override
-public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b) {
+@GenerateCached(warnFailedToCache = true, warnUncached = true)
+public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
+
+	@Override
+	public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b) {
 	return iMultivectorSymbolic.super.op(b);
+}
 }
 ```
 
