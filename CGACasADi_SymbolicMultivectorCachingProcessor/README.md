@@ -45,7 +45,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 - Parameters of methods can be of the types "annoted class" or `int`. Otherwise an error will be issued. To suppress the error, annotate an invalid method with `@Uncached`.
 - Overloaded methods will not be cached.
 	- An error will be issued. To suppress the error, use `@Uncached`.
-	- An overloaded method will be cached nonetheless, if all overloads but one are by themselves invalid (`private`, `static`, ...).
+	- An overloaded method will be cached nonetheless, if all overloads but one are by themselves invalid (`private`, `static`, ...) or `@Uncached`.
 	- This is the case for the union set of the methods of `iMultivectorSymbolic` and the annotated class.
 	- Overloads could be permitted in a future version if their name string keys in the cache would be extended with something like "_1", "_2", ... .
 
