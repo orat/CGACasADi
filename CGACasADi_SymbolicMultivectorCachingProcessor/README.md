@@ -65,9 +65,10 @@ Example:
 public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
 
 	@Override
+	@Uncached
 	public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b) {
-	return iMultivectorSymbolic.super.op(b);
-}
+		return iMultivectorSymbolic.super.op(b);
+	}
 }
 ```
 
