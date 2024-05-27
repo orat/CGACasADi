@@ -29,25 +29,20 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
 
 ## Rules
+#### Annotated class
 - The annotated class must implement `iMultivectorSymbolic`. Otherwise an error will be issued.
 - The annotated class must implement `iMultivectorSymbolic<itself>`, but this is not enforced with an explicit error.
 - The annotated class is prohibited to define type variables (generics). Otherwise an error will be issued.
 - The annotated class cannot be final. Otherwise an error will be issued.
 
-<!-- -->
 
+#### Methods default caching
 - All methods of `iMultivectorSymbolic` which return an object of the type parameter `IMultivectorSymbolic` will be cached per default.
 - All methods of the annotated class which return an object of the annotated class will be cached per default.
+
+
+#### Methods errors
 - Parameters of methods can be of the types "annoted class" or `int`. Otherwise an error will be issued. To suppress the error, annotate an invalid method with `@Uncached`.
-
-<!-- -->
-
-- `private` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
-- `static` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
-- `abstract` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
-
-<!-- -->
-
 - Overloaded methods will not be cached.
 	- An error will be issued. To suppress the error, use `@Uncached`.
 	- An overloaded method will be cached nonetheless, if all overloads but one are by themselves invalid (`private`, `static`, ...).
@@ -55,8 +50,14 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 	- Overloads could be permitted in a future version if their name string keys in the cache would be extended with something like "_1", "_2", ... .
 
 
+#### Methods warnings
+- `private` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
+- `static` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
+- `abstract` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
+
+
 ## Hint: `@Uncached` default methods
-If you want to set the semantics of `@Uncached` for a default method of `iMultivectorSymbolic`, override the method, annotate it and delegate to the super method.
+To set the semantics of `@Uncached` for a default method of `iMultivectorSymbolic`, override the method, annotate it and delegate to the super method.
 
 Example:
 ```java
@@ -65,3 +66,4 @@ public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b) {
 	return iMultivectorSymbolic.super.op(b);
 }
 ```
+
