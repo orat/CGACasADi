@@ -1,6 +1,7 @@
 package de.orat.math.cgacasadi.caching;
 
 import de.orat.math.cgacasadi.impl.CGASymbolicFunction;
+import de.orat.math.cgacasadi.impl.PurelySymbolicCachedSparseCGASymbolicMultivector;
 import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
@@ -24,11 +25,11 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
     private final Map<String, Integer> cachedFunctionsUsage
         = new HashMap<>(1024, 0.5f);
 
-    public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
+    public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<? extends CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
         CGASymbolicFunction func = functionCache.get(name);
         if (func == null) {
             final int size = args.size();
-            List<CachedSparseCGASymbolicMultivector> params = new ArrayList<>(size);
+            List<PurelySymbolicCachedSparseCGASymbolicMultivector> params = new ArrayList<>(size);
             if (args.size() > PARAM_NAMES.length()) {
                 throw new RuntimeException("Too many args given.");
             }
@@ -37,16 +38,16 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
                 // Convert to purely symbolic multivector.
                 // grades
                 // Is already a CachedSparseCGASymbolicMultivector.
-                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
+                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
                     String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
                 // sparsity
-//                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
+//                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
 //                    String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
                 // dense
-//                SparseCGASymbolicMultivector param = SparseCGASymbolicMultivector.create(
+//                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
 //                    String.valueOf(PARAM_NAMES.charAt(i)));
                 //
-                params.add(new CachedSparseCGASymbolicMultivector(param));
+                params.add(param);
             }
             func = new CGASymbolicFunction(name, params, List.of(res.apply(params)));
             functionCache.put(name, func);

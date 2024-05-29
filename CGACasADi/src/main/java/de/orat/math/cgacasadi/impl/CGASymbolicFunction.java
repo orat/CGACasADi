@@ -8,6 +8,7 @@ import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
+import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
 import java.util.List;
 
 /**
@@ -24,15 +25,15 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
 
     private final Function f_sym_casadi;
 
-    public CGASymbolicFunction(String name, List<? extends SparseCGASymbolicMultivector> parameters,
-        List<? extends SparseCGASymbolicMultivector> returns) {
+    public <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> CGASymbolicFunction(String name, List<MV> parameters, List<? extends SparseCGASymbolicMultivector> returns) {
         try {
+            // Only need runtime check, if parameters are not with their type enforced to be purely symbolic.
             // Parameters are only correct, if purely symbolic. The following ensures that.
-            for (var param : parameters) {
-                if (!param.getSX().is_valid_input()) {
-                    throw new IllegalArgumentException("CGASymbolicFunction: got non-purely-symbolic parameter.");
-                }
-            }
+//            for (var param : parameters) {
+//                if (!param.getSX().is_valid_input()) {
+//                    throw new IllegalArgumentException("CGASymbolicFunction: got non-purely-symbolic parameter.");
+//                }
+//            }
 
             var f_sym_in = transformImpl(parameters);
             var f_sym_out = transformImpl(returns);
@@ -46,7 +47,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
         }
     }
 
-    protected static StdVectorSX transformImpl(List<? extends SparseCGASymbolicMultivector> mvs) {
+    protected static StdVectorSX transformImpl(List<? extends ISparseCGASymbolicMultivector> mvs) {
         List<SX> sxs = mvs.stream().map(mv -> (mv).getSX()).toList();
         return new StdVectorSX(sxs);
     }

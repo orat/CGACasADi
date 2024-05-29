@@ -13,23 +13,23 @@ import util.cga.CGAMultivectorSparsity;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector> {
+public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector> {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
     // create symbolic multivectors
     @Override
-    public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, MatrixSparsity sparsity) {
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name, MatrixSparsity sparsity) {
         return SparseCGASymbolicMultivector.create(name, ColumnVectorSparsity.instance(sparsity));
     }
 
     @Override
-    public SparseCGASymbolicMultivector createMultivectorSymbolic(String name) {
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name) {
         return SparseCGASymbolicMultivector.create(name);
     }
 
     @Override
-    public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, int grade) {
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name, int grade) {
         return SparseCGASymbolicMultivector.create(name, grade);
     }
 
@@ -83,9 +83,9 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         return new SparseCGANumericMultivector(vec.nonzeros(), vec.getSparsity().getrow());
     }
 
-    // create function objects
+    // create function
     @Override
-    public CGASymbolicFunction createFunctionSymbolic(String name, List<SparseCGASymbolicMultivector> parameters, List<SparseCGASymbolicMultivector> returns) {
+    public CGASymbolicFunction createFunctionSymbolic(String name, List<PurelySymbolicCachedSparseCGASymbolicMultivector> parameters, List<SparseCGASymbolicMultivector> returns) {
         return new CGASymbolicFunction(name, parameters, returns);
     }
 

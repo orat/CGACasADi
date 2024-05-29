@@ -4,7 +4,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
-import util.cga.CGAKVectorSparsity;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
@@ -29,7 +28,7 @@ import util.cga.CGAOperations;
  * </pre>
  */
 @GenerateCached(warnFailedToCache = true, warnUncached = true)
-public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector> {
+public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector>, ISparseCGASymbolicMultivector<SparseCGASymbolicMultivector> {
 
     private MultivectorSymbolic.Callback callback;
     private final String name;
@@ -72,58 +71,28 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return new CachedSparseCGASymbolicMultivector(name, sx);
     }
 
-    /**
-     * <pre>
-     * Does not check for the same grade given more then once!
-     * ToDo: create fast implementation of this.
-     * Purely symbolic.
-     * </pre>
-     */
-    public static SparseCGASymbolicMultivector create(String name, int[] grades) {
-        if (grades.length < 1) {
-            throw new RuntimeException("At least one grade must be given.");
-        }
-
-        SparseCGASymbolicMultivector mv = create(name, grades[0]);
-        for (int i = 1; i < grades.length; ++i) {
-            mv = mv.add(create(name, grades[i]));
-        }
-
-        mv = create(name, mv.getSparsity());
-
-        return mv;
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name, int[] grades) {
+        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, grades);
     }
 
     /**
      * <pre>
      * Creates a k-Vector.
-     * Purely symbolic.
      * </pre>
      *
      * @param name
      * @param grade
      */
-    public static SparseCGASymbolicMultivector create(String name, int grade) {
-        CGAMultivectorSparsity sparsity = CGAKVectorSparsity.instance(grade);
-        return create(name, sparsity);
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name, int grade) {
+        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, grade);
     }
 
-    /**
-     * Purely symbolic.
-     */
-    public static SparseCGASymbolicMultivector create(String name, ColumnVectorSparsity sparsity) {
-        SX sx = SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity));
-        return new CachedSparseCGASymbolicMultivector(name, sx);
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name, ColumnVectorSparsity sparsity) {
+        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, sparsity);
     }
 
-    /**
-     * Purely symbolic.
-     */
-    public static SparseCGASymbolicMultivector create(String name) {
-        //de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity = CasADiUtil.toCasADiSparsity(CGAKVectorSparsity.dense());
-        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sparsity2 = de.dhbw.rahmlab.casadi.impl.casadi.Sparsity.dense(32);
-        SX sx = SX.sym(name, sparsity2);
-        return new CachedSparseCGASymbolicMultivector(name, sx);
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name) {
+        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name);
     }
 
     public static SparseCGASymbolicMultivector create(SX sx) {

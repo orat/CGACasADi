@@ -54,7 +54,7 @@ final class ClassGenerator {
         }
 
         TypeSpec genClassSpec = TypeSpec.classBuilder(genClass)
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .addModifiers(Modifier.PUBLIC)
             .superclass(T_c)
             .addField(CACHE)
             .addMethod(getCache)
@@ -166,7 +166,7 @@ final class ClassGenerator {
             .addStatement("String funName = CACHE.createFuncName($S, $L)", m.name, args)
             .addCode("""
                 return CACHE.getOrCreateSymbolicFunction(funName, List.of($L),
-                    ($T<$T> params) -> params.get(0).$L($L));""",
+                    ($T<? extends $T> params) -> params.get(0).$L($L));""",
                 superTypeArgs, T_List, genClass, m.name + "_super", params);
 
         //
@@ -180,7 +180,7 @@ final class ClassGenerator {
 
         // Signature
         methodBuilder
-            .addModifiers(Modifier.PRIVATE)
+            .addModifiers(Modifier.PROTECTED)
             .returns(T_ret);
 
         for (Parameter parameter : m.parameters) {
