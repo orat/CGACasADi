@@ -114,13 +114,12 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     @Override
     public int grade() {
-        CGAMultivectorSparsity sparsity = CasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
-        return sparsity.getGrade();
+        return this.getSparsity().getGrade();
     }
 
     @Override
     public int[] grades() {
-        return CasADiUtil.toCGAMultivectorSparsity(sx.sparsity()).getGrades();
+        return this.getSparsity().getGrades();
     }
 
     @Override
