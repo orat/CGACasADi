@@ -11,6 +11,7 @@ import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -186,6 +187,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     @Override
     public CGAConstantsSymbolic constants() {
         return CONSTANTS;
+    }
+
+    public CGAExprGraphFactory fac() {
+        return CGAExprGraphFactory.instance;
     }
 
     //======================================================
@@ -394,16 +399,28 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     @Override
     public SparseCGASymbolicMultivector scalarAbs() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
         return create(SX.abs(sx));
     }
 
     @Override
     public SparseCGASymbolicMultivector scalarAtan2(SparseCGASymbolicMultivector y) {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("The argument x of tang(x,y) is no scalar!");
+        }
+        if (!y.isScalar()) {
+            throw new IllegalArgumentException("The argument y of tang(x,y) is no scalar!");
+        }
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public SparseCGASymbolicMultivector scalarSqrt() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
         return create(SX.sqrt(sx));
     }
 
@@ -414,6 +431,9 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     public SparseCGASymbolicMultivector exp() {
         //TODO
         // exception werfen, wenn kein Bivector
+        if (grade() != 2) {
+            throw new IllegalArgumentException("exp() defined for bivectors only!");
+        }
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -650,6 +670,9 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      */
     @Override
     public SparseCGASymbolicMultivector scalarInverse() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
         //FIXME unklar ob isZero überhaupt korrekt implementiert ist, das muss nach
         // structural zero testen... also nicht erst zur Laufzeit
         if (isZero()) {
