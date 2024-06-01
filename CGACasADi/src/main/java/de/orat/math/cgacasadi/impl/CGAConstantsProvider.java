@@ -30,7 +30,7 @@ public class CGAConstantsProvider implements iConstantsProvider<SparseCGASymboli
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
-    public synchronized SparseCGASymbolicMultivector cached(Supplier<SparseCGASymbolicMultivector> creator) {
+    public SparseCGASymbolicMultivector cached(Supplier<SparseCGASymbolicMultivector> creator) {
         return this.cache.computeIfAbsent(creator, Supplier::get);
     }
 
