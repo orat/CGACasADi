@@ -181,10 +181,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return sx.is_zero();
     }
 
-    private static final CGAConstantsProvider CONSTANTS = CGAConstantsProvider.instance;
+    private static final CGAConstantsSymbolic CONSTANTS = CGAConstantsSymbolic.instance;
 
     @Override
-    public CGAConstantsProvider constants() {
+    public CGAConstantsSymbolic constants() {
         return CONSTANTS;
     }
 

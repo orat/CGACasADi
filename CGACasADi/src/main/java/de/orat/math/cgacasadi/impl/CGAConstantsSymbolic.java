@@ -3,15 +3,15 @@ package de.orat.math.cgacasadi.impl;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.function.Supplier;
-import de.orat.math.gacalc.spi.iConstantsProvider;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import de.orat.math.gacalc.spi.iConstantsSymbolic;
 
-public class CGAConstantsProvider implements iConstantsProvider<SparseCGASymbolicMultivector> {
+public class CGAConstantsSymbolic implements iConstantsSymbolic<SparseCGASymbolicMultivector> {
 
-    public static final CGAConstantsProvider instance = new CGAConstantsProvider();
+    public static final CGAConstantsSymbolic instance = new CGAConstantsSymbolic();
 
-    private CGAConstantsProvider() {
+    private CGAConstantsSymbolic() {
 
     }
 

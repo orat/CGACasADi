@@ -5,7 +5,6 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.cgacasadi.CasADiUtil;
 import static de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector.create;
-import de.orat.math.gacalc.spi.iConstantsProvider;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -15,6 +14,7 @@ import java.util.List;
 import java.util.Random;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
+import de.orat.math.gacalc.spi.iConstantsSymbolic;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -33,8 +33,8 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
-    public CGAConstantsProvider constants() {
-        return CGAConstantsProvider.instance;
+    public CGAConstantsSymbolic constants() {
+        return CGAConstantsSymbolic.instance;
     }
 
     // create symbolic multivectors
