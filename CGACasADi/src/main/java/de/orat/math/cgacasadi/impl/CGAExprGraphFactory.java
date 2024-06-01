@@ -17,6 +17,15 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
+    public final static CGAExprGraphFactory instance = new CGAExprGraphFactory();
+
+    /**
+     * Needs to be public in order to make ServiceLoader work.
+     */
+    public CGAExprGraphFactory() {
+
+    }
+
     // create symbolic multivectors
     @Override
     public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name, MatrixSparsity sparsity) {

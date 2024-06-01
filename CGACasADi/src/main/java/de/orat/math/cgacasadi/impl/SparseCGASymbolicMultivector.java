@@ -38,7 +38,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     private final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils
         = new CGAOperatorMatrixUtils(baseCayleyTable);
 
-    private final static CGAExprGraphFactory fac = new CGAExprGraphFactory();
+    private final static CGAExprGraphFactory fac = CGAExprGraphFactory.instance;
 
     // a multivector is represented by a sparse column vector
     private final SX sx;
@@ -97,6 +97,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     public static SparseCGASymbolicMultivector create(SX sx) {
         return new CachedSparseCGASymbolicMultivector("", sx);
+    }
+
+    public static SparseCGASymbolicMultivector create(String name, SX sx) {
+        return new CachedSparseCGASymbolicMultivector(name, sx);
     }
 
     //======================================================
@@ -217,6 +221,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     @Override
+    @Uncached
     public SparseCGASymbolicMultivector sparseEmptyInstance() {
         // empty vector implementation
         SX mysx = new SX(CasADiUtil.toCasADiSparsity(
@@ -226,6 +231,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     @Override
+    @Uncached
     public SparseCGASymbolicMultivector denseEmptyInstance() {
         SX mysx = new SX(CasADiUtil.toCasADiSparsity(
             ColumnVectorSparsity.dense(baseCayleyTable.getRows())));

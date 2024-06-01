@@ -11,7 +11,7 @@ import java.util.Random;
  */
 public class TestExprGraphFactory extends ExprGraphFactory {
 
-    public static CGAExprGraphFactory impl_ = new CGAExprGraphFactory();
+    public static CGAExprGraphFactory impl_ = CGAExprGraphFactory.instance;
 
     public static ExprGraphFactory instance() {
         return get(impl_);
