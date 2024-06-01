@@ -1,5 +1,11 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
+import de.orat.math.cgacasadi.CasADiUtil;
+import static de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector.create;
+import de.orat.math.gacalc.spi.iConstantsProvider;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -26,6 +32,11 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     }
 
+    @Override
+    public CGAConstantsProvider constants() {
+        return CGAConstantsProvider.instance;
+    }
+
     // create symbolic multivectors
     @Override
     public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name, MatrixSparsity sparsity) {
@@ -45,6 +56,22 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     @Override
     public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, SparseDoubleMatrix sparseVector) {
         return SparseCGASymbolicMultivector.create(name, sparseVector);
+    }
+
+    @Override
+    public SparseCGASymbolicMultivector createSparseEmptyInstance() {
+        // empty vector implementation
+        SX mysx = new SX(CasADiUtil.toCasADiSparsity(
+            ColumnVectorSparsity.empty(baseCayleyTable.getRows())),
+            new SX(new StdVectorVectorDouble(new StdVectorDouble[]{new StdVectorDouble()})));
+        return create(mysx);
+    }
+
+    @Override
+    public SparseCGASymbolicMultivector createDenseEmptyInstance() {
+        SX mysx = new SX(CasADiUtil.toCasADiSparsity(
+            ColumnVectorSparsity.dense(baseCayleyTable.getRows())));
+        return create(mysx);
     }
 
     // helper methods

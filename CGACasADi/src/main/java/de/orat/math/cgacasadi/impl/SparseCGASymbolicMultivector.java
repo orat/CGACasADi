@@ -181,64 +181,13 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return sx.is_zero();
     }
 
-    ////////////////////////////// Fabian TODO: Behandlung von Konstanten verbessern.
-    //======================================================
-    // Don't belong here
-    //======================================================
-    @Uncached
-    public SparseCGASymbolicMultivector scalar(double value) {
-        SparseDoubleMatrix sca = fac.createScalar(value);
-        String scalar_name = baseCayleyTable.getBasisBladeName(0);
-        return fac.createMultivectorSymbolic(scalar_name, sca);
-    }
-
-    private static SparseCGASymbolicMultivector pseudoscalar;
+    private static final CGAConstantsProvider CONSTANTS = CGAConstantsProvider.instance;
 
     @Override
-    public SparseCGASymbolicMultivector pseudoscalar() {
-        if (pseudoscalar == null) {
-            SparseDoubleMatrix pseudo = fac.createPseudoscalar();
-            String pseudoscalar_name = baseCayleyTable.getPseudoscalarName();
-            pseudoscalar = fac.createMultivectorSymbolic(pseudoscalar_name, pseudo);
-            //int grade = baseCayleyTable.getGrade(baseCayleyTable.getBasisBladeNames().length-1);
-            //pseudoscalar = instance(pseudoscalar_name, grade);
-        }
-        return pseudoscalar;
+    public CGAConstantsProvider constants() {
+        return CONSTANTS;
     }
 
-    //TODO
-    // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
-    // vieleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
-    // geht nur für CGA?
-    private static SparseCGASymbolicMultivector inversePseudoscalar;
-
-    @Override
-    public SparseCGASymbolicMultivector inversePseudoscalar() {
-        if (inversePseudoscalar == null) {
-            inversePseudoscalar = pseudoscalar().reverse();
-        }
-        return inversePseudoscalar;
-    }
-
-    @Override
-    @Uncached
-    public SparseCGASymbolicMultivector sparseEmptyInstance() {
-        // empty vector implementation
-        SX mysx = new SX(CasADiUtil.toCasADiSparsity(
-            ColumnVectorSparsity.empty(baseCayleyTable.getRows())),
-            new SX(new StdVectorVectorDouble(new StdVectorDouble[]{new StdVectorDouble()})));
-        return create(mysx);
-    }
-
-    @Override
-    @Uncached
-    public SparseCGASymbolicMultivector denseEmptyInstance() {
-        SX mysx = new SX(CasADiUtil.toCasADiSparsity(
-            ColumnVectorSparsity.dense(baseCayleyTable.getRows())));
-        return create(mysx);
-    }
-
-    ////////////////////////////// Fabian TODO: Behandlung von Konstanten verbessern.
     //======================================================
     // Operators
     //======================================================
@@ -474,7 +423,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     @Override
     public SparseCGASymbolicMultivector sqrt() {
         if (isEven()) {
-            return add(scalar(1d)).normalizeEvenElement();
+            return add(CONSTANTS.one()).normalizeEvenElement();
         }
         throw new RuntimeException("sqrt() not yet implemented for non even elements.");
     }
