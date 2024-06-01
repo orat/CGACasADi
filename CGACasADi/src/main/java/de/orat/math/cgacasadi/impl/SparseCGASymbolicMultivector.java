@@ -11,7 +11,6 @@ import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
-import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;

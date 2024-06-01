@@ -1,6 +1,5 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.function.Supplier;
 import java.util.Map;
@@ -21,7 +20,7 @@ public class CGAConstantsSymbolic implements iConstantsSymbolic<SparseCGASymboli
     }
 
     @Override
-    public iExprGraphFactory<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector> fac() {
+    public CGAExprGraphFactory fac() {
         return CGAExprGraphFactory.instance;
     }
 

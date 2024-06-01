@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Random;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
-import de.orat.math.gacalc.spi.iConstantsSymbolic;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
