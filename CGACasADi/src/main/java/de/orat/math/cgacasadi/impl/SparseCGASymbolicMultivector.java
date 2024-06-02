@@ -28,7 +28,7 @@ import util.cga.CGAOperations;
  * </pre>
  */
 @GenerateCached(warnFailedToCache = true, warnUncached = true)
-public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector>, ISparseCGASymbolicMultivector<SparseCGASymbolicMultivector> {
+public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector>, ISparseCGASymbolicMultivector {
 
     private MultivectorSymbolic.Callback callback;
     private final String name;
