@@ -20,6 +20,11 @@ public class CGAConstantsSymbolic implements iConstantsSymbolic<SparseCGASymboli
     }
 
     @Override
+    public SparseCGASymbolicMultivector newConstant(String name, SparseCGASymbolicMultivector definition) {
+        return SparseCGASymbolicMultivector.create(name, definition.getSX());
+    }
+
+    @Override
     public CGAExprGraphFactory fac() {
         return CGAExprGraphFactory.instance;
     }
@@ -37,9 +42,7 @@ public class CGAConstantsSymbolic implements iConstantsSymbolic<SparseCGASymboli
     // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
     // vielleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
     // geht nur für CGA?
-    @Override
     public SparseCGASymbolicMultivector getInversePseudoscalar() {
-        return cached(() -> SparseCGASymbolicMultivector.create("E˜", this.getPseudoscalar().reverse().getSX()));
+        return cached(() -> newConstant("E˜", this.getPseudoscalar().reverse()));
     }
-
 }
