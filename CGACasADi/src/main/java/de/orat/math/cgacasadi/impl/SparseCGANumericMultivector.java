@@ -1,6 +1,8 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorNumeric;
@@ -181,5 +183,47 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
         res[30] = a[30] + b[30];
         res[31] = a[31] + b[31];
         return res;
+    }
+
+    private static final CGAExprGraphFactory fac = CGAExprGraphFactory.instance;
+
+    public SparseCGASymbolicMultivector toSymbolic() {
+        var nonZeros = new StdVectorVectorDouble(1, this.dm.nonzeros());
+        var sx = new SX(this.dm.sparsity(), new SX(nonZeros));
+        return SparseCGASymbolicMultivector.create(sx);
+        // Potentially slower alternative:
+        // return fac.createMultivectorSymbolic("", this.elements());
+    }
+
+    /**
+     * <pre>
+     * https://github.com/casadi/casadi/wiki/L_rf
+     * Evaluates the expression numerically.
+     * An error is raised when the expression contains symbols.
+     * </pre>
+     */
+    public static SparseCGANumericMultivector fromSymbolic(SparseCGASymbolicMultivector sym) {
+        var dm = SX.evalf(sym.getSX());
+        return new SparseCGANumericMultivector(dm);
+    }
+
+    @Override
+    public iMultivectorNumeric add(iMultivectorNumeric mv) {
+        var thisSym = this.toSymbolic();
+        var mvSym = ((SparseCGANumericMultivector) mv).toSymbolic();
+        var resSym = thisSym.add(mvSym);
+        var resNum = fromSymbolic(resSym);
+        return resNum;
+    }
+
+    public static void main(String[] args) {
+        var first = fac.createMultivectorNumeric(fac.createScalar(46));
+        System.out.println(first);
+
+        var second = fac.createMultivectorNumeric(fac.createScalar(46));
+        System.out.println(second);
+
+        var res = first.add(second);
+        System.out.println(res);
     }
 }
