@@ -6,7 +6,6 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.cgacasadi.CasADiUtil;
 import static de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector.create;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
-import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -18,7 +17,7 @@ import util.cga.CGAMultivectorSparsity;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector> {
+public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector, SparseCGANumericMultivector> {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
@@ -99,22 +98,22 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
      * @return
      */
     @Override
-    public iMultivectorNumeric createMultivectorNumeric(double[] values) {
+    public SparseCGANumericMultivector createMultivectorNumeric(double[] values) {
         return new SparseCGANumericMultivector(values);
     }
 
     @Override
-    public iMultivectorNumeric createMultivectorNumeric(double[] nonzeros, int[] rows) {
+    public SparseCGANumericMultivector createMultivectorNumeric(double[] nonzeros, int[] rows) {
         return new SparseCGANumericMultivector(nonzeros, rows);
     }
 
     @Override
-    public iMultivectorNumeric createRandomMultivectorNumeric() {
+    public SparseCGANumericMultivector createRandomMultivectorNumeric() {
         return createMultivectorNumeric(createRandomKVector(baseCayleyTable.getBladesCount()));
     }
 
     @Override
-    public iMultivectorNumeric createMultivectorNumeric(SparseDoubleMatrix vec) {
+    public SparseCGANumericMultivector createMultivectorNumeric(SparseDoubleMatrix vec) {
         return new SparseCGANumericMultivector(vec.nonzeros(), vec.getSparsity().getrow());
     }
 

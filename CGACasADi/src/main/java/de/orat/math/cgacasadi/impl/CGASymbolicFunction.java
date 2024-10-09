@@ -7,14 +7,13 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
-import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
 import java.util.List;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicMultivector> {
+public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicMultivector, SparseCGANumericMultivector> {
 
     private final String name;
     private final int arity;
@@ -71,13 +70,12 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
      * Caution: does not check for sparsity compatibility with the formal parameters given in the constructor.
      */
     @Override
-    public List<iMultivectorNumeric> callNumeric(List<iMultivectorNumeric> arguments) {
+    public List<? extends SparseCGANumericMultivector> callNumeric(List<? extends SparseCGANumericMultivector> arguments) {
         try {
-            var f_num_in = new StdVectorDM(arguments.stream().map(
-                imvn -> ((SparseCGANumericMultivector) imvn).dm).toList());
+            var f_num_in = new StdVectorDM(arguments.stream().map(imvn -> imvn.dm).toList());
             var f_num_out = new StdVectorDM();
             this.f_sym_casadi.call(f_num_in, f_num_out);
-            return f_num_out.stream().map(dm -> (iMultivectorNumeric) (new SparseCGANumericMultivector(dm))).toList();
+            return f_num_out.stream().map(dm -> new SparseCGANumericMultivector(dm)).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }

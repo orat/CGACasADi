@@ -6,8 +6,12 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorNumeric;
+import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.spi.iConstantsSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
+import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import util.CayleyTable;
 //import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 
 /**
@@ -15,7 +19,7 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
  *
  * Achtung: Es können Objekte mit und ohne sparsity erzeugt werden.
  */
-public class SparseCGANumericMultivector implements iMultivectorNumeric {
+public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector> {
 
     final DM dm;
 
@@ -187,6 +191,7 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
 
     private static final CGAExprGraphFactory fac = CGAExprGraphFactory.instance;
 
+    @Override
     public SparseCGASymbolicMultivector toSymbolic() {
         var nonZeros = new StdVectorVectorDouble(1, this.dm.nonzeros());
         var sx = new SX(this.dm.sparsity(), new SX(nonZeros));
@@ -208,13 +213,15 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
     }
 
     @Override
-    public iMultivectorNumeric add(iMultivectorNumeric mv) {
+    public SparseCGANumericMultivector add(SparseCGANumericMultivector mv) {
         var thisSym = this.toSymbolic();
-        var mvSym = ((SparseCGANumericMultivector) mv).toSymbolic();
+        var mvSym = mv.toSymbolic();
         var resSym = thisSym.add(mvSym);
         var resNum = fromSymbolic(resSym);
         return resNum;
     }
+
+    // For optimal performance, override all default methods.
 
     public static void main(String[] args) {
         var first = fac.createMultivectorNumeric(fac.createScalar(46));
@@ -223,7 +230,151 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric {
         var second = fac.createMultivectorNumeric(fac.createScalar(46));
         System.out.println(second);
 
-        var res = first.add(second);
+        var res = first.gp(second);
         System.out.println(res);
+    }
+
+    @Override
+    public SparseCGANumericMultivector gp(SparseCGANumericMultivector rhs) {
+        var thisSym = this.toSymbolic();
+        var mvSym = rhs.toSymbolic();
+        var resSym = thisSym.gp(mvSym);
+        var resNum = fromSymbolic(resSym);
+        return resNum;
+    }
+
+    @Override
+    public void init(MultivectorSymbolic.Callback callback) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public MatrixSparsity getSparsity() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public boolean isZero() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public CayleyTable getCayleyTable() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public int grade() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public int[] grades() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public iConstantsSymbolic<SparseCGANumericMultivector> constants() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector gradeSelection(int grade) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector reverse() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector gpWithScalar(double s) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector undual() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector conjugate() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector negate14() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector scalarAbs() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector scalarAtan2(SparseCGANumericMultivector y) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector scalarSqrt() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector exp() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector sqrt() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector log() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector meet(SparseCGANumericMultivector b) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector join(SparseCGANumericMultivector b) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector inorm() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector normalizeBySquaredNorm() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector normalizeEvenElement() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector generalInverse() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public SparseCGANumericMultivector scalarInverse() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
