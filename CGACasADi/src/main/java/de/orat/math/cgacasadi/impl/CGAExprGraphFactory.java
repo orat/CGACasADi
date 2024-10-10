@@ -31,8 +31,13 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
-    public CGAConstantsSymbolic constants() {
+    public CGAConstantsSymbolic constantsSymbolic() {
         return CGAConstantsSymbolic.instance;
+    }
+
+    @Override
+    public CGAConstantsNumeric constantsNumeric() {
+        return CGAConstantsNumeric.instance;
     }
 
     // create symbolic multivectors

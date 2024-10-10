@@ -44,11 +44,6 @@ public final class Method {
                 "\"%s\": @Uncached.", this.name);
         }
 
-        if (!this.returnType.equals(enclosingClassQualifiedName)) {
-            throw FailedToCacheException.create(correspondingElement,
-                "\"%s\": Return type \"%s\" was not the expected one \"%s\".", this.name, this.returnType, enclosingClassQualifiedName);
-        }
-
         if (this.modifiers.contains(Modifier.PRIVATE)) {
             throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": private method will not be cached.", this.name);
@@ -60,6 +55,11 @@ public final class Method {
         if (this.modifiers.contains(Modifier.ABSTRACT)) {
             throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": abstract method will not be cached.", this.name);
+        }
+
+        if (!this.returnType.equals(enclosingClassQualifiedName)) {
+            throw FailedToCacheException.create(correspondingElement,
+                "\"%s\": Return type \"%s\" was not the expected one \"%s\".", this.name, this.returnType, enclosingClassQualifiedName);
         }
 
         this.parameters = computeParameters(correspondingElement, enclosingClassQualifiedName, typeParametersToArguments, utils);

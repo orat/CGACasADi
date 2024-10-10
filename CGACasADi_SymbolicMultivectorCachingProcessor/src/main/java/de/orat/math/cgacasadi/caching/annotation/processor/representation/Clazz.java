@@ -5,13 +5,14 @@ import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException
 import de.orat.math.cgacasadi.caching.annotation.processor.common.FailedToCacheException;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_iMultivectorSymbolic;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -76,29 +77,77 @@ public class Clazz {
             .filter(el -> el.getKind() == ElementKind.METHOD)
             .toList();
 
-        Set<String> classMethodElementsNames = classMethodElements.stream()
+        // Search for all super interfaces and compute recursive substitutions.
+        Set<DeclaredType> allImplementedInterfaces = new LinkedHashSet<>();
+        Map<DeclaredType, TypeParametersToArguments> iToParamsToArgs = new HashMap<>();
+        {
+            List<DeclaredType> subInterfaces = (List<DeclaredType>) correspondingElement.getInterfaces();
+            while (!subInterfaces.isEmpty()) {
+                List<DeclaredType> nextSubInterfaces = new ArrayList<>();
+                // System.out.println("run");
+                for (DeclaredType subInterface : subInterfaces) {
+                    allImplementedInterfaces.add(subInterface);
+                    if (iToParamsToArgs.containsKey(subInterface)) {
+                        // System.out.println("sub: " + subInterface.toString() + subInterface.hashCode());
+                        continue;
+                    }
+
+                    var subParamsToArgs = new TypeParametersToArguments(subInterface);
+                    iToParamsToArgs.put(subInterface, subParamsToArgs);
+                    // System.out.println(subInterface.toString() + subInterface.hashCode());
+
+                    List<DeclaredType> superInterfaces = (List<DeclaredType>) ((TypeElement) subInterface.asElement()).getInterfaces();
+                    for (DeclaredType superInterface : superInterfaces) {
+                        if (iToParamsToArgs.containsKey(superInterface)) {
+                            // System.out.println("super: " + superInterface.toString() + superInterface.hashCode());
+                            continue;
+                        }
+                        nextSubInterfaces.add(superInterface);
+
+                        var superParamsToArgs = new TypeParametersToArguments(superInterface);
+                        superParamsToArgs.substitute(subParamsToArgs);
+                        iToParamsToArgs.put(superInterface, superParamsToArgs);
+                        // System.out.println(subInterface.toString() + subInterface.hashCode() + " extends/implements " + superInterface.toString() + superInterface.hashCode());
+                    }
+                }
+                subInterfaces = nextSubInterfaces;
+            }
+        }
+        // allImplementedInterfaces.forEach(i -> System.out.println(i));
+
+        Set<String> previousMethodElementsNames = classMethodElements.stream()
             .map(me -> me.getSimpleName().toString())
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(HashSet::new));
 
-        List<ExecutableElement> interfaceDefaultMethodElements = correspondingElement.getInterfaces().stream()
-            .map(i -> ((TypeElement) ((DeclaredType) i).asElement()).getEnclosedElements())
-            .flatMap(Collection::stream)
-            .filter(el -> el.getKind() == ElementKind.METHOD)
-            .map(m -> (ExecutableElement) m)
-            .filter(m -> m.isDefault())
-            // Remove overrides
-            .filter(m -> !classMethodElementsNames.contains(m.getSimpleName().toString()))
-            .toList();
+        List<Method> allMethods = new ArrayList<>();
+        {
+            List<Method> classMethods = checkCreateMethods(classMethodElements, utils, enclosingClassQualifiedName, new TypeParametersToArguments());
+            allMethods.addAll(classMethods);
+        }
 
-        List<ExecutableElement> allMethodElements
-            = Stream.concat(interfaceDefaultMethodElements.stream(), classMethodElements.stream())
+        for (DeclaredType superInterface : allImplementedInterfaces) {
+            List<ExecutableElement> interfaceDefaultMethodElements = ((TypeElement) superInterface.asElement()).getEnclosedElements().stream()
+                .filter(el -> el.getKind() == ElementKind.METHOD)
+                .map(m -> (ExecutableElement) m)
+                .filter(m -> m.isDefault())
+                // Remove overrides
+                .filter(m -> !previousMethodElementsNames.contains(m.getSimpleName().toString()))
                 .toList();
-        TypeParametersToArguments typeParametersToArguments = new TypeParametersToArguments(correspondingElement);
-        List<Method> allMethods = checkCreateMethods(allMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
+
+            List<String> methodElementsNames = interfaceDefaultMethodElements.stream()
+                .map(me -> me.getSimpleName().toString())
+                .toList();
+            previousMethodElementsNames.addAll(methodElementsNames);
+
+            TypeParametersToArguments typeParametersToArguments = iToParamsToArgs.get(superInterface);
+            List<Method> defaultMethods = checkCreateMethods(interfaceDefaultMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
+            allMethods.addAll(defaultMethods);
+        }
 
         return allMethods;
     }
 
+    // private static
     private static List<Method> checkCreateMethods(List<ExecutableElement> methodElements, Utils utils, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments) {
         List<Method> methods = new ArrayList<>(methodElements.size());
         Set<String> methodNames = new HashSet<>(methodElements.size());

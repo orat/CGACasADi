@@ -37,7 +37,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
 
 #### Methods default caching
-- All methods of `iMultivectorSymbolic` which return an object of the type parameter `IMultivectorSymbolic` will be cached per default.
+- All methods of `iMultivectorSymbolic` (and all methods of the interfaces which it does directly or indirectly extend) which return an object which type will be substituted by `SparseCGASymbolicMultivector` will be cached per default.
 - All methods of the annotated class which return an object of the annotated class will be cached per default.
 
 

@@ -6,13 +6,11 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorNumeric;
-import de.orat.math.gacalc.api.MultivectorSymbolic;
-import de.orat.math.gacalc.spi.iConstantsSymbolic;
+import de.orat.math.gacalc.spi.iConstantsFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import util.CayleyTable;
-//import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -244,11 +242,6 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
     }
 
     @Override
-    public void init(MultivectorSymbolic.Callback callback) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
     public String getName() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
@@ -275,11 +268,6 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
 
     @Override
     public int[] grades() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public iConstantsSymbolic<SparseCGANumericMultivector> constants() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -375,6 +363,11 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
 
     @Override
     public SparseCGANumericMultivector scalarInverse() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public iConstantsFactory<SparseCGANumericMultivector> constants() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

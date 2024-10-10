@@ -4,9 +4,9 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.function.Supplier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import de.orat.math.gacalc.spi.iConstantsSymbolic;
+import de.orat.math.gacalc.spi.iConstantsFactorySymbolic;
 
-public class CGAConstantsSymbolic implements iConstantsSymbolic<SparseCGASymbolicMultivector> {
+public class CGAConstantsSymbolic implements iCGAConstants<SparseCGASymbolicMultivector>, iConstantsFactorySymbolic<SparseCGASymbolicMultivector> {
 
     public static final CGAConstantsSymbolic instance = new CGAConstantsSymbolic();
 
@@ -36,13 +36,5 @@ public class CGAConstantsSymbolic implements iConstantsSymbolic<SparseCGASymboli
     @Override
     public SparseCGASymbolicMultivector cached(Supplier<SparseCGASymbolicMultivector> creator) {
         return this.cache.computeIfAbsent(creator, Supplier::get);
-    }
-
-    //TODO
-    // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
-    // vielleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
-    // geht nur für CGA?
-    public SparseCGASymbolicMultivector getInversePseudoscalar() {
-        return cached(() -> newConstant("E˜", this.getPseudoscalar().reverse()));
     }
 }
