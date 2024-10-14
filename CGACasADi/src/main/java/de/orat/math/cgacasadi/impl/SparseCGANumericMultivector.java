@@ -220,7 +220,6 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
     }
 
     // For optimal performance, override all default methods.
-
     public static void main(String[] args) {
         var first = fac.createMultivectorNumeric(fac.createScalar(46));
         System.out.println(first);

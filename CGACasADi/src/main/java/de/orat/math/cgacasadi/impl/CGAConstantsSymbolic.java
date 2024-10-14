@@ -34,7 +34,13 @@ public class CGAConstantsSymbolic implements iCGAConstants<SparseCGASymbolicMult
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
-    public SparseCGASymbolicMultivector cached(Supplier<SparseCGASymbolicMultivector> creator) {
-        return this.cache.computeIfAbsent(creator, Supplier::get);
+    public synchronized SparseCGASymbolicMultivector cached(Supplier<SparseCGASymbolicMultivector> creator) {
+        // Avoid Recursive Update exception happening with computeIfAbsent.
+        var value = this.cache.get(creator);
+        if (value == null) {
+            value = creator.get();
+            this.cache.put(creator, value);
+        }
+        return value;
     }
 }

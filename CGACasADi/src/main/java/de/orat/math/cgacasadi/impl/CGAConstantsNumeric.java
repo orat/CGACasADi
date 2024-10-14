@@ -36,7 +36,13 @@ public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultiv
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
-    public SparseCGANumericMultivector cached(Supplier<SparseCGANumericMultivector> creator) {
-        return this.cache.computeIfAbsent(creator, Supplier::get);
+    public synchronized SparseCGANumericMultivector cached(Supplier<SparseCGANumericMultivector> creator) {
+        // Avoid Recursive Update exception happening with computeIfAbsent.
+        var value = this.cache.get(creator);
+        if (value == null) {
+            value = creator.get();
+            this.cache.put(creator, value);
+        }
+        return value;
     }
 }
