@@ -78,28 +78,30 @@ public class Clazz {
             .toList();
 
         // Search for all super interfaces and compute recursive substitutions.
+        // // Inheritance of the same interface with different arguments after substitution is prohibited by Java.
         Set<DeclaredType> allImplementedInterfaces = new LinkedHashSet<>();
         Map<DeclaredType, TypeParametersToArguments> iToParamsToArgs = new HashMap<>();
         {
             List<DeclaredType> subInterfaces = (List<DeclaredType>) correspondingElement.getInterfaces();
+            for (DeclaredType subInterface : subInterfaces) {
+                System.out.println("new: " + subInterface.toString() + subInterface.hashCode());
+                var subParamsToArgs = new TypeParametersToArguments(subInterface);
+                iToParamsToArgs.put(subInterface, subParamsToArgs);
+            }
+
             while (!subInterfaces.isEmpty()) {
                 List<DeclaredType> nextSubInterfaces = new ArrayList<>();
-                // System.out.println("run");
+                System.out.println("run");
                 for (DeclaredType subInterface : subInterfaces) {
                     allImplementedInterfaces.add(subInterface);
-                    if (iToParamsToArgs.containsKey(subInterface)) {
-                        // System.out.println("sub: " + subInterface.toString() + subInterface.hashCode());
-                        continue;
-                    }
 
-                    var subParamsToArgs = new TypeParametersToArguments(subInterface);
-                    iToParamsToArgs.put(subInterface, subParamsToArgs);
-                    // System.out.println(subInterface.toString() + subInterface.hashCode());
+                    var subParamsToArgs = iToParamsToArgs.get(subInterface);
+                    System.out.println("sub: " + subInterface.toString() + subInterface.hashCode());
 
                     List<DeclaredType> superInterfaces = (List<DeclaredType>) ((TypeElement) subInterface.asElement()).getInterfaces();
                     for (DeclaredType superInterface : superInterfaces) {
                         if (iToParamsToArgs.containsKey(superInterface)) {
-                            // System.out.println("super: " + superInterface.toString() + superInterface.hashCode());
+                            System.out.println("super: " + superInterface.toString() + superInterface.hashCode());
                             continue;
                         }
                         nextSubInterfaces.add(superInterface);
@@ -107,13 +109,15 @@ public class Clazz {
                         var superParamsToArgs = new TypeParametersToArguments(superInterface);
                         superParamsToArgs.substitute(subParamsToArgs);
                         iToParamsToArgs.put(superInterface, superParamsToArgs);
-                        // System.out.println(subInterface.toString() + subInterface.hashCode() + " extends/implements " + superInterface.toString() + superInterface.hashCode());
+                        System.out.println(subInterface.toString() + subInterface.hashCode() + " extends/implements " + superInterface.toString() + superInterface.hashCode());
                     }
                 }
                 subInterfaces = nextSubInterfaces;
             }
         }
-        // allImplementedInterfaces.forEach(i -> System.out.println(i));
+        System.out.println("runs finished.");
+        System.out.println("allImplementedInterfaces:");
+        allImplementedInterfaces.forEach(i -> System.out.println(i));
 
         Set<String> previousMethodElementsNames = classMethodElements.stream()
             .map(me -> me.getSimpleName().toString())
