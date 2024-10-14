@@ -5,9 +5,11 @@ import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException
 import de.orat.math.cgacasadi.caching.annotation.processor.common.FailedToCacheException;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_iMultivectorSymbolic;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 
 public class Clazz {
 
@@ -77,47 +80,28 @@ public class Clazz {
             .filter(el -> el.getKind() == ElementKind.METHOD)
             .toList();
 
-        // Search for all super interfaces and compute recursive substitutions.
-        // // Inheritance of the same interface with different arguments after substitution is prohibited by Java.
-        Set<DeclaredType> allImplementedInterfaces = new LinkedHashSet<>();
-        Map<DeclaredType, TypeParametersToArguments> iToParamsToArgs = new HashMap<>();
+        // Compute all recursive super types
+        Map<String, TypeMirror> allSuperTypes = new LinkedHashMap<>();
         {
-            List<DeclaredType> subInterfaces = (List<DeclaredType>) correspondingElement.getInterfaces();
-            for (DeclaredType subInterface : subInterfaces) {
-                System.out.println("new: " + subInterface.toString() + subInterface.hashCode());
-                var subParamsToArgs = new TypeParametersToArguments(subInterface);
-                iToParamsToArgs.put(subInterface, subParamsToArgs);
-            }
-
-            while (!subInterfaces.isEmpty()) {
-                List<DeclaredType> nextSubInterfaces = new ArrayList<>();
-                System.out.println("run");
-                for (DeclaredType subInterface : subInterfaces) {
-                    allImplementedInterfaces.add(subInterface);
-
-                    var subParamsToArgs = iToParamsToArgs.get(subInterface);
-                    System.out.println("sub: " + subInterface.toString() + subInterface.hashCode());
-
-                    List<DeclaredType> superInterfaces = (List<DeclaredType>) ((TypeElement) subInterface.asElement()).getInterfaces();
-                    for (DeclaredType superInterface : superInterfaces) {
-                        if (iToParamsToArgs.containsKey(superInterface)) {
-                            System.out.println("super: " + superInterface.toString() + superInterface.hashCode());
-                            continue;
-                        }
-                        nextSubInterfaces.add(superInterface);
-
-                        var superParamsToArgs = new TypeParametersToArguments(superInterface);
-                        superParamsToArgs.substitute(subParamsToArgs);
-                        iToParamsToArgs.put(superInterface, superParamsToArgs);
-                        System.out.println(subInterface.toString() + subInterface.hashCode() + " extends/implements " + superInterface.toString() + superInterface.hashCode());
+            var currentSubTypes = List.of(correspondingElement.asType());
+            while (!currentSubTypes.isEmpty()) {
+                List<TypeMirror> nextSubTypes = new ArrayList<>();
+                for (var currentSubType : currentSubTypes) {
+                    var previousEntry = allSuperTypes.putIfAbsent(currentSubType.toString(), currentSubType);
+                    if (previousEntry != null) {
+                        continue;
                     }
+
+                    // Includes substitutions.
+                    var currentSuperTypes = utils.typeUtils().directSupertypes(currentSubType);
+                    nextSubTypes.addAll(currentSuperTypes);
                 }
-                subInterfaces = nextSubInterfaces;
+                currentSubTypes = nextSubTypes;
             }
         }
-        System.out.println("runs finished.");
-        System.out.println("allImplementedInterfaces:");
-        allImplementedInterfaces.forEach(i -> System.out.println(i));
+        allSuperTypes.remove(correspondingElement.toString());
+        allSuperTypes.remove("java.lang.Object");
+        // allSuperTypes.keySet().forEach(s -> System.out.println("superTypes: " + s.toString() + s.hashCode()));
 
         Set<String> previousMethodElementsNames = classMethodElements.stream()
             .map(me -> me.getSimpleName().toString())
@@ -129,8 +113,8 @@ public class Clazz {
             allMethods.addAll(classMethods);
         }
 
-        for (DeclaredType superInterface : allImplementedInterfaces) {
-            List<ExecutableElement> interfaceDefaultMethodElements = ((TypeElement) superInterface.asElement()).getEnclosedElements().stream()
+        for (TypeMirror superInterface : allSuperTypes.values()) {
+            List<ExecutableElement> interfaceDefaultMethodElements = ((TypeElement) ((DeclaredType) superInterface).asElement()).getEnclosedElements().stream()
                 .filter(el -> el.getKind() == ElementKind.METHOD)
                 .map(m -> (ExecutableElement) m)
                 .filter(m -> m.isDefault())
@@ -143,7 +127,7 @@ public class Clazz {
                 .toList();
             previousMethodElementsNames.addAll(methodElementsNames);
 
-            TypeParametersToArguments typeParametersToArguments = iToParamsToArgs.get(superInterface);
+            TypeParametersToArguments typeParametersToArguments = new TypeParametersToArguments((DeclaredType) superInterface);
             List<Method> defaultMethods = checkCreateMethods(interfaceDefaultMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
             allMethods.addAll(defaultMethods);
         }
