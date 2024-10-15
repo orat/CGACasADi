@@ -47,7 +47,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     }
 
     protected static StdVectorSX transformImpl(List<? extends ISparseCGASymbolicMultivector> mvs) {
-        List<SX> sxs = mvs.stream().map(mv -> (mv).getSX()).toList();
+        List<SX> sxs = mvs.stream().map(ISparseCGASymbolicMultivector::getSX).toList();
         return new StdVectorSX(sxs);
     }
 
@@ -60,7 +60,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
             var f_sym_in = transformImpl(arguments);
             var f_sym_out = new StdVectorSX();
             this.f_sym_casadi.call(f_sym_in, f_sym_out);
-            return f_sym_out.stream().map(sx -> (SparseCGASymbolicMultivector.create(sx))).toList();
+            return f_sym_out.stream().map(SparseCGASymbolicMultivector::create).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
@@ -72,10 +72,10 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     @Override
     public List<? extends SparseCGANumericMultivector> callNumeric(List<? extends SparseCGANumericMultivector> arguments) {
         try {
-            var f_num_in = new StdVectorDM(arguments.stream().map(imvn -> imvn.dm).toList());
+            var f_num_in = new StdVectorDM(arguments.stream().map(SparseCGANumericMultivector::getDM).toList());
             var f_num_out = new StdVectorDM();
             this.f_sym_casadi.call(f_num_in, f_num_out);
-            return f_num_out.stream().map(dm -> new SparseCGANumericMultivector(dm)).toList();
+            return f_num_out.stream().map(SparseCGANumericMultivector::create).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }

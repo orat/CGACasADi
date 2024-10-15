@@ -104,12 +104,12 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
      */
     @Override
     public SparseCGANumericMultivector createMultivectorNumeric(double[] values) {
-        return new SparseCGANumericMultivector(values);
+        return SparseCGANumericMultivector.create(values);
     }
 
     @Override
     public SparseCGANumericMultivector createMultivectorNumeric(double[] nonzeros, int[] rows) {
-        return new SparseCGANumericMultivector(nonzeros, rows);
+        return SparseCGANumericMultivector.create(nonzeros, rows);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     @Override
     public SparseCGANumericMultivector createMultivectorNumeric(SparseDoubleMatrix vec) {
-        return new SparseCGANumericMultivector(vec.nonzeros(), vec.getSparsity().getrow());
+        return SparseCGANumericMultivector.create(vec.nonzeros(), vec.getSparsity().getrow());
     }
 
     // create function
@@ -136,7 +136,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     @Override
     public String getName() {
-        return "cgacasadimx";
+        return "cgacasadisx";
     }
 
     // create constants

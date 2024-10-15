@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
@@ -45,14 +46,22 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     //======================================================
     // Constructors and static creators.
-    // -> Constructors must only used within creators or subclasses.
+    // -> Constructors must only used within subclasses.
     // -> creators return cached instances.
     //======================================================
+    /**
+     * Constructors must only used within subclasses.
+     */
+    @Deprecated
     protected SparseCGASymbolicMultivector(SparseCGASymbolicMultivector other) {
         this.name = other.getName();
         this.sx = other.getSX();
     }
 
+    /**
+     * Constructors must only used within subclasses.
+     */
+    @Deprecated
     protected SparseCGASymbolicMultivector(String name, SX sx) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(sx);
@@ -93,6 +102,12 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name) {
         return new PurelySymbolicCachedSparseCGASymbolicMultivector(name);
+    }
+
+    public static SparseCGASymbolicMultivector create(DM dm) {
+        var nonZeros = new StdVectorVectorDouble(1, dm.nonzeros());
+        var sx = new SX(dm.sparsity(), new SX(nonZeros));
+        return new CachedSparseCGASymbolicMultivector("", sx);
     }
 
     public static SparseCGASymbolicMultivector create(SX sx) {

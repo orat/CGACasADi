@@ -2,7 +2,6 @@ package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.MultivectorNumeric;
@@ -19,34 +18,60 @@ import util.CayleyTable;
  */
 public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector> {
 
-    final DM dm;
+    private final DM dm;
+    private final SparseCGASymbolicMultivector sym;
 
-    final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
     private MultivectorNumeric.Callback callback;
 
-    public SparseCGANumericMultivector() {
-        //this.dm = new DM(baseCayleyTable.getBladesCount(),1);
-        dm = null;
+    @Override
+    public void init(MultivectorNumeric.Callback callback) {
+        this.callback = callback;
     }
 
-    public SparseCGANumericMultivector instance(double[] values) {
-        return new SparseCGANumericMultivector(values);
+    //======================================================
+    // Constructors and static creators.
+    // -> Constructors must only used within subclasses.
+    //======================================================
+    /**
+     * <pre>
+     * Constructors must only used within subclasses.
+     *
+     * https://github.com/casadi/casadi/wiki/L_rf
+     * Evaluates the expression numerically.
+     * An error is raised when the expression contains symbols.
+     * </pre>
+     */
+    @Deprecated
+    protected SparseCGANumericMultivector(SparseCGASymbolicMultivector sym) {
+        this.dm = SX.evalf(sym.getSX());
+        this.sym = sym;
     }
 
-    protected SparseCGANumericMultivector(double[] values) {
+    /**
+     * Constructors must only used within subclasses.
+     */
+    @Deprecated
+    private SparseCGANumericMultivector(DM dm) {
+        this.dm = dm;
+        this.sym = SparseCGASymbolicMultivector.create(dm);
+    }
+
+    public static SparseCGANumericMultivector create(DM dm) {
+        return new SparseCGANumericMultivector(dm);
+    }
+
+    public static SparseCGANumericMultivector create(double[] values) {
         if (baseCayleyTable.getBladesCount() != values.length) {
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(values.length));
         }
-        this.dm = CasADiUtil.toDM(values);
+        var dm = CasADiUtil.toDM(values);
+        return new SparseCGANumericMultivector(dm);
     }
 
-    public SparseCGANumericMultivector instance(double[] nonzeros, int[] rows) {
-        return new SparseCGANumericMultivector(nonzeros, rows);
-    }
-
-    protected SparseCGANumericMultivector(double[] nonzeros, int[] rows) {
+    public static SparseCGANumericMultivector create(double[] nonzeros, int[] rows) {
         if (baseCayleyTable.getBladesCount() < nonzeros.length) {
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(nonzeros.length));
@@ -54,20 +79,12 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
         if (nonzeros.length != rows.length) {
             throw new IllegalArgumentException("Construction of CGA multivector failed because nonzeros.length != rows.length!");
         }
-        this.dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
+        var dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
+        return new SparseCGANumericMultivector(dm);
     }
 
     public DM getDM() {
         return dm;
-    }
-
-    SparseCGANumericMultivector(DM dm) {
-        this.dm = dm;
-    }
-
-    @Override
-    public void init(MultivectorNumeric.Callback callback) {
-        this.callback = callback;
     }
 
     @Override
@@ -86,15 +103,6 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
         return CasADiUtil.elements(dm);
     }
 
-    /*@Override
-    public SparseCGANumericMultivector op(SparseCGANumericMultivector mv) {
-        return new SparseCGANumericMultivector(op(elements(), mv.elements()));
-    }
-    
-    @Override
-    public SparseCGANumericMultivector add(SparseCGANumericMultivector mv) {
-        return new SparseCGANumericMultivector(add(elements(), mv.elements()));
-    }*/
     /**
      * Wedge.
      *
@@ -187,37 +195,12 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
         return res;
     }
 
-    private static final CGAExprGraphFactory fac = CGAExprGraphFactory.instance;
-
     @Override
     public SparseCGASymbolicMultivector toSymbolic() {
-        var nonZeros = new StdVectorVectorDouble(1, this.dm.nonzeros());
-        var sx = new SX(this.dm.sparsity(), new SX(nonZeros));
-        return SparseCGASymbolicMultivector.create(sx);
-        // Potentially slower alternative:
-        // return fac.createMultivectorSymbolic("", this.elements());
+        return this.sym;
     }
 
-    /**
-     * <pre>
-     * https://github.com/casadi/casadi/wiki/L_rf
-     * Evaluates the expression numerically.
-     * An error is raised when the expression contains symbols.
-     * </pre>
-     */
-    public static SparseCGANumericMultivector fromSymbolic(SparseCGASymbolicMultivector sym) {
-        var dm = SX.evalf(sym.getSX());
-        return new SparseCGANumericMultivector(dm);
-    }
-
-    @Override
-    public SparseCGANumericMultivector add(SparseCGANumericMultivector mv) {
-        var thisSym = this.toSymbolic();
-        var mvSym = mv.toSymbolic();
-        var resSym = thisSym.add(mvSym);
-        var resNum = fromSymbolic(resSym);
-        return resNum;
-    }
+    private static final CGAExprGraphFactory fac = CGAExprGraphFactory.instance;
 
     // For optimal performance, override all default methods.
     public static void main(String[] args) {
@@ -232,12 +215,15 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
     }
 
     @Override
+    public SparseCGANumericMultivector add(SparseCGANumericMultivector rhs) {
+        var resSym = this.sym.add(rhs.sym);
+        return new SparseCGANumericMultivector(resSym);
+    }
+
+    @Override
     public SparseCGANumericMultivector gp(SparseCGANumericMultivector rhs) {
-        var thisSym = this.toSymbolic();
-        var mvSym = rhs.toSymbolic();
-        var resSym = thisSym.gp(mvSym);
-        var resNum = fromSymbolic(resSym);
-        return resNum;
+        var resSym = this.sym.gp(rhs.sym);
+        return new SparseCGANumericMultivector(resSym);
     }
 
     @Override
