@@ -18,7 +18,6 @@ import util.CayleyTable;
  */
 public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector> {
 
-    private final DM dm;
     private final SparseCGASymbolicMultivector sym;
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
@@ -35,17 +34,10 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
     // -> Constructors must only used within subclasses.
     //======================================================
     /**
-     * <pre>
      * Constructors must only used within subclasses.
-     *
-     * https://github.com/casadi/casadi/wiki/L_rf
-     * Evaluates the expression numerically.
-     * An error is raised when the expression contains symbols.
-     * </pre>
      */
     @Deprecated
     protected SparseCGANumericMultivector(SparseCGASymbolicMultivector sym) {
-        this.dm = SX.evalf(sym.getSX());
         this.sym = sym;
     }
 
@@ -54,7 +46,6 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
      */
     @Deprecated
     private SparseCGANumericMultivector(DM dm) {
-        this.dm = dm;
         this.sym = SparseCGASymbolicMultivector.create(dm);
     }
 
@@ -83,13 +74,23 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
         return new SparseCGANumericMultivector(dm);
     }
 
+    private DM lazyDM = null;
+
     public DM getDM() {
-        return dm;
+        if (this.lazyDM == null) {
+            /*
+            * https://github.com/casadi/casadi/wiki/L_rf
+            * Evaluates the expression numerically.
+            * An error is raised when the expression contains symbols.
+             */
+            this.lazyDM = SX.evalf(sym.getSX());
+        }
+        return lazyDM;
     }
 
     @Override
     public String toString() {
-        return dm.toString();
+        return this.getDM().toString();
     }
 
     /**
@@ -100,7 +101,7 @@ public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCG
      */
     @Override
     public SparseDoubleMatrix elements() {
-        return CasADiUtil.elements(dm);
+        return CasADiUtil.elements(this.getDM());
     }
 
     /**
