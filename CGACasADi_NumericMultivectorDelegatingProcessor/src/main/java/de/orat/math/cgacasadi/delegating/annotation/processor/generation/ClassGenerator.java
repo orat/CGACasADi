@@ -123,7 +123,6 @@ final class ClassGenerator {
         TypeName T_ret = betterGuess(m.returnType);
 
         Set<Modifier> modifiers = new HashSet<>(m.modifiers);
-        modifiers.remove(Modifier.DEFAULT);
 
         // Signature
         methodBuilder

@@ -1,9 +1,9 @@
 package de.orat.math.cgacasadi.delegating.annotation.processor.representation;
 
-import de.orat.math.cgacasadi.delegating.annotation.processor.GenerateCachedProcessor.Utils;
+import com.google.common.collect.Sets;
+import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
+import de.orat.math.cgacasadi.delegating.annotation.processor.GenerateDelegatingProcessor.Utils;
 import de.orat.math.cgacasadi.delegating.annotation.processor.common.ErrorException;
-import de.orat.math.cgacasadi.delegating.annotation.processor.common.FailedToCacheException;
-import static de.orat.math.cgacasadi.delegating.annotation.processor.generation.Classes.T_iMultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,11 +14,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 
 public class Clazz {
@@ -31,6 +30,7 @@ public class Clazz {
      * Unmodifiable
      */
     public final List<Method> methods;
+    public final DeclaredType annotateddTo;
 
     public Clazz(TypeElement correspondingElement, Utils utils) throws ErrorException, Exception {
         this.correspondingElement = correspondingElement;
@@ -45,42 +45,31 @@ public class Clazz {
                 this.qualifiedName, kind);
         }
 
-        if (correspondingElement.getModifiers().contains(Modifier.FINAL)) {
-            throw ErrorException.create(correspondingElement, "Has prohibited modifier \"final\".");
+        DeclaredType to;
+        try {
+            GenerateDelegate annotation = correspondingElement.getAnnotation(GenerateDelegate.class);
+            annotation.to().getClass();
+            throw new AssertionError("Should have thrown a MirroredTypeException before this.");
+        } catch (MirroredTypeException mte) {
+            // Save assumption because classes are DeclaredTypes.
+            to = (DeclaredType) mte.getTypeMirror();
         }
+        this.annotateddTo = to;
 
-        List<? extends TypeParameterElement> typeParamsList = correspondingElement.getTypeParameters();
-        if (!typeParamsList.isEmpty()) {
-            String typeParamsString = typeParamsList.stream()
-                .map(tp -> tp.getSimpleName().toString())
-                .collect(Collectors.joining(", "));
-            throw ErrorException.create(correspondingElement, "Type parameters are prohibited: %s", typeParamsString);
-        }
+        var toSuperTypeElements = computeSuperTypes(to, utils).values().stream().map(tm -> ((DeclaredType) tm).asElement()).collect(Collectors.toSet());
+        Map<String, TypeMirror> commonSuperTypes = computeSuperTypes(correspondingElement.asType(), utils);
+        var commonSuperTypeElemenents = commonSuperTypes.entrySet().stream().filter(e -> !toSuperTypeElements.contains(((DeclaredType) e.getValue()).asElement())).toList();
+        commonSuperTypes.entrySet().removeAll(commonSuperTypeElemenents);
+        // commonSuperTypes.keySet().forEach(k -> System.out.println(k));
 
-        Set<String> iMultivectorSymbolic = correspondingElement.getInterfaces().stream()
-            .map(i -> ((TypeElement) ((DeclaredType) i).asElement()).getQualifiedName().toString())
-            .collect(Collectors.toSet());
-        if (!iMultivectorSymbolic.contains(T_iMultivectorSymbolic.canonicalName())) {
-            throw ErrorException.create(correspondingElement,
-                "Needs to implement \"%s\", but does not.", T_iMultivectorSymbolic.canonicalName());
-        }
-
-        this.methods = Collections.unmodifiableList(Clazz.computeMethods(correspondingElement, this.qualifiedName, utils));
+        this.methods = Collections.unmodifiableList(Clazz.computeMethods(commonSuperTypes, this.qualifiedName, utils));
     }
 
-    private static List<Method> computeMethods(TypeElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws FailedToCacheException, ErrorException {
-        // Safe cast because
-        // - filtered for Methods
-        // - Methods are ExceutableElements.
-        List<ExecutableElement> classMethodElements = (List<ExecutableElement>) correspondingElement.getEnclosedElements()
-            .stream()
-            .filter(el -> el.getKind() == ElementKind.METHOD)
-            .toList();
-
+    private static Map<String, TypeMirror> computeSuperTypes(TypeMirror baseType, Utils utils) {
         // Compute all recursive super types
         Map<String, TypeMirror> allSuperTypes = new LinkedHashMap<>();
         {
-            var currentSubTypes = List.of(correspondingElement.asType());
+            List<TypeMirror> currentSubTypes = List.of(baseType);
             while (!currentSubTypes.isEmpty()) {
                 List<TypeMirror> nextSubTypes = new ArrayList<>();
                 for (var currentSubType : currentSubTypes) {
@@ -96,25 +85,20 @@ public class Clazz {
                 currentSubTypes = nextSubTypes;
             }
         }
-        allSuperTypes.remove(correspondingElement.toString());
+        allSuperTypes.remove(baseType.toString());
         allSuperTypes.remove("java.lang.Object");
         // allSuperTypes.keySet().forEach(s -> System.out.println("superTypes: " + s.toString() + s.hashCode()));
+        return allSuperTypes;
+    }
 
-        Set<String> previousMethodElementsNames = classMethodElements.stream()
-            .map(me -> me.getSimpleName().toString())
-            .collect(Collectors.toCollection(HashSet::new));
-
+    private static List<Method> computeMethods(Map<String, TypeMirror> superTypes, String enclosingClassQualifiedName, Utils utils) throws ErrorException {
+        Set<String> previousMethodElementsNames = new HashSet<>();
         List<Method> allMethods = new ArrayList<>();
-        {
-            List<Method> classMethods = checkCreateMethods(classMethodElements, utils, enclosingClassQualifiedName, new TypeParametersToArguments());
-            allMethods.addAll(classMethods);
-        }
 
-        for (TypeMirror superInterface : allSuperTypes.values()) {
+        for (TypeMirror superInterface : superTypes.values()) {
             List<ExecutableElement> interfaceDefaultMethodElements = ((TypeElement) ((DeclaredType) superInterface).asElement()).getEnclosedElements().stream()
                 .filter(el -> el.getKind() == ElementKind.METHOD)
                 .map(m -> (ExecutableElement) m)
-                .filter(m -> m.isDefault())
                 // Remove overrides
                 .filter(m -> !previousMethodElementsNames.contains(m.getSimpleName().toString()))
                 .toList();
@@ -125,8 +109,8 @@ public class Clazz {
             previousMethodElementsNames.addAll(methodElementsNames);
 
             TypeParametersToArguments typeParametersToArguments = new TypeParametersToArguments((DeclaredType) superInterface);
-            List<Method> defaultMethods = checkCreateMethods(interfaceDefaultMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
-            allMethods.addAll(defaultMethods);
+            List<Method> containedMethods = checkCreateMethods(interfaceDefaultMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
+            allMethods.addAll(containedMethods);
         }
 
         return allMethods;

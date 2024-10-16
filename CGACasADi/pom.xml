@@ -12,8 +12,8 @@
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<generatedSourcesDirectory>${project.build.directory}/generated-sources/CGACasADi_SymbolicMultivectorCachingProcessor</generatedSourcesDirectory>
-		<generatedTestSourcesDirectory>${project.build.directory}/generated-test-sources/CGACasADi_SymbolicMultivectorCachingProcessor</generatedTestSourcesDirectory>
+		<generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+		<generatedTestSourcesDirectory>${project.build.directory}/generated-test-sources/annotations</generatedTestSourcesDirectory>
 		<maven.compiler.release>17</maven.compiler.release>
 	</properties>
 	<dependencies>
@@ -57,6 +57,14 @@
 			<!-- Supress transitivity -->
 			<optional>true</optional>
 		</dependency>
+
+		<dependency>
+			<groupId>de.orat.math.cgacasadi</groupId>
+			<artifactId>CGACasADi_NumericMultivectorDelegatingProcessor</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<!-- Supress transitivity -->
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -82,12 +90,22 @@
 							<artifactId>CGACasADi_SymbolicMultivectorCachingProcessor</artifactId>
 							<version>1.0-SNAPSHOT</version>
 						</path>
+						<path>
+							<groupId>de.orat.math.cgacasadi</groupId>
+							<artifactId>CGACasADi_NumericMultivectorDelegatingProcessor</artifactId>
+							<version>1.0-SNAPSHOT</version>
+						</path>
 					</annotationProcessorPaths>
 				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>de.orat.math.cgacasadi</groupId>
 						<artifactId>CGACasADi_SymbolicMultivectorCachingProcessor</artifactId>
+						<version>1.0-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>de.orat.math.cgacasadi</groupId>
+						<artifactId>CGACasADi_NumericMultivectorDelegatingProcessor</artifactId>
 						<version>1.0-SNAPSHOT</version>
 					</dependency>
 				</dependencies>

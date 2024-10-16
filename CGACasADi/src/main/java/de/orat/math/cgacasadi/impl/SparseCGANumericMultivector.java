@@ -4,6 +4,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
+import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.spi.iConstantsFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
@@ -16,6 +17,7 @@ import util.CayleyTable;
  *
  * Achtung: Es können Objekte mit und ohne sparsity erzeugt werden.
  */
+@GenerateDelegate(to = SparseCGASymbolicMultivector.class)
 public class SparseCGANumericMultivector implements iMultivectorNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector> {
 
     private final SparseCGASymbolicMultivector sym;

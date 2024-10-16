@@ -1,12 +1,10 @@
 package de.orat.math.cgacasadi.delegating.annotation.processor.representation;
 
-import de.orat.math.cgacasadi.delegating.annotation.api.Uncached;
-import de.orat.math.cgacasadi.delegating.annotation.processor.GenerateCachedProcessor.Utils;
-import de.orat.math.cgacasadi.delegating.annotation.processor.common.ErrorException;
-import de.orat.math.cgacasadi.delegating.annotation.processor.common.UncachedException;
-import de.orat.math.cgacasadi.delegating.annotation.processor.common.FailedToCacheException;
+import de.orat.math.cgacasadi.delegating.annotation.processor.GenerateDelegatingProcessor.Utils;
+import de.orat.math.cgacasadi.delegating.annotation.processor.common.WarningException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.ElementKind;
@@ -27,7 +25,7 @@ public final class Method {
     public final List<Parameter> parameters;
     public final String enclosingType;
 
-    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException, UncachedException, FailedToCacheException {
+    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws WarningException {
         assert correspondingElement.getKind() == ElementKind.METHOD : String.format(
             "Expected \"%s\" to be a method, but was \"%s\".",
             correspondingElement.getSimpleName(), correspondingElement.getKind());
@@ -35,37 +33,28 @@ public final class Method {
         this.enclosingType = ((TypeElement) correspondingElement.getEnclosingElement()).getQualifiedName().toString();
         this.name = correspondingElement.getSimpleName().toString();
         this.returnType = typeParametersToArguments.clearTypeParameterIfPresent(correspondingElement.getReturnType().toString());
-        this.modifiers = correspondingElement.getModifiers();
-
-        // Needs to be the first check.
-        Uncached uncached = correspondingElement.getAnnotation(Uncached.class);
-        if (uncached != null) {
-            throw UncachedException.create(correspondingElement,
-                "\"%s\": @Uncached.", this.name);
-        }
+        this.modifiers = new HashSet<>(correspondingElement.getModifiers());
+        modifiers.remove(Modifier.DEFAULT);
+        modifiers.remove(Modifier.ABSTRACT);
 
         if (this.modifiers.contains(Modifier.PRIVATE)) {
-            throw FailedToCacheException.create(correspondingElement,
+            throw WarningException.create(correspondingElement,
                 "\"%s\": private method will not be cached.", this.name);
         }
         if (this.modifiers.contains(Modifier.STATIC)) {
-            throw FailedToCacheException.create(correspondingElement,
+            throw WarningException.create(correspondingElement,
                 "\"%s\": static method will not be cached.", this.name);
-        }
-        if (this.modifiers.contains(Modifier.ABSTRACT)) {
-            throw FailedToCacheException.create(correspondingElement,
-                "\"%s\": abstract method will not be cached.", this.name);
         }
 
         if (!this.returnType.equals(enclosingClassQualifiedName)) {
-            throw FailedToCacheException.create(correspondingElement,
+            throw WarningException.create(correspondingElement,
                 "\"%s\": Return type \"%s\" was not the expected one \"%s\".", this.name, this.returnType, enclosingClassQualifiedName);
         }
 
         this.parameters = computeParameters(correspondingElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
     }
 
-    private static List<Parameter> computeParameters(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws ErrorException {
+    private static List<Parameter> computeParameters(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) {
         List<VariableElement> parameterElements = (List<VariableElement>) correspondingElement.getParameters();
         List<Parameter> parameters = new ArrayList<>(parameterElements.size());
         for (VariableElement parameterElement : parameterElements) {

@@ -12,24 +12,18 @@ public class ExceptionHandler {
     static protected final boolean IS_DEBUG = false;
 
     protected final Messager messager;
-    protected final boolean warnFailedToCache;
-    protected final boolean warnUncached;
 
     public ExceptionHandler(Messager messager) {
         this.messager = messager;
-        this.warnFailedToCache = true;
-        this.warnUncached = false;
     }
 
-    public ExceptionHandler(ExceptionHandler handler, boolean warnFailedToCache, boolean warnUncached) {
+    public ExceptionHandler(ExceptionHandler handler) {
         this.messager = handler.messager;
-        this.warnFailedToCache = warnFailedToCache;
-        this.warnUncached = warnUncached;
     }
 
     public interface Executable {
 
-        void execute() throws ErrorException, FailedToCacheException, UncachedException, Exception;
+        void execute() throws ErrorException, Exception;
     }
 
     /**
@@ -46,18 +40,12 @@ public class ExceptionHandler {
             } else {
                 error(ex.element, ex.getMessage());
             }
-        } catch (FailedToCacheException ex) {
+        } catch (WarningException ex) {
             if (ExceptionHandler.IS_DEBUG) {
                 String message = extractStackTrace(ex);
                 warn(ex.element, message);
-            } else if (this.warnFailedToCache) {
-                warn(ex.element, ex.getMessage());
-            }
-        } catch (UncachedException ex) {
-            if (ExceptionHandler.IS_DEBUG) {
-                String message = extractStackTrace(ex);
-                warn(ex.element, message);
-            } else if (this.warnUncached) {
+                // Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            } else {
                 warn(ex.element, ex.getMessage());
             }
         } catch (Exception ex) {
@@ -77,14 +65,14 @@ public class ExceptionHandler {
     protected void error(Element e, String message, Object... args) {
         this.messager.printMessage(
             Diagnostic.Kind.ERROR,
-            String.format("[Cache] " + message, args),
+            String.format("[Delegating] " + message, args),
             e);
     }
 
     protected void warn(Element e, String message, Object... args) {
         this.messager.printMessage(
             Diagnostic.Kind.MANDATORY_WARNING,
-            String.format("[Cache] " + message, args),
+            String.format("[Delegating] " + message, args),
             e);
     }
 }

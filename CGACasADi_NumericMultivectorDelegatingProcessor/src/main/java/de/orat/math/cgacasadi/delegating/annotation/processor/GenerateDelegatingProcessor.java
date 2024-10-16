@@ -1,7 +1,6 @@
 package de.orat.math.cgacasadi.delegating.annotation.processor;
 
 import com.google.auto.service.AutoService;
-import de.orat.math.cgacasadi.delegating.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.delegating.annotation.processor.common.ExceptionHandler;
 import de.orat.math.cgacasadi.delegating.annotation.processor.generation.ClassesGenerator;
 import de.orat.math.cgacasadi.delegating.annotation.processor.representation.Clazz;
@@ -18,9 +17,10 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
 
-// @AutoService(Processor.class)
-public final class GenerateCachedProcessor extends AbstractProcessor {
+@AutoService(Processor.class)
+public final class GenerateDelegatingProcessor extends AbstractProcessor {
 
     public static record Utils(ExceptionHandler exceptionHandler, Elements elementUtils, Types typeUtils) {
 
@@ -32,7 +32,7 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
 
     private volatile boolean initialized = false;
 
-    protected static final Set<String> supportedAnnotationTypes = Set.of(GenerateCached.class.getCanonicalName());
+    protected static final Set<String> supportedAnnotationTypes = Set.of(GenerateDelegate.class.getCanonicalName());
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -69,7 +69,7 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
         }
 
         this.utils.exceptionHandler().handle(() -> {
-            List<Clazz> classes = GenerateCachedProcessor.computeClasses(roundEnv, this.utils);
+            List<Clazz> classes = GenerateDelegatingProcessor.computeClasses(roundEnv, this.utils);
             ClassesGenerator.generate(classes, this.filer);
         });
 
@@ -79,15 +79,11 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
 
     private static List<Clazz> computeClasses(RoundEnvironment roundEnv, Utils utils) {
         // Safe cast because "@Target(ElementType.TYPE)" of Annotation.
-        Set<TypeElement> annotatedTypes = (Set<TypeElement>) roundEnv.getElementsAnnotatedWith(GenerateCached.class);
+        Set<TypeElement> annotatedTypes = (Set<TypeElement>) roundEnv.getElementsAnnotatedWith(GenerateDelegate.class);
 
         List<Clazz> classes = new ArrayList<>(annotatedTypes.size());
         for (TypeElement annotatedType : annotatedTypes) {
-            GenerateCached generateCached = annotatedType.getAnnotation(GenerateCached.class);
-            boolean warnFailedToCache = generateCached.warnFailedToCache();
-            boolean warnUncached = generateCached.warnUncached();
-
-            Utils adjustedUtils = new Utils(new ExceptionHandler(utils.exceptionHandler(), warnFailedToCache, warnUncached),
+            Utils adjustedUtils = new Utils(new ExceptionHandler(utils.exceptionHandler()),
                 utils.elementUtils(),
                 utils.typeUtils());
 

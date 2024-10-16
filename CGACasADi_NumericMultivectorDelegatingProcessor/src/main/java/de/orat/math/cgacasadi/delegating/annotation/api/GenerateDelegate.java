@@ -6,13 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Doc: https://github.com/orat/CGACasADi/blob/master/CGACasADi_SymbolicMultivectorCachingProcessor/README.md
+ * Doc:
+ * https://github.com/orat/CGACasADi/blob/master/CGACasADi_NumericMultivectorDelegatingProcessor/README.md
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface GenerateCached {
+public @interface GenerateDelegate {
 
-    boolean warnFailedToCache() default true;
-
-    boolean warnUncached() default false;
+    Class<?> to();
 }
