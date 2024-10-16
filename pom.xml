@@ -8,6 +8,7 @@
 	<modules>
 		<module>CGACasADi_SymbolicMultivectorCachingProcessor</module>
 		<module>CGACasADi</module>
+		<module>CGACasADi_NumericMultivectorDelegatingProcessor</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
