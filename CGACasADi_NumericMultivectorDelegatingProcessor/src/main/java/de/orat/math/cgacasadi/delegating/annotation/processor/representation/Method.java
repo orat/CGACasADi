@@ -12,54 +12,61 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 
+/**
+ * Convention: representation of target structure, not source structure. With other words, being directly
+ * usable by generation classes.
+ */
 public final class Method {
 
     public final String name;
-    public final String returnType;
+    public final TypeMirror returnType;
+    public final TypeElement enclosingType;
+    /**
+     * Unmodifiable
+     */
     public final Set<Modifier> modifiers;
 
     /**
      * Unmodifiable
      */
     public final List<Parameter> parameters;
-    public final String enclosingType;
 
-    protected Method(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) throws WarningException {
+    protected Method(ExecutableElement correspondingElement, TypeParametersToArguments typeParametersToArguments, Utils utils) throws WarningException {
         assert correspondingElement.getKind() == ElementKind.METHOD : String.format(
             "Expected \"%s\" to be a method, but was \"%s\".",
             correspondingElement.getSimpleName(), correspondingElement.getKind());
 
-        this.enclosingType = ((TypeElement) correspondingElement.getEnclosingElement()).getQualifiedName().toString();
         this.name = correspondingElement.getSimpleName().toString();
-        this.returnType = typeParametersToArguments.clearTypeParameterIfPresent(correspondingElement.getReturnType().toString());
-        this.modifiers = new HashSet<>(correspondingElement.getModifiers());
-        modifiers.remove(Modifier.DEFAULT);
-        modifiers.remove(Modifier.ABSTRACT);
+        this.returnType = typeParametersToArguments.clearTypeParameterIfPresent(correspondingElement.getReturnType());
+        this.enclosingType = (TypeElement) correspondingElement.getEnclosingElement();
 
-        if (this.modifiers.contains(Modifier.PRIVATE)) {
-            throw WarningException.create(correspondingElement,
-                "\"%s\": private method will not be cached.", this.name);
-        }
-        if (this.modifiers.contains(Modifier.STATIC)) {
-            throw WarningException.create(correspondingElement,
-                "\"%s\": static method will not be cached.", this.name);
+        {
+            var modifiers = new HashSet<>(correspondingElement.getModifiers());
+            modifiers.remove(Modifier.DEFAULT);
+            modifiers.remove(Modifier.ABSTRACT);
+            this.modifiers = Collections.unmodifiableSet(modifiers);
+
+            if (modifiers.contains(Modifier.PRIVATE)) {
+                throw WarningException.create(correspondingElement,
+                    "\"%s\": private method will not be delegated.", this.name);
+            }
+            if (modifiers.contains(Modifier.STATIC)) {
+                throw WarningException.create(correspondingElement,
+                    "\"%s\": static method will not be delegated.", this.name);
+            }
         }
 
-        if (!this.returnType.equals(enclosingClassQualifiedName)) {
-            throw WarningException.create(correspondingElement,
-                "\"%s\": Return type \"%s\" was not the expected one \"%s\".", this.name, this.returnType, enclosingClassQualifiedName);
-        }
-
-        this.parameters = computeParameters(correspondingElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
+        this.parameters = computeParameters(correspondingElement, typeParametersToArguments, utils);
     }
 
-    private static List<Parameter> computeParameters(ExecutableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) {
+    private static List<Parameter> computeParameters(ExecutableElement correspondingElement, TypeParametersToArguments typeParametersToArguments, Utils utils) {
         List<VariableElement> parameterElements = (List<VariableElement>) correspondingElement.getParameters();
         List<Parameter> parameters = new ArrayList<>(parameterElements.size());
         for (VariableElement parameterElement : parameterElements) {
             utils.exceptionHandler().handle(() -> {
-                Parameter parameter = new Parameter(parameterElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
+                Parameter parameter = new Parameter(parameterElement, typeParametersToArguments, utils);
                 parameters.add(parameter);
             });
         }

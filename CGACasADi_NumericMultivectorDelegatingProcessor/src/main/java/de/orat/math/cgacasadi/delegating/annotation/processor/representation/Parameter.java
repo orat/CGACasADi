@@ -2,24 +2,19 @@ package de.orat.math.cgacasadi.delegating.annotation.processor.representation;
 
 import de.orat.math.cgacasadi.delegating.annotation.processor.GenerateDelegatingProcessor.Utils;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 
+/**
+ * Convention: representation of target structure, not source structure. With other words, being directly
+ * usable by generation classes.
+ */
 public final class Parameter {
 
-    public final String type;
+    public final TypeMirror type;
     public final String identifier;
 
-    protected Parameter(VariableElement correspondingElement, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Utils utils) {
-        this.type = typeParametersToArguments.clearTypeParameterIfPresent(correspondingElement.asType().toString());
+    protected Parameter(VariableElement correspondingElement, TypeParametersToArguments typeParametersToArguments, Utils utils) {
+        this.type = typeParametersToArguments.clearTypeParameterIfPresent(correspondingElement.asType());
         this.identifier = correspondingElement.getSimpleName().toString();
-
-        if (this.type.equals(enclosingClassQualifiedName)) {
-
-        } else if (this.type.equals("int")) {
-
-//        } else {
-//            throw ErrorException.create(correspondingElement,
-//                "Type of parameter \"%s %s\" was not one of the expected: \"%s\", \"%s\".",
-//                this.type, this.identifier, enclosingClassQualifiedName, "int");
-        }
     }
 }

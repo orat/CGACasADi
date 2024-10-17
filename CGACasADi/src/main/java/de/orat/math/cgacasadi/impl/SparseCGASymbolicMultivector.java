@@ -28,7 +28,7 @@ import util.cga.CGAOperations;
  *    https://github.com/orat/CGACasADi/blob/master/CGACasADi_SymbolicMultivectorCachingProcessor/README.md
  * </pre>
  */
-@GenerateCached(warnFailedToCache = true, warnUncached = true)
+@GenerateCached(warnFailedToCache = false, warnUncached = false)
 public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector>, ISparseCGASymbolicMultivector {
 
     private MultivectorSymbolic.Callback callback;
