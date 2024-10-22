@@ -54,14 +54,16 @@ public abstract class DelegatingSparseCGANumericMultivector implements iMultivec
 
 
 ## Rules
-#### Annotated class
-- [not checked] must be subtype of the generated class.
-- [not checked] must implement the abstract `create` method provided by the generated class.
-- [not checked] must implement all methods of supertypes which are not provided by the generated class or the supertypes.
-
-
 #### Generated class
-- Will have methods of common supertypes of the annotated class and the class given with the `to` parameter.
+- Will have methods of common supertypes of the annotated class and the class given with the `to` parameter. Except for those methods which are already defined in the annotated class.
+
+
+#### Annotated class
+[All not checked] The annotated class must ...
+- extend the generated class.
+- implement the abstract `create` method provided by the generated class.
+- implement all methods of supertypes which are not provided by the generated class or the supertypes.
+- implement all methods of the common supertypes which can not be delegated. (Like the `constants` method.)
 
 
 #### Methods errors
