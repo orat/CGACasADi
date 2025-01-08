@@ -422,10 +422,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     @Override
     public SparseCGASymbolicMultivector scalarAtan2(SparseCGASymbolicMultivector y) {
         if (!isScalar()) {
-            throw new IllegalArgumentException("The argument x of tang(x,y) is no scalar!");
+            throw new IllegalArgumentException("The argument x of atan2(x,y) is no scalar!");
         }
         if (!y.isScalar()) {
-            throw new IllegalArgumentException("The argument y of tang(x,y) is no scalar!");
+            throw new IllegalArgumentException("The argument y of atan2(x,y) is no scalar!");
         }
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -438,6 +438,51 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return create(SX.sqrt(sx));
     }
 
+    // new scalar functions
+    /* IMultivector scalarSign();
+    IMultivector scalarSin();
+    IMultivector scalarCos();
+    IMultivector scalarAtan();
+    IMultivector scalarAsin();
+    IMultivector scalarAcos();*/
+    public SparseCGASymbolicMultivector scalarSign() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return create(SX.sign(sx));
+    }
+    public SparseCGASymbolicMultivector scalarSin() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return create(SX.sin(sx));
+    }
+    public SparseCGASymbolicMultivector scalarCos() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return create(SX.cos(sx));
+    }
+    public SparseCGASymbolicMultivector scalarAtan() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return create(SX.atan(sx));
+    }
+    public SparseCGASymbolicMultivector scalarAsin() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return create(SX.asin(sx));
+    }
+    public SparseCGASymbolicMultivector scalarAcos() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return create(SX.acos(sx));
+    }
+    
+    
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector only for CGA (R41)
     // kann aus CGAImplTest.exp() abgeleitet werden
