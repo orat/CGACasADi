@@ -427,7 +427,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         if (!y.isScalar()) {
             throw new IllegalArgumentException("The argument y of atan2(x,y) is no scalar!");
         }
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
+        // not yet tested
+        SX result = SX.atan2(y.getSX(), sx);
+        return create(result);
     }
 
     @Override
