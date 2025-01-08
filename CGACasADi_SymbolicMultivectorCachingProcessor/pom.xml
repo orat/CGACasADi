@@ -45,7 +45,7 @@
 				<version>3.12.1</version>
 				<configuration>
 					<!-- annotation processing of auto-service -->
-					<compilerArgs>-proc:full</compilerArgs>
+					<!--compilerArgs>-proc:full</compilerArgs-->
 				</configuration>
 			</plugin>
 		</plugins>

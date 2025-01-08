@@ -463,6 +463,12 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         }
         return create(SX.cos(sx));
     }
+    public SparseCGASymbolicMultivector scalarTan() {
+        if (!isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return create(SX.tan(sx));
+    }
     public SparseCGASymbolicMultivector scalarAtan() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
