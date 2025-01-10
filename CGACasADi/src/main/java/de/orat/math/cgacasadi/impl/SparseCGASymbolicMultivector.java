@@ -1,7 +1,10 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.api.SXColVec;
+import de.dhbw.rahmlab.casadi.api.SXScalar;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.casadi.SxSubIndex;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -18,6 +21,7 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.Objects;
 import util.CayleyTable;
+import util.cga.CGACayleyTable;
 //import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
 
@@ -300,7 +304,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
      */
     //TODO
-    // undual zu implmentieren muss ich erst gp() implementieren damit ich createGPFuncition() zur Verfügung habe
+    // undual zu implementieren muss ich erst gp() implementieren damit ich createGPFuncition() zur Verfügung habe
     /**
      *
      * @return undual of a multivector
@@ -441,13 +445,9 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return create(SX.sqrt(sx));
     }
 
+    
     // new scalar functions
-    /* IMultivector scalarSign();
-    IMultivector scalarSin();
-    IMultivector scalarCos();
-    IMultivector scalarAtan();
-    IMultivector scalarAsin();
-    IMultivector scalarAcos();*/
+    
     public SparseCGASymbolicMultivector scalarSign() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
@@ -495,6 +495,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector only for CGA (R41)
     // kann aus CGAImplTest.exp() abgeleitet werden
+    //TODO
     @Override
     public SparseCGASymbolicMultivector exp() {
         //TODO
@@ -503,28 +504,273 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
             throw new IllegalArgumentException("exp() defined for bivectors only!");
         }
         throw new UnsupportedOperationException("Not supported yet.");
+        /*
+        var exp = (B)=>{
+    // B*B = S + Ti*ei*I
+    var S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
+    var [T1, T2, T3, T4, T5] = [
+      2*(B[4]*B[9]-B[5]*B[8]+B[6]*B[7]), //e2345
+      2*(B[1]*B[9]-B[2]*B[8]+B[3]*B[7]), //e1345
+      2*(B[0]*B[9]-B[2]*B[6]+B[3]*B[5]), //e1245
+      2*(B[0]*B[8]-B[1]*B[6]+B[3]*B[4]), //e1235
+      2*(B[0]*B[7]-B[1]*B[5]+B[2]*B[4])  //e1234
+    ]
+    // Calculate the norms of the invariants
+    var Tsq = -T1*T1-T2*T2-T3*T3-T4*T4+T5*T5;
+    var norm = sqrt(S*S - Tsq), sc = -0.5/norm, lambdap = 0.5*S+0.5*norm;
+    var [lp, lm] = [sqrt(abs(lambdap)), sqrt(-0.5*S+0.5*norm)]
+    // The associated trig (depending on sign lambdap)
+    var [cp, sp] = lambdap>0?[cosh(lp), sinh(lp)/lp]:lambdap<0?[cos(lp), sin(lp)/lp]:[1,1]
+    var [cm, sm] = [cos(lm), lm==0?1:sin(lm)/lm]
+    // Calculate the mixing factors alpha and beta_i.
+    var [cmsp, cpsm, spsm] = [cm*sp,cp*sm,sp*sm/2], D = cmsp-cpsm, E = sc*D;
+    var [alpha,beta1,beta2,beta3,beta4,beta5] = [ D*(0.5-sc*S) + cpsm, E*T1, -E*T2, E*T3, -E*T4, -E*T5 ]
+    // Create the final rotor.
+    return Element.even(
+        cp*cm,
+        (B[0]*alpha+B[7]*beta5-B[8]*beta4+B[9]*beta3),
+        (B[1]*alpha-B[5]*beta5+B[6]*beta4-B[9]*beta2),
+        (B[2]*alpha+B[4]*beta5-B[6]*beta3+B[8]*beta2),
+        (B[3]*alpha+B[4]*beta4-B[5]*beta3+B[7]*beta2),
+        (B[4]*alpha+B[2]*beta5-B[3]*beta4+B[9]*beta1),
+        (B[5]*alpha-B[1]*beta5+B[3]*beta3-B[8]*beta1),
+        (B[6]*alpha-B[1]*beta4+B[2]*beta3-B[7]*beta1),
+        (B[7]*alpha+B[0]*beta5-B[3]*beta2+B[6]*beta1),
+        (B[8]*alpha+B[0]*beta4-B[2]*beta2+B[5]*beta1),
+        (B[9]*alpha-B[0]*beta3+B[1]*beta2-B[4]*beta1),
+        spsm*T5, spsm*T4, spsm*T3, spsm*T2, spsm*T1
+      )
     }
 
+        */
+    }
+
+   
+    /**
+     * CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
+     * 
+     * Normalize an even element (a general rotor R with 16 coefficients)
+     * X = [1,e12,e13,e14,e15,e23,e24,e25,e34,e35,e45,e1234,e1235,e1245,e1345,e2345]
+     *
+     * Normalization, Square Roots, and the Exponential and Logarithmic Maps in
+     * Geometric Algebras of Less than 6D
+     * S. de. Keninck, M. Roelfs, 2022
+     */
+    public SparseCGASymbolicMultivector normalizeEvenElement() {
+        if (!isEven()) {
+            throw new IllegalArgumentException("Element must be an even element!");
+        }
+        int[] ind = CGACayleyTable.getEvenIndizes();
+        SXColVec X = new SXColVec(sx, ind);
+
+        // var S = X[0]*X[0]-X[10]*X[10]+X[11]*X[11]-X[12]*X[12]-X[13]*X[13]-X[14]*X[14]-X[15]*X[15]+X[1]*X[1]
+        // +X[2]*X[2]+X[3]*X[3]-X[4]*X[4]+X[5]*X[5]+X[6]*X[6]-X[7]*X[7]+X[8]*X[8]-X[9]*X[9];
+       
+        /* Direkte Implementierung
+        SX S = CasADiUtil.createScalar();
+        S = SX.plus(S, SX.sq(sx.at(ind[0])));
+        S = SX.minus(S, SX.sq(sx.at(ind[10])));
+        S = SX.plus(S, SX.sq(sx.at(ind[11])));
+        S = SX.minus(S, SX.sq(sx.at(ind[12])));
+        S = SX.minus(S, SX.sq(sx.at(ind[13])));
+        S = SX.minus(S, SX.sq(sx.at(ind[14])));
+        S = SX.minus(S, SX.sq(sx.at(ind[15])));
+        S = SX.plus(S, SX.sq(sx.at(ind[1])));
+        S = SX.plus(S, SX.sq(sx.at(ind[2])));
+        S = SX.plus(S, SX.sq(sx.at(ind[3])));
+        S = SX.minus(S, SX.sq(sx.at(ind[4])));
+        S = SX.plus(S, SX.sq(sx.at(ind[5])));
+        S = SX.plus(S, SX.sq(sx.at(ind[6])));
+        S = SX.minus(S, SX.sq(sx.at(ind[7])));
+        S = SX.plus(S, SX.sq(sx.at(ind[8])));
+        S = SX.minus(S, SX.sq(sx.at(ind[9]))); */
+        
+        // TODO X als SX-Vector zusammensetzen, mit nur even Elementen
+        SXScalar S = SXScalar.sumSq(X, new int[]{0,11,1,2,3,5,6,8});
+        S = S.sub(SXScalar.sumSq(X, new int[]{10,12,13,14,15,4,7,9}));
+
+        // var T1 = 2*(X[0]*X[11]-X[10]*X[12]+X[13]*X[9]-X[14]*X[7]+X[15]*X[4]-X[1]*X[8]+X[2]*X[6]-X[3]*X[5]);
+        SXScalar T1 = SXScalar.sumProd(X, new int[]{0,13,15,2}, new int[]{11,9,4,6});
+        T1 = T1.sub(SXScalar.sumProd(X, new int[]{10,14,1,3}, new int[]{12,7,8,5}));
+
+        // var T2 = 2*(X[0]*X[12]-X[10]*X[11]+X[13]*X[8]-X[14]*X[6]+X[15]*X[3]-X[1]*X[9]+X[2]*X[7]-X[4]*X[5]);
+        SXScalar T2 = SXScalar.sumProd(X, new int[]{0,13,15,2}, new int[]{12,8,3,7});
+        T2 = T2.sub(SXScalar.sumProd(X, new int[]{10,14,1,4}, new int[]{11,6,9,5}));
+
+        //var T3 = 2*(X[0]*X[13]-X[10]*X[1]+X[11]*X[9]-X[12]*X[8]+X[14]*X[5]-X[15]*X[2]+X[3]*X[7]-X[4]*X[6]);
+        SXScalar T3 = SXScalar.sumProd(X, new int[]{0,11,14,3}, new int[]{13,9,5,7});
+        T3 = T3.sub(SXScalar.sumProd(X, new int[]{10,12,15,4}, new int[]{1,8,2,6})).muls(2);
+
+        //var T4 = 2*(X[0]*X[14]-X[10]*X[2]-X[11]*X[7]+X[12]*X[6]-X[13]*X[5]+X[15]*X[1]+X[3]*X[9]-X[4]*X[8]);
+        SXScalar T4 = SXScalar.sumProd(X, new int[]{0,12,15,3}, new int[]{14,6,1,9});
+        T4 = T4.sub(SXScalar.sumProd(X, new int[]{10,11,13,4}, new int[]{2,7,5,8})).muls(2d);
+
+        //var T5 = 2*(X[0]*X[15]-X[10]*X[5]+X[11]*X[4]-X[12]*X[3]+X[13]*X[2]-X[14]*X[1]+X[6]*X[9]-X[7]*X[8]);
+        SXScalar T5 = SXScalar.sumProd(X, new int[]{0,11,13,6}, new int[]{15,4,2,9});
+        T5 = T5.sub(SXScalar.sumProd(X, new int[]{10,12,14,7}, new int[]{5,3,1,8})).muls(2d);
+
+        //var TT = -T1*T1+T2*T2+T3*T3+T4*T4+T5*T5;
+        SXScalar TT = T1.sq().negate().add(T2.sq()).add(T3.sq()).add(T4.sq()).add(T5.sq());
+
+        //var N = ((S*S+TT)**0.5+S)**0.5, N2 = N*N;
+        SXScalar N = S.sq().add(TT).pow(0.5).add(S).pow(0.5);
+        SXScalar N2 = N.sq();
+
+        //var M = 2**0.5*N/(N2*N2+TT);
+        SXScalar M = SXScalar.pow(2d, N.muls(0.5d).div(N2.sq().add(TT)));
+
+        //var A = N2*M, [B1,B2,B3,B4,B5] = [-T1*M,-T2*M,-T3*M,-T4*M,-T5*M];
+        SXScalar A = N2.mul(M);
+        //TODO
+        // neue Methode mit function als argument um negate().mul(M) übergeben zu können
+        // damit die nachfolgenden Zeilen in eine zusammengezogen werden können
+        SXScalar B1 = T1.negate().mul(M);
+        SXScalar B2 = T2.negate().mul(M);
+        SXScalar B3 = T3.negate().mul(M);
+        SXScalar B4 = T4.negate().mul(M);
+        SXScalar B5 = T5.negate().mul(M);
+         
+        // TODO neues SX erzeugen, mit passender sparsity für ein event element/rotor
+        
+        //SxSubIndex ele = X.at(0);
+        //sx.assign(ele);
+        
+        /*return rotor(A*X.at(0) + B1*X[11] - B2*X[12] - B3*X[13] - B4*X[14] - B5*X[15],
+        A*X[1] - B1*X[8] + B2*X[9] + B3*X[10] - B4*X[15] + B5*X[14],
+        A*X[2] + B1*X[6] - B2*X[7] + B3*X[15] + B4*X[10] - B5*X[13],
+        A*X[3] - B1*X[5] - B2*X[15] - B3*X[7] - B4*X[9] + B5*X[12],
+        A*X[4] - B1*X[15] - B2*X[5] - B3*X[6] - B4*X[8] + B5*X[11],
+        A*X[5] - B1*X[3] + B2*X[4] - B3*X[14] + B4*X[13] + B5*X[10],
+        A*X[6] + B1*X[2] + B2*X[14] + B3*X[4] - B4*X[12] - B5*X[9],
+        A*X[7] + B1*X[14] + B2*X[2] + B3*X[3] - B4*X[11] - B5*X[8],
+        A*X[8] - B1*X[1] - B2*X[13] + B3*X[12] + B4*X[4] + B5*X[7],
+        A*X[9] - B1*X[13] - B2*X[1] + B3*X[11] + B4*X[3] + B5*X[6],
+        A*X[10] + B1*X[12] - B2*X[11] - B3*X[1] - B4*X[2] - B5*X[5],
+        A*X[11] + B1*X[0] + B2*X[10] - B3*X[9] + B4*X[7] - B5*X[4],
+        A*X[12] + B1*X[10] + B2*X[0] - B3*X[8] + B4*X[6] - B5*X[3],
+        A*X[13] - B1*X[9] + B2*X[8] + B3*X[0] - B4*X[5] + B5*X[2],
+        A*X[14] + B1*X[7] - B2*X[6] + B3*X[5] + B4*X[0] - B5*X[1],
+        A*X[15] - B1*X[4] + B2*X[3] - B3*X[2] + B4*X[1] + B5*X[0]);*/
+    /* return rotor(A*sx.at(ind[0] + B1*sx.at(ind[11] - B2*sx.at(ind[12] - B3*sx.at(ind[13] - B4*sx.at(ind[14] - B5*sx.at(ind[15],
+        A*sx.at(ind[1]) - B1*sx.at(ind[8] + B2*sx.at(ind[9] + B3*sx.at(ind[10] - B4*X[15] + B5*X[14],
+        A*sx.at(ind[2]) + B1*sx.at(ind[6] - B2*sx.at(ind[7] + B3*sx.at(ind[15] + B4*X[10] - B5*X[13],
+        A*sx.at(ind[3]) - B1*sx.at(ind[5] - B2*sx.at(ind[15] - B3*sx.at(ind[7] - B4*X[9] + B5*X[12],
+        A*sx.at(ind[4]) - B1*sx.at(ind[15] - B2*sx.at(ind[5] - B3*sx.at(ind[6] - B4*X[8] + B5*X[11],
+        A*sx.at(ind[5]) - B1*sx.at(ind[3] + B2*sx.at(ind[4] - B3*sx.at(ind[14] + B4*X[13] + B5*X[10],
+        A*sx.at(ind[6]) + B1*sx.at(ind[2] + B2*sx.at(ind[14] + B3*sx.at(ind[4] - B4*X[12] - B5*X[9],
+        A*sx.at(ind[7]) + B1*sx.at(ind[14] + B2*sx.at(ind[2] + B3*sx.at(ind[3] - B4*X[11] - B5*X[8],
+        A*sx.at(ind[8]) - B1*sx.at(ind[1] - B2*sx.at(ind[13] + B3*sx.at(ind[12] + B4*X[4] + B5*X[7],
+        A*sx.at(ind[9]) - B1*sx.at(ind[13] - B2*sx.at(ind[1] + B3*sx.at(ind[11] + B4*X[3] + B5*X[6],
+        A*sx.at(ind[10]) + B1*sx.at(ind[12] - B2*sx.at(ind[11] - B3*sx.at(ind[1] - B4*X[2] - B5*X[5],
+        A*sx.at(ind[11] + B1*sx.at(ind[0] + B2*sx.at(ind[10] - B3*sx.at(ind[9] + B4*X[7] - B5*X[4],
+        A*sx.at(ind[12] + B1*sx.at(ind[10] + B2*sx.at(ind[0] - B3*sx.at(ind[8] + B4*X[6] - B5*X[3],
+        A*sx.at(ind[13] - B1*sx.at(ind[9] + B2*sx.at(ind[8] + B3*sx.at(ind[0] - B4*X[5] + B5*X[2],
+        A*sx.at(ind[14] + B1*sx.at(ind[7] - B2*sx.at(ind[6] + B3*sx.at(ind[5] + B4*X[0] - B5*X[1],
+        A*sx.at(ind[15] - B1*sx.at(ind[4] + B2*sx.at(ind[3] - B3*sx.at(ind[2] + B4*X[1] + B5*X[0]);*/
+    
+        throw new IllegalArgumentException("not yet immplemented!");
+    }
+
+    /*
+    function Normalize(X) {
+        var S = X[0]*X[0]-X[10]*X[10]+X[11]*X[11]-X[12]*X[12]-X[13]*X[13]-X[14]*X[14]-X[15]*X[15]+X[1]*X[1]
+        +X[2]*X[2]+X[3]*X[3]-X[4]*X[4]+X[5]*X[5]+X[6]*X[6]-X[7]*X[7]+X[8]*X[8]-X[9]*X[9];
+        var T1 = 2*(X[0]*X[11]-X[10]*X[12]+X[13]*X[9]-X[14]*X[7]+X[15]*X[4]-X[1]*X[8]+X[2]*X[6]-X[3]*X[5]);
+        var T2 = 2*(X[0]*X[12]-X[10]*X[11]+X[13]*X[8]-X[14]*X[6]+X[15]*X[3]-X[1]*X[9]+X[2]*X[7]-X[4]*X[5]);
+        var T3 = 2*(X[0]*X[13]-X[10]*X[1]+X[11]*X[9]-X[12]*X[8]+X[14]*X[5]-X[15]*X[2]+X[3]*X[7]-X[4]*X[6]);
+        var T4 = 2*(X[0]*X[14]-X[10]*X[2]-X[11]*X[7]+X[12]*X[6]-X[13]*X[5]+X[15]*X[1]+X[3]*X[9]-X[4]*X[8]);
+        var T5 = 2*(X[0]*X[15]-X[10]*X[5]+X[11]*X[4]-X[12]*X[3]+X[13]*X[2]-X[14]*X[1]+X[6]*X[9]-X[7]*X[8]);
+        var TT = -T1*T1+T2*T2+T3*T3+T4*T4+T5*T5;
+        var N = ((S*S+TT)**0.5+S)**0.5, N2 = N*N;
+        var M = 2**0.5*N/(N2*N2+TT);
+        var A = N2*M, [B1,B2,B3,B4,B5] = [-T1*M,-T2*M,-T3*M,-T4*M,-T5*M];
+        return rotor(A*X[0] + B1*X[11] - B2*X[12] - B3*X[13] - B4*X[14] - B5*X[15],
+        A*X[1] - B1*X[8] + B2*X[9] + B3*X[10] - B4*X[15] + B5*X[14],
+        A*X[2] + B1*X[6] - B2*X[7] + B3*X[15] + B4*X[10] - B5*X[13],
+        A*X[3] - B1*X[5] - B2*X[15] - B3*X[7] - B4*X[9] + B5*X[12],
+        A*X[4] - B1*X[15] - B2*X[5] - B3*X[6] - B4*X[8] + B5*X[11],
+        A*X[5] - B1*X[3] + B2*X[4] - B3*X[14] + B4*X[13] + B5*X[10],
+        A*X[6] + B1*X[2] + B2*X[14] + B3*X[4] - B4*X[12] - B5*X[9],
+        A*X[7] + B1*X[14] + B2*X[2] + B3*X[3] - B4*X[11] - B5*X[8],
+        A*X[8] - B1*X[1] - B2*X[13] + B3*X[12] + B4*X[4] + B5*X[7],
+        A*X[9] - B1*X[13] - B2*X[1] + B3*X[11] + B4*X[3] + B5*X[6],
+        A*X[10] + B1*X[12] - B2*X[11] - B3*X[1] - B4*X[2] - B5*X[5],
+        A*X[11] + B1*X[0] + B2*X[10] - B3*X[9] + B4*X[7] - B5*X[4],
+        A*X[12] + B1*X[10] + B2*X[0] - B3*X[8] + B4*X[6] - B5*X[3],
+        A*X[13] - B1*X[9] + B2*X[8] + B3*X[0] - B4*X[5] + B5*X[2],
+        A*X[14] + B1*X[7] - B2*X[6] + B3*X[5] + B4*X[0] - B5*X[1],
+        A*X[15] - B1*X[4] + B2*X[3] - B3*X[2] + B4*X[1] + B5*X[0]);
+    }
+     */
+    
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector only for CGA (R41)
     // kann aus CGAImplTest.exp() abgeleitet werden
+    //TODO
     @Override
     public SparseCGASymbolicMultivector sqrt() {
         if (isEven()) {
             return add(CONSTANTS.one()).normalizeEvenElement();
         }
-        throw new RuntimeException("sqrt() not yet implemented for non even elements.");
+        throw new RuntimeException("sqrt() not yet implemented for non even elements. Should be implemented in the default method of the interface with a generic version.");
     }
 
+    
+    
+    
+    // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
+    /*
+     var log = (R)=>{
+      // B*B = S + T*e1234
+      //var S = R[10]*R[10]-R[1]*R[1]-R[2]*R[2]-R[3]*R[3]+R[4]*R[4]-R[5]*R[5]-R[6]*R[6]+R[7]*R[7]-R[8]*R[8]+R[9]*R[9]
+      var S = R[0]*R[0]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]-1;
+      var [T1, T2, T3, T4, T5] = [
+        2*R[0]*R[15],   //e2345
+        2*R[0]*R[14],   //e1345
+        2*R[0]*R[13],   //e1245
+        2*R[0]*R[12],   //e1235
+        2*R[0]*R[11],   //e1234
+      ]
+      var Tsq      = -T1*T1-T2*T2-T3*T3-T4*T4+T5*T5;
+      var norm     = sqrt(S*S - Tsq)
+      if (norm==0 && S==0) {  // at most a single translation
+        return Element.bivector(R[1], R[2], R[3], R[4], R[5], R[6], R[7], R[8], R[9], R[10])
+      }
+      var lambdap  = 0.5*S+0.5*norm;
+      // lm is always a rotation, lp can be boost, translation, rotation
+      var [lp, lm] = [sqrt(abs(lambdap)), sqrt((-0.5*S+0.5*norm))]
+      var theta2   = lm==0?0:atan2(lm, R[0]); 
+      var theta1   = lambdap<0?asin(lp/cos(theta2)):lambdap>0?atanh(lp/R[0]):lp/R[0];
+      var [l1, l2] = [lp==0?0:theta1/lp, lm==0?0:theta2/lm]
+      var [A, B1, B2, B3, B4, B5]   = [
+        (l1-l2)*0.5*(1+S/norm) + l2,  -0.5*T1*(l1-l2)/norm, -0.5*T2*(l1-l2)/norm, 
+        -0.5*T3*(l1-l2)/norm,         -0.5*T4*(l1-l2)/norm, -0.5*T5*(l1-l2)/norm, 
+      ];
+      return Element.bivector(
+        (A*R[1]+B3*R[10]+B4*R[9]-B5*R[8]),
+        (A*R[2]+B2*R[10]-B4*R[7]+B5*R[6]),
+        (A*R[3]-B2*R[9]-B3*R[7]-B5*R[5]),
+        (A*R[4]-B2*R[8]-B3*R[6]-B4*R[5]),
+        (A*R[5]+B1*R[10]+B4*R[4]-B5*R[3]),
+        (A*R[6]-B1*R[9]+B3*R[4]+B5*R[2]),
+        (A*R[7]-B1*R[8]+B3*R[3]+B4*R[2]),
+        (A*R[8]+B1*R[7]+B2*R[4]-B5*R[1]),
+        (A*R[9]+B1*R[6]+B2*R[3]-B4*R[1]),
+        (A*R[10]-B1*R[5]-B2*R[2]-B3*R[1])
+      )
+    }
+    */
+    // TODO
     @Override
     public SparseCGASymbolicMultivector log() {
         //TODO
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    
+    
     public SparseCGASymbolicMultivector meet(SparseCGASymbolicMultivector b) {
         throw new UnsupportedOperationException("Not supported yet.");
-
     }
 
     public SparseCGASymbolicMultivector join(SparseCGASymbolicMultivector b) {
@@ -581,134 +827,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return divs(norm());
     }
 
-    // CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
-    // Normalize an even element X = [1,e12,e13,e14,e15,e23,e24,e25,e34,e35,e45,
-    //                                e1234,e1235,e1245,e1345,e2345]
-    // Normalization, Square Roots, and the Exponential and Logarithmic Maps in
-    // Geometric Algebras of Less than 6D
-    // S de. Keninck, M. Roelfs, 2022
-    public SparseCGASymbolicMultivector normalizeEvenElement() {
-        if (!isEven()) {
-            throw new IllegalArgumentException("Element must be an even element!");
-        }
-        // var S = X[0]*X[0]-X[10]*X[10]+X[11]*X[11]-X[12]*X[12]-X[13]*X[13]-X[14]*X[14]-X[15]*X[15]+X[1]*X[1]
-        // +X[2]*X[2]+X[3]*X[3]-X[4]*X[4]+X[5]*X[5]+X[6]*X[6]-X[7]*X[7]+X[8]*X[8]-X[9]*X[9];
-        /*SX S = CasADiUtil.createScalar();
-        S = SX.plus(S, SX.sq(sx.at(0)));
-        S = SX.minus(S, SX.sq(sx.at(10)));
-        S = SX.plus(S, SX.sq(sx.at(11)));
-        S = SX.minus(S, SX.sq(sx.at(12)));
-        S = SX.minus(S, SX.sq(sx.at(13)));
-        S = SX.minus(S, SX.sq(sx.at(14)));
-        S = SX.minus(S, SX.sq(sx.at(15)));
-        S = SX.plus(S, SX.sq(sx.at(1)));
-        S = SX.plus(S, SX.sq(sx.at(2)));
-        S = SX.plus(S, SX.sq(sx.at(3)));
-        S = SX.minus(S, SX.sq(sx.at(4)));
-        S = SX.plus(S, SX.sq(sx.at(5)));
-        S = SX.plus(S, SX.sq(sx.at(6)));
-        S = SX.minus(S, SX.sq(sx.at(7)));
-        S = SX.plus(S, SX.sq(sx.at(8)));
-        S = SX.minus(S, SX.sq(sx.at(9)));*/
- /*
-        SXColVec X = new SXColVec(sx);
-        SXScalar S = SXScalar.sumSq(X, new int[]{0,11,1,2,3,5,6,8});
-        S = S.sub(SXScalar.sumSq(X, new int[]{10,12,13,14,15,4,7,9}));
-
-        // var T1 = 2*(X[0]*X[11]-X[10]*X[12]+X[13]*X[9]-X[14]*X[7]+X[15]*X[4]-X[1]*X[8]+X[2]*X[6]
-        // -X[3]*X[5]);
-        SXScalar T1 = SXScalar.sumProd(X, new int[]{0,13,15,2}, new int[]{11,9,4,6});
-        T1 = T1.sub(SXScalar.sumProd(X, new int[]{10,14,1,3}, new int[]{12,7,8,5}));
-
-        // var T2 = 2*(X[0]*X[12]-X[10]*X[11]+X[13]*X[8]-X[14]*X[6]+X[15]*X[3]-X[1]*X[9]+X[2]*X[7]-X[4]*X[5]);
-        SXScalar T2 = SXScalar.sumProd(X, new int[]{0,13,15,2}, new int[]{12,8,3,7});
-        T2 = T2.sub(SXScalar.sumProd(X, new int[]{10,14,1,4}, new int[]{11,6,9,5}));
-
-        //var T3 = 2*(X[0]*X[13]-X[10]*X[1]+X[11]*X[9]-X[12]*X[8]+X[14]*X[5]-X[15]*X[2]+X[3]*X[7]-X[4]*X[6]);
-        SXScalar T3 = SXScalar.sumProd(X, new int[]{0,11,14,3}, new int[]{13,9,5,7});
-        T3 = T3.sub(SXScalar.sumProd(X, new int[]{10,12,15,4}, new int[]{1,8,2,6})).muls(2);
-
-        //var T4 = 2*(X[0]*X[14]-X[10]*X[2]-X[11]*X[7]+X[12]*X[6]-X[13]*X[5]+X[15]*X[1]+X[3]*X[9]-X[4]*X[8]);
-        SXScalar T4 = SXScalar.sumProd(X, new int[]{0,12,15,3}, new int[]{14,6,1,9});
-        T4 = T4.sub(SXScalar.sumProd(X, new int[]{10,11,13,4}, new int[]{2,7,5,8})).muls(2d);
-
-        //var T5 = 2*(X[0]*X[15]-X[10]*X[5]+X[11]*X[4]-X[12]*X[3]+X[13]*X[2]-X[14]*X[1]+X[6]*X[9]-X[7]*X[8]);
-        SXScalar T5 = SXScalar.sumProd(X, new int[]{0,11,13,6}, new int[]{15,4,2,9});
-        T5 = T5.sub(SXScalar.sumProd(X, new int[]{10,12,14,7}, new int[]{5,3,1,8})).muls(2d);
-
-        //var TT = -T1*T1+T2*T2+T3*T3+T4*T4+T5*T5;
-        SXScalar TT = T1.sq().add(T2.sq()).add(T3.sq()).add(T4.sq()).add(T5.sq()).negate();
-
-        //var N = ((S*S+TT)**0.5+S)**0.5, N2 = N*N;
-        SXScalar N = S.sq().add(TT).pow(0.5).add(S);
-        SXScalar N2 = N.sq();
-
-        //var M = 2**0.5*N/(N2*N2+TT);
-        SXScalar M = SXScalar.pow(2d, N.muls(0.5d).div(N2.sq().add(TT)));
-
-        //var A = N2*M, [B1,B2,B3,B4,B5] = [-T1*M,-T2*M,-T3*M,-T4*M,-T5*M];
-        SXScalar A = N2.mul(M);
-        //TODO
-        // neue Methode mit function als argument um negate().mul(M) übergeben zu können
-        // damit die nachfolgenden Zeilen in eine zusammengezogen werden können
-        SXScalar B1 = T1.negate().mul(M);
-        SXScalar B2 = T2.negate().mul(M);
-        SXScalar B3 = T3.negate().mul(M);
-        SXScalar B4 = T4.negate().mul(M);
-        SXScalar B5 = T5.negate().mul(M);
-         */
-
- /*return rotor(A*X[0] + B1*X[11] - B2*X[12] - B3*X[13] - B4*X[14] - B5*X[15],
-        A*X[1] - B1*X[8] + B2*X[9] + B3*X[10] - B4*X[15] + B5*X[14],
-        A*X[2] + B1*X[6] - B2*X[7] + B3*X[15] + B4*X[10] - B5*X[13],
-        A*X[3] - B1*X[5] - B2*X[15] - B3*X[7] - B4*X[9] + B5*X[12],
-        A*X[4] - B1*X[15] - B2*X[5] - B3*X[6] - B4*X[8] + B5*X[11],
-        A*X[5] - B1*X[3] + B2*X[4] - B3*X[14] + B4*X[13] + B5*X[10],
-        A*X[6] + B1*X[2] + B2*X[14] + B3*X[4] - B4*X[12] - B5*X[9],
-        A*X[7] + B1*X[14] + B2*X[2] + B3*X[3] - B4*X[11] - B5*X[8],
-        A*X[8] - B1*X[1] - B2*X[13] + B3*X[12] + B4*X[4] + B5*X[7],
-        A*X[9] - B1*X[13] - B2*X[1] + B3*X[11] + B4*X[3] + B5*X[6],
-        A*X[10] + B1*X[12] - B2*X[11] - B3*X[1] - B4*X[2] - B5*X[5],
-        A*X[11] + B1*X[0] + B2*X[10] - B3*X[9] + B4*X[7] - B5*X[4],
-        A*X[12] + B1*X[10] + B2*X[0] - B3*X[8] + B4*X[6] - B5*X[3],
-        A*X[13] - B1*X[9] + B2*X[8] + B3*X[0] - B4*X[5] + B5*X[2],
-        A*X[14] + B1*X[7] - B2*X[6] + B3*X[5] + B4*X[0] - B5*X[1],
-        A*X[15] - B1*X[4] + B2*X[3] - B3*X[2] + B4*X[1] + B5*X[0]);*/
-        //TODO
-        throw new RuntimeException("not yet implemented!");
-    }
-
-    /*
-    function Normalize(X) {
-        var S = X[0]*X[0]-X[10]*X[10]+X[11]*X[11]-X[12]*X[12]-X[13]*X[13]-X[14]*X[14]-X[15]*X[15]+X[1]*X[1]
-        +X[2]*X[2]+X[3]*X[3]-X[4]*X[4]+X[5]*X[5]+X[6]*X[6]-X[7]*X[7]+X[8]*X[8]-X[9]*X[9];
-        var T1 = 2*(X[0]*X[11]-X[10]*X[12]+X[13]*X[9]-X[14]*X[7]+X[15]*X[4]-X[1]*X[8]+X[2]*X[6]-X[3]*X[5]);
-        var T2 = 2*(X[0]*X[12]-X[10]*X[11]+X[13]*X[8]-X[14]*X[6]+X[15]*X[3]-X[1]*X[9]+X[2]*X[7]-X[4]*X[5]);
-        var T3 = 2*(X[0]*X[13]-X[10]*X[1]+X[11]*X[9]-X[12]*X[8]+X[14]*X[5]-X[15]*X[2]+X[3]*X[7]-X[4]*X[6]);
-        var T4 = 2*(X[0]*X[14]-X[10]*X[2]-X[11]*X[7]+X[12]*X[6]-X[13]*X[5]+X[15]*X[1]+X[3]*X[9]-X[4]*X[8]);
-        var T5 = 2*(X[0]*X[15]-X[10]*X[5]+X[11]*X[4]-X[12]*X[3]+X[13]*X[2]-X[14]*X[1]+X[6]*X[9]-X[7]*X[8]);
-        var TT = -T1*T1+T2*T2+T3*T3+T4*T4+T5*T5;
-        var N = ((S*S+TT)**0.5+S)**0.5, N2 = N*N;
-        var M = 2**0.5*N/(N2*N2+TT);
-        var A = N2*M, [B1,B2,B3,B4,B5] = [-T1*M,-T2*M,-T3*M,-T4*M,-T5*M];
-        return rotor(A*X[0] + B1*X[11] - B2*X[12] - B3*X[13] - B4*X[14] - B5*X[15],
-        A*X[1] - B1*X[8] + B2*X[9] + B3*X[10] - B4*X[15] + B5*X[14],
-        A*X[2] + B1*X[6] - B2*X[7] + B3*X[15] + B4*X[10] - B5*X[13],
-        A*X[3] - B1*X[5] - B2*X[15] - B3*X[7] - B4*X[9] + B5*X[12],
-        A*X[4] - B1*X[15] - B2*X[5] - B3*X[6] - B4*X[8] + B5*X[11],
-        A*X[5] - B1*X[3] + B2*X[4] - B3*X[14] + B4*X[13] + B5*X[10],
-        A*X[6] + B1*X[2] + B2*X[14] + B3*X[4] - B4*X[12] - B5*X[9],
-        A*X[7] + B1*X[14] + B2*X[2] + B3*X[3] - B4*X[11] - B5*X[8],
-        A*X[8] - B1*X[1] - B2*X[13] + B3*X[12] + B4*X[4] + B5*X[7],
-        A*X[9] - B1*X[13] - B2*X[1] + B3*X[11] + B4*X[3] + B5*X[6],
-        A*X[10] + B1*X[12] - B2*X[11] - B3*X[1] - B4*X[2] - B5*X[5],
-        A*X[11] + B1*X[0] + B2*X[10] - B3*X[9] + B4*X[7] - B5*X[4],
-        A*X[12] + B1*X[10] + B2*X[0] - B3*X[8] + B4*X[6] - B5*X[3],
-        A*X[13] - B1*X[9] + B2*X[8] + B3*X[0] - B4*X[5] + B5*X[2],
-        A*X[14] + B1*X[7] - B2*X[6] + B3*X[5] + B4*X[0] - B5*X[1],
-        A*X[15] - B1*X[4] + B2*X[3] - B3*X[2] + B4*X[1] + B5*X[0]);
-    }
-     */
+   
     /**
      * General inverse implemented in an efficient cga specific way.
      *
