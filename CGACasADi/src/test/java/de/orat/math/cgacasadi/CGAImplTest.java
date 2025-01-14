@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi;
 
+import de.dhbw.rahmlab.casadi.api.Trigometry;
 import util.cga.CGAMultivectorSparsity;
 import de.orat.math.gacalc.api.ExprGraphFactory;
 import de.orat.math.gacalc.api.FunctionSymbolic;
@@ -8,6 +9,7 @@ import de.orat.math.gacalc.api.MultivectorPurelySymbolic;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseDoubleColumnVector;
+import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +17,9 @@ import java.util.List;
 import java.util.PrimitiveIterator.OfDouble;
 import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 
 /**
@@ -408,6 +412,110 @@ public class CGAImplTest {
         }
     }
 
+    @Test
+    @Disabled
+    public void testExpOfBivectorRandom() {
+
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        // input is bivector is grade 2
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a",2);
+        
+        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorSymbolic res = mva.exp();
+        System.out.println("expOfBivectorRandom: " + res.toString());
+
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+
+        // input is bivector
+        double[] values_A = exprGraphFactory.createRandomMultivector(2);
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+
+        double[] test = exp(values_A);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        try {
+            System.out.println("random a=" + arg_a.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("exp(a)=" + mv.toString());
+            System.out.println("test exp(a)=" + testMatrix.toString());
+
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
+    // test only array based implementations
+    @Test
+    public void testLogExpOfBivectorRandomArrayBased() {
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        // input is bivector
+        double[] values_A = exprGraphFactory.createRandomMultivector(2);
+        DenseDoubleColumnVector valuesMatrix = new DenseDoubleColumnVector(values_A);
+        double[] test = log(exp(values_A));
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        try {
+            System.out.println("random a=" + valuesMatrix.toString());
+            System.out.println("test log(exp(a)==" + testMatrix.toString());
+            double eps = 0.00001;
+            assertTrue(equals(values_A, test, eps));
+        } catch (Exception e) {}
+    }
+    
+    
+    @Test
+    @Disabled
+    public void testLogOfRotorRandom() {
+
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        // input is rotor 
+        MultivectorPurelySymbolic mva = exprGraphFactory.
+            createMultivectorPurelySymbolic("a", new int[]{0,2,4});
+        
+        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorSymbolic res = mva.log();
+        System.out.println("logOfRotorRandom: " + res.toString());
+
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+
+        // hier muss ich einen random rotor erzeugen
+        double[] values_A = createRandomRotor();
+        
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+
+        double[] test = log(values_A);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        try {
+            System.out.println("random a=" + arg_a.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("log(a)=" + mv.toString());
+            System.out.println("test log(a)=" + testMatrix.toString());
+
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
     /**
      * A versor is a multivector that can be expressed as the geometric product of a number of non-null
      * 1-vectors.
@@ -1192,7 +1300,7 @@ public class CGAImplTest {
     public void testNormalizeRandom() {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv");
-        MultivectorSymbolic result = mv.normalize();
+        MultivectorSymbolic result = mv.normalize(); // normalize by squared norm
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mv);
@@ -1220,6 +1328,78 @@ public class CGAImplTest {
         }
     }
 
+    /**
+     * Creates a general rotor with 16 indizes, this is not only grade 2
+     * @return 
+     */
+    private static double[] createRandomRotor(){
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        return exprGraphFactory.createRandomMultivector(CGACayleyTable.getEvenIndizes());
+    }
+    /*
+    
+    private static double[] createRandomRotor() {
+        double[] result = new double[32];
+        Random random = new Random();
+        OfDouble rand = random.doubles(-1, 1).iterator();
+        //TODO scalar, e12, e23, e31 konstruieren, d.h. die betreffenden blades
+        result[0] = rand.next();
+        // 6, 10, 7
+        result[6] = rand.next();
+        result[10] = rand.next();
+        result[7] = rand.next();
+        // beschaffen und random werte hineinsetzen
+        return result;
+    }
+    */
+    
+    @Test
+    public void testNormalizeRotorRandom() {
+
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        
+        MultivectorPurelySymbolic mva = exprGraphFactory.
+            createMultivectorPurelySymbolic("a", new int[]{0,2,4});
+        
+        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorSymbolic res = mva.normalizeRotor();
+        System.out.println("normalizeRotorRandom: " + res.toString());
+
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+
+        // hier muss ich einen random rotor erzeugen
+        double[] values_A = createRandomRotor();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+
+        double[] test = normalizeRotor(values_A);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        //FIXME liefert anderes Ergebnis
+        double[] test2 = normalize(values_A);
+        DenseDoubleColumnVector test2Matrix = new DenseDoubleColumnVector(test2);
+        
+        try {
+            System.out.println("random a=" + arg_a.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("normalizeRotor(a)=" + mv.toString());
+            System.out.println("test normalizeRotor(a)=" + testMatrix.toString());
+            System.out.println("test2 normalize(a)="+test2Matrix.toString());
+            
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
     /**
      * Vergleich java reference impl mit versorInverse
      */
@@ -1688,27 +1868,49 @@ public class CGAImplTest {
         return res;
     }
 
-    private static double[] normalize(double[] R) {
-        return muls(R, 1d / norm(R));
+    //FIXME liefert anderes Ergebnis als normalizeRotor()
+    private static double[] normalize(double[] X) {
+        return muls(X, 1d / norm(X));
     }
 
+    // Multivector with even elements only inclusive the scalar
+    private static double[] rotor(double[] X){
+        int[] indizes = CGACayleyTable.getEvenIndizes();
+        double[] R = new double[indizes.length];
+        for (int i=0;i<indizes.length;i++){
+            R[i] = X[indizes[i]];
+        }
+        return R;
+    }
+    private static double[] bivector(double[] X){
+        int[] indizes = CGACayleyTable.getBivectorIndizes();
+        double[] B = new double[indizes.length];
+        for (int i=0;i<indizes.length;i++){
+            B[i] = X[indizes[i]];
+        }
+        return B;
+    }
+    
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // renormalization in R41 (CGA)
-    // needed to calculate square roots
-    private static double[] normalizeEvenElement(double[] R) {
-        var S = R[0] * R[0] - R[10] * R[10] + R[11] * R[11] - R[12] * R[12] - R[13] * R[13] - R[14] * R[14] - R[15] * R[15] + R[1] * R[1]
-            + R[2] * R[2] + R[3] * R[3] - R[4] * R[4] + R[5] * R[5] + R[6] * R[6] - R[7] * R[7] + R[8] * R[8] - R[9] * R[9];
-        var T1 = 2 * (R[0] * R[11] - R[10] * R[12] + R[13] * R[9] - R[14] * R[7] + R[15] * R[4] - R[1] * R[8] + R[2] * R[6] - R[3] * R[5]);
-        var T2 = 2 * (R[0] * R[12] - R[10] * R[11] + R[13] * R[8] - R[14] * R[6] + R[15] * R[3] - R[1] * R[9] + R[2] * R[7] - R[4] * R[5]);
-        var T3 = 2 * (R[0] * R[13] - R[10] * R[1] + R[11] * R[9] - R[12] * R[8] + R[14] * R[5] - R[15] * R[2] + R[3] * R[7] - R[4] * R[6]);
-        var T4 = 2 * (R[0] * R[14] - R[10] * R[2] - R[11] * R[7] + R[12] * R[6] - R[13] * R[5] + R[15] * R[1] + R[3] * R[9] - R[4] * R[8]);
-        var T5 = 2 * (R[0] * R[15] - R[10] * R[5] + R[11] * R[4] - R[12] * R[3] + R[13] * R[2] - R[14] * R[1] + R[6] * R[9] - R[7] * R[8]);
-        var TT = -T1 * T1 + T2 * T2 + T3 * T3 + T4 * T4 + T5 * T5;
+    private static double[] normalizeRotor(double[] X) {
+        double[] R = rotor(X);
+        // var S  = R[0]*R[0]-R[10]*R[10]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]+R[1]*R[1]
+        double S  = R[0]*R[0]-R[10]*R[10]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]+R[1]*R[1]
+        //   +R[2]*R[2]+R[3]*R[3]-R[4]*R[4]+R[5]*R[5]+R[6]*R[6]-R[7]*R[7]+R[8]*R[8]-R[9]*R[9];
+             +R[2]*R[2]+R[3]*R[3]-R[4]*R[4]+R[5]*R[5]+R[6]*R[6]-R[7]*R[7]+R[8]*R[8]-R[9]*R[9];
+        
+        double T1 = 2d*(R[0]*R[11]-R[10]*R[12]+R[13]*R[9]-R[14]*R[7]+R[15]*R[4]-R[1]*R[8]+R[2]*R[6]-R[3]*R[5]);
+        double T2 = 2d*(R[0]*R[12]-R[10]*R[11]+R[13]*R[8]-R[14]*R[6]+R[15]*R[3]-R[1]*R[9]+R[2]*R[7]-R[4]*R[5]);
+        double T3 = 2d*(R[0]*R[13]-R[10]*R[1]+R[11]*R[9]-R[12]*R[8]+R[14]*R[5]-R[15]*R[2]+R[3]*R[7]-R[4]*R[6]);
+        double T4 = 2d*(R[0]*R[14]-R[10]*R[2]-R[11]*R[7]+R[12]*R[6]-R[13]*R[5]+R[15]*R[1]+R[3]*R[9]-R[4]*R[8]);
+        double T5 = 2d*(R[0]*R[15]-R[10]*R[5]+R[11]*R[4]-R[12]*R[3]+R[13]*R[2]-R[14]*R[1]+R[6]*R[9]-R[7]*R[8]);
+        double TT = -T1 * T1 + T2 * T2 + T3 * T3 + T4 * T4 + T5 * T5;
         //var N = ((S*S+TT)**.5+S)**.5, N2 = N*N;
-        double N = Math.pow((Math.pow(S * S + TT, 0.5d) + S), 0.5d);
-        double N2 = N * N;
+        double N = Math.pow((Math.pow(S*S+TT, 0.5d) + S), 0.5d);
+        double N2 = N*N;
         //var ND = 2**.5*N/(N2*N2+TT);
-        double ND = Math.pow(2, 0.5) * N / (N2 * N2 + TT);
+        double ND = Math.pow(2d, 0.5) * N/(N2*N2+TT);
         double C = N2 * ND;
         double D1 = -T1 * ND;
         double D2 = -T2 * ND;
@@ -1749,14 +1951,16 @@ public class CGAImplTest {
 
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector only for CGA (R41)
-    private static double[] exp(double[] B) {
-        // B*B = S + Ti*ei*I
-        double S = -B[0] * B[0] - B[1] * B[1] - B[2] * B[2] + B[3] * B[3] - B[4] * B[4] - B[5] * B[5] + B[6] * B[6] - B[7] * B[7] + B[8] * B[8] + B[9] * B[9];
-        double T1 = 2 * (B[4] * B[9] - B[5] * B[8] + B[6] * B[7]); //e2345
-        double T2 = 2 * (B[1] * B[9] - B[2] * B[8] + B[3] * B[7]); //e1345
-        double T3 = 2 * (B[0] * B[9] - B[2] * B[6] + B[3] * B[5]); //e1245
-        double T4 = 2 * (B[0] * B[8] - B[1] * B[6] + B[3] * B[4]); //e1235
-        double T5 = 2 * (B[0] * B[7] - B[1] * B[5] + B[2] * B[4]); //e1234
+    private static double[] exp(double[] X) {
+        double[] B = bivector(X);
+        
+        // var S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
+        double S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
+        double T1 = 2d * (B[4] * B[9] - B[5] * B[8] + B[6] * B[7]); //e2345
+        double T2 = 2d * (B[1] * B[9] - B[2] * B[8] + B[3] * B[7]); //e1345
+        double T3 = 2d * (B[0] * B[9] - B[2] * B[6] + B[3] * B[5]); //e1245
+        double T4 = 2d * (B[0] * B[8] - B[1] * B[6] + B[3] * B[4]); //e1235
+        double T5 = 2d * (B[0] * B[7] - B[1] * B[5] + B[2] * B[4]); //e1234
 
         // Calculate the norms of the invariants
         double Tsq = -T1 * T1 - T2 * T2 - T3 * T3 - T4 * T4 + T5 * T5;
@@ -1775,14 +1979,16 @@ public class CGAImplTest {
             cp = Math.cos(lp);
             sp = Math.sin(lp) / lp;
         } else {
-            cp = 1;
-            sp = 1;
+            cp = 1d;
+            sp = 1d;
         }
+        //System.out.println("sc="+String.valueOf(sc)+", lm="+String.valueOf(lm)+", lp="+String.valueOf(lp)+",cp="+String.valueOf(cp)+", sp="+String.valueOf(sp));
+        
         //var [cm, sm] = [cos(lm), lm==0?1:sin(lm)/lm]
         double cm = Math.cos(lm);
         double sm;
         if (lm == 0) {
-            sm = 1;
+            sm = 1d;
         } else {
             sm = Math.sin(lm) / lm;
         }
@@ -1820,6 +2026,111 @@ public class CGAImplTest {
         return result;
     }
 
+    // exponential by taylor series
+   /* private static double[] expSeries(double[] X) {
+         double R = 1d;
+         B = 
+         double[] C = B;
+         double f = 1;
+         for (int i=1; i<20; ++i){
+             R = R + C/f;
+             C = C*B
+             f = f* (i+1);
+         }
+    }*/
+    
+    private double[] mul(double[] A, double[] B){
+        double[] result = new double[A.length];
+        for (int i=0;i<A.length;i++){
+        
+        }
+        return result;
+    }
+    
+    // nur für einen rotor
+    private static double[] log(double[] X){
+        
+        // B*B = S + T*e1234
+        double[] R = rotor(X);
+        
+        double S = R[0]*R[0]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]-1;
+  
+        double T1 = 2d*R[0]*R[15];   //e2345
+        double T2 = 2d*R[0]*R[14];   //e1345
+        double T3 = 2d*R[0]*R[13];   //e1245
+        double T4 = 2d*R[0]*R[12];   //e1235
+        double T5 = 2d*R[0]*R[11];   //e1234
+  
+        double Tsq      = -T1*T1-T2*T2-T3*T3-T4*T4+T5*T5;
+        double norm     = Math.sqrt(S*S - Tsq);
+        if (norm==0 && S==0){   // at most a single translation
+            double[] result = new double[32];
+            result[6] = R[1];
+            result[7] = R[2];
+            result[8] = R[3];
+            result[9] = R[4];
+            result[10] = R[5];
+            result[11] = R[6];
+            result[12] = R[7];
+            result[13] = R[8];
+            result[14] = R[9];
+            result[15] = R[10];
+            return result;
+        }
+             
+        double lambdap  = 0.5*S+0.5*norm;
+        // lm is always a rotation, lp can be boost, translation, rotation
+        double lp = Math.sqrt(Math.abs(lambdap));
+        double lm = Math.sqrt(-0.5*S+0.5*norm);
+        //double theta2   = lm==0?0:atan2(lm, R[0]); 
+        double theta2 = 0d;
+        if (lm != 0d) theta2 = Math.atan2(lm, R[0]);
+        
+        // var theta1   = lambdap<0?asin(lp/cos(theta2)):lambdap>0?atanh(lp/R[0]):lp/R[0];
+        double theta1;
+        if (lambdap < 0){
+            theta1 = Math.asin(lp/Math.cos(theta2));
+        } else if (lambdap > 0){
+            theta1 = Trigometry.atanh(lp/R[0]);
+        } else {
+            theta1 = lp/R[0];
+        }
+        // var [l1, l2] = [lp==0?0:theta1/lp, lm==0?0:theta2/lm]
+        double l1=0d;
+        if (lp != 0){
+            l1 = theta1/lp;
+        }
+        double l2=0d;
+        if (lm != 0){
+            l2 = theta2/lm;
+        }
+        //var [A, B1, B2, B3, B4, B5]   = [
+        //  (l1-l2)*0.5*(1+S/norm) + l2,  -0.5*T1*(l1-l2)/norm, -0.5*T2*(l1-l2)/norm, 
+        //  -0.5*T3*(l1-l2)/norm,         -0.5*T4*(l1-l2)/norm, -0.5*T5*(l1-l2)/norm, 
+        //];
+        double A = (l1-l2)*0.5*(1+S/norm) + l2;
+        double B1 = -0.5*T1*(l1-l2)/norm;
+        double B2 = -0.5*T2*(l1-l2)/norm;
+        double B3 = -0.5*T3*(l1-l2)/norm;
+        double B4 = -0.5*T4*(l1-l2)/norm;
+        double B5 = -0.5*T5*(l1-l2)/norm;
+        
+        // create the final bivector
+        double[] result = new double[32];
+        result[6] = (A*R[1]+B3*R[10]+B4*R[9]-B5*R[8]);
+        result[7] = (A*R[2]+B2*R[10]-B4*R[7]+B5*R[6]);
+        result[8] = (A*R[3]-B2*R[9]-B3*R[7]-B5*R[5]);
+        result[9] = (A*R[4]-B2*R[8]-B3*R[6]-B4*R[5]);
+        result[10] = (A*R[5]+B1*R[10]+B4*R[4]-B5*R[3]);
+        result[11] = (A*R[6]-B1*R[9]+B3*R[4]+B5*R[2]);
+        result[12] = (A*R[7]-B1*R[8]+B3*R[3]+B4*R[2]);
+        result[13] = (A*R[8]+B1*R[7]+B2*R[4]-B5*R[1]);
+        result[14] = (A*R[9]+B1*R[6]+B2*R[3]-B4*R[1]);
+        result[15] = (A*R[10]-B1*R[5]-B2*R[2]-B3*R[1]);
+        return result;
+    }
+    
+    
     private boolean equals(double[] a, double[] b, double eps) {
         if (a.length != b.length) {
             throw new IllegalArgumentException("a.length != b.length");
@@ -1884,20 +2195,6 @@ public class CGAImplTest {
         result[13] = rand.next();
         result[14] = result[13];
         //0,8,9,11,12,13,14
-        return result;
-    }
-
-    private static double[] createRandomRotor() {
-        double[] result = new double[32];
-        Random random = new Random();
-        OfDouble rand = random.doubles(-1, 1).iterator();
-        //TODO scalar, e12, e23, e31 konstruieren, d.h. die betreffenden blades
-        result[0] = rand.next();
-        // 6, 10, 7
-        result[6] = rand.next();
-        result[10] = rand.next();
-        result[7] = rand.next();
-        // beschaffen und random werte hineinsetzen
         return result;
     }
 

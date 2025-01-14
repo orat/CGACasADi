@@ -1,5 +1,9 @@
 package de.orat.math.cgacasadi;
 
+import de.dhbw.rahmlab.casadi.api.Util;
+import static de.dhbw.rahmlab.casadi.api.Util.toIntArr;
+import static de.dhbw.rahmlab.casadi.api.Util.toLongArr;
+import static de.dhbw.rahmlab.casadi.api.Util.toStdVectorDouble;
 import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
@@ -25,30 +29,18 @@ import de.orat.math.sparsematrix.SparseStringMatrix;
  */
 public class CasADiUtil {
 
-    private static long[] toLongArr(int[] values) {
-        long[] result = new long[values.length];
-        for (int i = 0; i < values.length; i++) {
-            result[i] = values[i];
-        }
-        return result;
+    public static CGAMultivectorSparsity toCGAMultivectorSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
+        return new CGAMultivectorSparsity(toIntArr(sxSparsity.get_row()));
     }
 
-    private static int[] toIntArr(StdVectorCasadiInt values) {
-        int[] result = new int[values.size()];
-        for (int i = 0; i < values.size(); i++) {
-            result[i] = values.get(i).intValue();
-        }
-        return result;
+    public static SX toSX(SparseDoubleMatrix m) {
+        return new SX(toCasADiSparsity(m.getSparsity()), Util.toSX(m.nonzeros()));
     }
-
-    private static int[] toIntArr(long[] values) {
-        int[] result = new int[values.length];
-        for (int i = 0; i < values.length; i++) {
-            result[i] = (int) values[i];
-        }
-        return result;
+    
+    public static SX createScalar() {
+        return new SX(toCasADiSparsity(CGAMultivectorSparsity.scalar()));
     }
-
+    
     public static MatrixSparsity toMatrixSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
         //TODO
         // kann ich identifizieren ob es ein Row- oder Column -Vektor ist und wenn ja
@@ -62,23 +54,6 @@ public class CasADiUtil {
         return new ColumnVectorSparsity((int) sxSparsity.rows(),
             toIntArr(sxSparsity.get_row()));
     }
-
-    public static CGAMultivectorSparsity toCGAMultivectorSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
-        return new CGAMultivectorSparsity(toIntArr(sxSparsity.get_row()));
-    }
-
-    public static SX toSX(SparseDoubleMatrix m) {
-        return new SX(toCasADiSparsity(m.getSparsity()), toSX(m.nonzeros()));
-    }
-
-    public static SX toSX(double[] values) {
-        return new SX(new StdVectorVectorDouble(new StdVectorDouble[]{toStdVectorDouble(values)}));
-    }
-
-    public static SX createScalar() {
-        return new SX(toCasADiSparsity(CGAMultivectorSparsity.scalar()));
-    }
-
     /**
      * Create a corresponding matrix for geometric product calculation, considering of the sparsity of the
      * input multivector.
@@ -250,14 +225,6 @@ public class CasADiUtil {
     public static DM toDM(int n_row, double[] nonzeros, int[] rows) {
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(n_row, rows);
         return new DM(toCasADiSparsity(sparsity), toStdVectorDouble(nonzeros), false);
-    }
-
-    public static StdVectorDouble toStdVectorDouble(double[] values) {
-        StdVectorDouble result = new StdVectorDouble();
-        for (int i = 0; i < values.length; i++) {
-            result.add(values[i]);
-        }
-        return result;
     }
 
     /**

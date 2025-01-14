@@ -30,6 +30,10 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     }
 
+    public int getBasisBladesCount(){
+        return baseCayleyTable.getBladesCount();
+    }
+    
     @Override
     public CGAConstantsSymbolic constantsSymbolic() {
         return CGAConstantsSymbolic.instance;
@@ -52,10 +56,16 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name, int grade) {
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(
+                                String name, int grade) {
         return SparseCGASymbolicMultivector.create(name, grade);
     }
 
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(
+                                String name, int[] grades) {
+        return SparseCGASymbolicMultivector.create(name, grades);
+    }
+    
     @Override
     public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, SparseDoubleMatrix sparseVector) {
         return SparseCGASymbolicMultivector.create(name, sparseVector);
@@ -78,10 +88,10 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     // helper methods
-    @Override
+    /*@Override
     public double[] createRandomMultivector() {
-        return createRandomMultivector(baseCayleyTable.getBladesCount());
-    }
+        return impl.createRandomMultivector(baseCayleyTable.getBladesCount());
+    }*/
 
     public double[] createRandomKVector(int grade) {
         double[] result = new double[baseCayleyTable.getRows()];
@@ -124,7 +134,9 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     // create function
     @Override
-    public CGASymbolicFunction createFunctionSymbolic(String name, List<PurelySymbolicCachedSparseCGASymbolicMultivector> parameters, List<SparseCGASymbolicMultivector> returns) {
+    public CGASymbolicFunction createFunctionSymbolic(String name, 
+                List<PurelySymbolicCachedSparseCGASymbolicMultivector> parameters, 
+                List<SparseCGASymbolicMultivector> returns) {
         return new CGASymbolicFunction(name, parameters, returns);
     }
 
