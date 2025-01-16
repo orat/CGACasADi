@@ -414,7 +414,7 @@ public class CGAImplTest {
     }
 
     @Test
-    @Disabled
+    //@Disabled
     public void testExpOfBivectorRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -456,7 +456,7 @@ public class CGAImplTest {
     }
     
     @Test
-    @Disabled
+    //@Disabled
     public void testExpLogOfNormalizedRotorRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -498,7 +498,7 @@ public class CGAImplTest {
     }
     
     @Test
-    @Disabled
+    //@Disabled
     public void testLogExpOfBivectorRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -555,8 +555,6 @@ public class CGAImplTest {
         } catch (Exception e) {}
     }
     
-    @Test
-    @Disabled
     public void testExpOfBivectorRandomArrayBasedByTaylorSeries() {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is bivector
@@ -576,7 +574,7 @@ public class CGAImplTest {
     }
         
     @Test
-    @Disabled
+    //@Disabled
     public void testLogOfNormalizedRotorRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -2151,6 +2149,10 @@ public class CGAImplTest {
         // Create the final rotor.
         double[] result = new double[32];
         result[0] = cp  * cm; // cp und cm scheinen beide falsch zu sein
+        //result[0] = 1d;
+        //result[0] = cm; //cp;
+        //result[0] = Tsq;
+        
         result[6] = (B[0] * alpha + B[7] * beta5 - B[8] * beta4 + B[9] * beta3);
         result[7] = (B[1] * alpha - B[5] * beta5 + B[6] * beta4 - B[9] * beta2);
         result[8] = (B[2] * alpha + B[4] * beta5 - B[6] * beta3 + B[8] * beta2);
@@ -2215,7 +2217,7 @@ public class CGAImplTest {
     private static double[] log(double[] X){
         double[] R = rotor(X);
         
-        double S = R[0]*R[0]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]-1;
+        double S = R[0]*R[0]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]-1d;
   
         double T1 = 2d*R[0]*R[15];   //e2345
         double T2 = 2d*R[0]*R[14];   //e1345

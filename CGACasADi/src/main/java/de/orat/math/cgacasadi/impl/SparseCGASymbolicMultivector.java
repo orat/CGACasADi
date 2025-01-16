@@ -171,7 +171,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * cayley-table
      */
     SX getSX(String bladeName) {
-        int row = baseCayleyTable.getBasisBladeRow(bladeName);
+        int row = baseCayleyTable.getBasisBladeIndex(bladeName);
         if (row == -1) {
             throw new IllegalArgumentException("The given bladeName ="
                 + bladeName + " does not exist in the cayley table!");
@@ -505,12 +505,14 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return create(SX.acos(sx));
     }
     
-    
+    // non linear operators/functions
+    // [8] M Roelfs and S De Keninck. 2021.
+    // Graded Symmetry Groups: Plane and Simple. arXiv:2107.03771 [math-ph]
+    // https://arxiv.org/pdf/2107.03771
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector only for CGA (R41)
     @Override
     public SparseCGASymbolicMultivector exp() {
-        
         if (!isBivector()){
             throw new IllegalArgumentException("exp() defined for bivectors only!");
         }
@@ -524,7 +526,8 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         SXScalar T1 = SXScalar.sumProd(B, new int[]{4,6}, new int[]{9,7}).
             sub(B.get(5).mul(B.get(8))).muls(2d);
         // 2*(B[1]*B[9]-B[2]*B[8]+B[3]*B[7]), //e1345
-        SXScalar T2 = SXScalar.sumProd(B, new int[]{1,3}, new int[]{9,7}).
+        //SXScalar T2 = SXScalar.sumProd(B, new int[]{1,3}, new int[]{9,7}).
+        SXScalar T2 = B.get(1).mul(B.get(9)).add(B.get(3).mul(B.get(7))).
             sub(B.get(2).mul(B.get(8))).muls(2d);
         // 2*(B[0]*B[9]-B[2]*B[6]+B[3]*B[5]), //e1245
         SXScalar T3 = SXScalar.sumProd(B, new int[]{0,3}, new int[]{9,5}).
@@ -577,6 +580,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         SXElem[] generalRotorValues = new SXElem[]{
             //cp*cm,
             cp.mul(cm).sx.scalar(),
+            //new SXScalar(1d).sx.scalar(),
+            //cm.sx.scalar(),
+            //Tsq.sx.scalar(),
+            
             //(B[0]*alpha+B[7]*beta5-B[8]*beta4+B[9]*beta3),
             B.get(0).mul(alpha).add(B.get(7).mul(beta5)).sub(B.get(8).mul(beta4)).
                 add(B.get(9).mul(beta3)).sx.scalar(),
@@ -617,7 +624,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
    
     /**
-     * CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
+     * CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1<p>
      * 
      * Normalize an even element (a general rotor R with 16 coefficients)
      * X = [1,e12,e13,e14,e15,e23,e24,e25,e34,e35,e45,e1234,e1235,e1245,e1345,e2345]<p>
@@ -765,11 +772,11 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         SXScalar S = R.get(0).sq().add(R.get(11).sq()).sub(R.get(12).sq()). 
                      sub(R.get(13).sq()).sub(R.get(14).sq()).sub(R.get(15).sq()).sub(new SXScalar(1d));
   
-        SXScalar T1 = R.get(0).mul(R.get(15)).muls(2d);   //e2345
+        SXScalar T1 = (new SXScalar(2d)).mul(R.get(0)).mul(R.get(15));   //e2345
         SXScalar T2 = R.get(0).mul(R.get(14)).muls(2d);   //e1345
         SXScalar T3 = R.get(0).mul(R.get(13)).muls(2d);   //e1245
         SXScalar T4 = R.get(0).mul(R.get(12)).muls(2d);   //e1235
-        SXScalar T5 = R.get(0).mul(R.get(1)).muls(2d);    //e1234
+        SXScalar T5 = R.get(0).mul(R.get(11)).muls(2d);    //e1234
   
         //-T1*T1-T2*T2-T3*T3-T4*T4+T5*T5;
         SXScalar Tsq      = T1.sq().negate().sub(T2.sq()).sub(T3.sq()).sub(T4.sq()).add(T5.sq()); 
@@ -839,12 +846,17 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         SXScalar[] Belse = new SXScalar[]{
             //(A*R[1]+B3*R[10]+B4*R[9]-B5*R[8]),
             A.mul(R.get(1)).add(B3.mul(R.get(10))).add(B4.mul(R.get(9))).sub(B5.mul(R.get(8))),
+            
+            //Tsq, 
             //(A*R[2]+B2*R[10]-B4*R[7]+B5*R[6]),
             A.mul(R.get(2)).add(B2.mul(R.get(10))).sub(B4.mul(R.get(7))).add(B5.mul(R.get(6))),
             //(A*R[3]-B2*R[9]-B3*R[7]-B5*R[5]),
             A.mul(R.get(3)).sub(B2.mul(R.get(9))).sub(B3.mul(R.get(7))).sub(B5.mul(R.get(5))),
+            
+
+            //FIXME besonders schlecht
             //(A*R[4]-B2*R[8]-B3*R[6]-B4*R[5]),
-            A.mul(R.get(4)).sub(B2.mul(R.get(8))).sub(B3.mul(R.get(6))).sub(B5.mul(R.get(5))),
+            A.mul(R.get(4)).sub(B2.mul(R.get(8))).sub(B3.mul(R.get(6))).sub(B4.mul(R.get(5))),
             //(A*R[5]+B1*R[10]+B4*R[4]-B5*R[3]),
             A.mul(R.get(5)).add(B1.mul(R.get(10))).add(B4.mul(R.get(4))).sub(B5.mul(R.get(3))),
             //(A*R[6]-B1*R[9]+B3*R[4]+B5*R[2]),
