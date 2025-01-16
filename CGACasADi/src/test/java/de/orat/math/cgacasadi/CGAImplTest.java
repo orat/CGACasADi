@@ -19,6 +19,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import util.CayleyTable;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 
@@ -433,11 +434,94 @@ public class CGAImplTest {
         List<MultivectorNumeric> arguments = new ArrayList<>();
 
         // input is bivector
+        double[] bivector = exprGraphFactory.createRandomMultivector(2);
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(bivector);
+        arguments.add(arg_a);
+
+        double[] test = exp(bivector);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        try {
+            System.out.println("random a (bivector)=" + arg_a.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("exp(a)=" + mv.toString());
+            System.out.println("test exp(a)=" + testMatrix.toString());
+
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    @Disabled
+    public void testExpLogOfNormalizedRotorRandom() {
+
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorPurelySymbolic mva = exprGraphFactory.
+            createMultivectorPurelySymbolic("a",CGACayleyTable.getEvenGrades());
+        
+        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorSymbolic res = mva.log().exp();
+        System.out.println("ExpLogOfNormalizedRotorRandom: " + res.toString());
+
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+
+        double[] normalizedRotor =normalizeRotor(exprGraphFactory.
+            createRandomMultivector(CGACayleyTable.getEvenIndizes()));
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(normalizedRotor);
+        arguments.add(arg_a);
+
+        double[] test = exp(log(normalizedRotor));
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        try {
+            System.out.println("random a (normalized rotor)=" + arg_a.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("exp(log(normalizedRotor(a)))=" + mv.toString());
+            System.out.println("test exp(log(normalizedRotor(a)))=" + testMatrix.toString());
+
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    @Disabled
+    public void testLogExpOfBivectorRandom() {
+
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a",2);
+        
+        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorSymbolic res = mva.exp().log();
+        System.out.println("logExpOfBivectorRandom: " + res.toString());
+
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+
+        // input is bivector
         double[] values_A = exprGraphFactory.createRandomMultivector(2);
         MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         arguments.add(arg_a);
 
-        double[] test = exp(values_A);
+        double[] test = log(exp(values_A));
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
         //System.out.println(testMatrix.toString());
 
@@ -445,8 +529,8 @@ public class CGAImplTest {
             System.out.println("random a=" + arg_a.toString());
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric mv = result2.iterator().next();
-            System.out.println("exp(a)=" + mv.toString());
-            System.out.println("test exp(a)=" + testMatrix.toString());
+            System.out.println("log(exp(a))=" + mv.toString());
+            System.out.println("test log(exp(a))=" + testMatrix.toString());
 
             double eps = 0.00001;
             assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
@@ -471,21 +555,40 @@ public class CGAImplTest {
         } catch (Exception e) {}
     }
     
-    
     @Test
     @Disabled
-    public void testLogOfRotorRandom() {
+    public void testExpOfBivectorRandomArrayBasedByTaylorSeries() {
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        // input is bivector
+        double[] values_A = exprGraphFactory.createRandomMultivector(2);
+        DenseDoubleColumnVector valuesMatrix = new DenseDoubleColumnVector(values_A);
+        double[] test = exp(values_A);
+        double[] testTaylorSeries = expSeries(values_A);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        DenseDoubleColumnVector test2Matrix = new DenseDoubleColumnVector(testTaylorSeries);
+        try {
+            System.out.println("random a=" + valuesMatrix.toString());
+            System.out.println("test exp(a)==" + testMatrix.toString());
+            System.out.println("test expSeries(a)==" + test2Matrix.toString());
+            double eps = 0.00001;
+            assertTrue(equals(test, testTaylorSeries, eps));
+        } catch (Exception e) {}
+    }
+        
+    @Test
+    @Disabled
+    public void testLogOfNormalizedRotorRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is rotor 
         MultivectorPurelySymbolic mva = exprGraphFactory.
-            createMultivectorPurelySymbolic("a", new int[]{0,2,4});
+            createMultivectorPurelySymbolic("a", CGACayleyTable.getEvenGrades());
         
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
         
         MultivectorSymbolic res = mva.log();
-        System.out.println("logOfRotorRandom: " + res.toString());
+        System.out.println("logOfNormalizedRotorRandom: " + res.toString());
 
         List<MultivectorSymbolic> result = new ArrayList<>();
         result.add(res);
@@ -493,22 +596,19 @@ public class CGAImplTest {
 
         List<MultivectorNumeric> arguments = new ArrayList<>();
 
-        // hier muss ich einen random rotor erzeugen
-        double[] values_A = createRandomRotor();
+        double[] normalizedRotor = normalizeRotor(createRandomRotor());
         
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(normalizedRotor);
         arguments.add(arg_a);
 
-        double[] test = log(values_A);
+        double[] test = log(normalizedRotor);
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
-        //System.out.println(testMatrix.toString());
-
         try {
-            System.out.println("random a=" + arg_a.toString());
+            System.out.println("random a (normalized rotor) =" + arg_a.toString());
             List<MultivectorNumeric> result2 = f.callNumeric(arguments);
             MultivectorNumeric mv = result2.iterator().next();
-            System.out.println("log(a)=" + mv.toString());
-            System.out.println("test log(a)=" + testMatrix.toString());
+            System.out.println("log(normalizedRotor(a))=" + mv.toString());
+            System.out.println("test log(normalizedRotor(a))=" + testMatrix.toString());
 
             double eps = 0.00001;
             assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
@@ -852,11 +952,11 @@ public class CGAImplTest {
         
         List<MultivectorNumeric> arguments = new ArrayList<>();
         
-        double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        double[] normalizedRotor = exprGraphFactory.createRandomMultivector();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(normalizedRotor);
         arguments.add(arg_a);
         
-        double[] test = generalInverse(values_A);
+        double[] test = generalInverse(normalizedRotor);
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
         
         try {
@@ -1330,28 +1430,14 @@ public class CGAImplTest {
 
     /**
      * Creates a general rotor with 16 indizes, this is not only grade 2
-     * @return 
+     * 
+     * @return random general rotor
      */
     private static double[] createRandomRotor(){
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         return exprGraphFactory.createRandomMultivector(CGACayleyTable.getEvenIndizes());
     }
-    /*
-    
-    private static double[] createRandomRotor() {
-        double[] result = new double[32];
-        Random random = new Random();
-        OfDouble rand = random.doubles(-1, 1).iterator();
-        //TODO scalar, e12, e23, e31 konstruieren, d.h. die betreffenden blades
-        result[0] = rand.next();
-        // 6, 10, 7
-        result[6] = rand.next();
-        result[10] = rand.next();
-        result[7] = rand.next();
-        // beschaffen und random werte hineinsetzen
-        return result;
-    }
-    */
+   
     
     @Test
     public void testNormalizeRotorRandom() {
@@ -1359,7 +1445,7 @@ public class CGAImplTest {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
         
         MultivectorPurelySymbolic mva = exprGraphFactory.
-            createMultivectorPurelySymbolic("a", new int[]{0,2,4});
+            createMultivectorPurelySymbolic("a", CGACayleyTable.getEvenGrades());
         
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -1373,15 +1459,13 @@ public class CGAImplTest {
 
         List<MultivectorNumeric> arguments = new ArrayList<>();
 
-        // hier muss ich einen random rotor erzeugen
         double[] values_A = createRandomRotor();
         MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
         arguments.add(arg_a);
 
         double[] test = normalizeRotor(values_A);
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
-        //System.out.println(testMatrix.toString());
-
+        
         //FIXME liefert anderes Ergebnis
         double[] test2 = normalize(values_A);
         DenseDoubleColumnVector test2Matrix = new DenseDoubleColumnVector(test2);
@@ -1399,6 +1483,48 @@ public class CGAImplTest {
         } catch (Exception e) {
         }
     }
+    
+    
+    @Test
+    public void testSqrtRotorRandom() {
+
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        
+        MultivectorPurelySymbolic mva = exprGraphFactory.
+            createMultivectorPurelySymbolic("a", CGACayleyTable.getEvenGrades());
+        
+        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorSymbolic res = mva.sqrt();
+        System.out.println("sqrtRotorRandom: " + res.toString());
+
+        List<MultivectorSymbolic> result = new ArrayList<>();
+        result.add(res);
+        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+
+        List<MultivectorNumeric> arguments = new ArrayList<>();
+
+        double[] values_A = createRandomRotor();
+        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        arguments.add(arg_a);
+
+        double[] test = sqrtRotor(values_A);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        
+        try {
+            System.out.println("random a=" + arg_a.toString());
+            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
+            MultivectorNumeric mv = result2.iterator().next();
+            System.out.println("sqrtRotor(a)=" + mv.toString());
+            System.out.println("test sqrtRotor(a)=" + testMatrix.toString());
+            
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
     
     /**
      * Vergleich java reference impl mit versorInverse
@@ -1869,6 +1995,9 @@ public class CGAImplTest {
     }
 
     //FIXME liefert anderes Ergebnis als normalizeRotor()
+    // vergleiche mit der clifford-impl bei up() und mit der default impl in der SparseCGASymbolicMultivector
+    // bzw. im zugehörigen interface der GACalcAPI
+    // vielleicht ist hier die falsche norm()-function verwendet worden
     private static double[] normalize(double[] X) {
         return muls(X, 1d / norm(X));
     }
@@ -1950,23 +2079,38 @@ public class CGAImplTest {
     }
 
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-    // exponential of a bivector only for CGA (R41)
+    // sqrt of a rotor
+    private static double[] sqrtRotor(double[] X){
+        double[] one = new double[X.length];
+        one[0] = 1d;
+        return normalizeRotor(add(one, X));
+    }
+    
+    // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
+    // exponential of a bivector only for CGA (R41), results in a multivector with even elements only
     private static double[] exp(double[] X) {
         double[] B = bivector(X);
         
         // var S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
         double S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
+        // 2*(B[4]*B[9]-B[5]*B[8]+B[6]*B[7]), //e2345
         double T1 = 2d * (B[4] * B[9] - B[5] * B[8] + B[6] * B[7]); //e2345
+        // 2*(B[1]*B[9]-B[2]*B[8]+B[3]*B[7]), //e1345
         double T2 = 2d * (B[1] * B[9] - B[2] * B[8] + B[3] * B[7]); //e1345
+        // 2*(B[0]*B[9]-B[2]*B[6]+B[3]*B[5]), //e1245
         double T3 = 2d * (B[0] * B[9] - B[2] * B[6] + B[3] * B[5]); //e1245
-        double T4 = 2d * (B[0] * B[8] - B[1] * B[6] + B[3] * B[4]); //e1235
+        // 2*(B[0]*B[8]-B[1]*B[6]+B[3]*B[4]), //e1235
+        double T4 = 2d * (B[0] * B[8] - B[1] * B[6] + B[3] * B[4]); 
+        //e1235// 2*(B[0]*B[7]-B[1]*B[5]+B[2]*B[4])  //e1234
         double T5 = 2d * (B[0] * B[7] - B[1] * B[5] + B[2] * B[4]); //e1234
 
         // Calculate the norms of the invariants
         double Tsq = -T1 * T1 - T2 * T2 - T3 * T3 - T4 * T4 + T5 * T5;
+        // var norm = sqrt(S*S - Tsq), sc = -0.5/norm, lambdap = 0.5*S+0.5*norm;
         double norm = Math.sqrt(S * S - Tsq);
         double sc = -0.5 / norm;
         double lambdap = 0.5 * S + 0.5 * norm;
+        // var [lp, lm] = [sqrt(abs(lambdap)), sqrt(-0.5*S+0.5*norm)]
         double lp = Math.sqrt(Math.abs(lambdap));
         double lm = Math.sqrt(-0.5 * S + 0.5 * norm);
         // The associated trig (depending on sign lambdap)
@@ -1982,7 +2126,6 @@ public class CGAImplTest {
             cp = 1d;
             sp = 1d;
         }
-        //System.out.println("sc="+String.valueOf(sc)+", lm="+String.valueOf(lm)+", lp="+String.valueOf(lp)+",cp="+String.valueOf(cp)+", sp="+String.valueOf(sp));
         
         //var [cm, sm] = [cos(lm), lm==0?1:sin(lm)/lm]
         double cm = Math.cos(lm);
@@ -2007,7 +2150,7 @@ public class CGAImplTest {
 
         // Create the final rotor.
         double[] result = new double[32];
-        result[0] = cp * cm;
+        result[0] = cp  * cm; // cp und cm scheinen beide falsch zu sein
         result[6] = (B[0] * alpha + B[7] * beta5 - B[8] * beta4 + B[9] * beta3);
         result[7] = (B[1] * alpha - B[5] * beta5 + B[6] * beta4 - B[9] * beta2);
         result[8] = (B[2] * alpha + B[4] * beta5 - B[6] * beta3 + B[8] * beta2);
@@ -2026,31 +2169,50 @@ public class CGAImplTest {
         return result;
     }
 
-    // exponential by taylor series
-   /* private static double[] expSeries(double[] X) {
-         double R = 1d;
-         B = 
-         double[] C = B;
+    // exponential of a bivector implemented by taylor series
+    //FIXME funktioniert so noch nicht!
+    private static double[] expSeries(double[] B) {
+         double[] R = new double[B.length];
+         R[0] = 1d;
+         double[] C = copy(B);
          double f = 1;
          for (int i=1; i<20; ++i){
-             R = R + C/f;
-             C = C*B
-             f = f* (i+1);
+             R = adda(R, div(C,f));
+             C = mul(C,B);
+             f = f * (i+1);
          }
-    }*/
+         return R;
+    }
     
-    private double[] mul(double[] A, double[] B){
+    private static double[] mul(double[] A, double[] B){
         double[] result = new double[A.length];
         for (int i=0;i<A.length;i++){
-        
+            result[i] = A[i]*B[i];
         }
+        return result;
+    }
+    private static double[] adda(double[] A, double[] B){
+        double[] result = new double[A.length];
+        for (int i=0;i<A.length;i++){
+            result[i] = A[i] + B[i];
+        }
+        return result;
+    }
+    private static double[] div(double[] A, double B){
+        double[] result = new double[A.length];
+        for (int i=0;i<A.length;i++){
+            result[i] = A[i]/B;
+        }
+        return result;
+    }
+    private static double[] copy(double[] A){
+        double[] result = new double[A.length];
+        System.arraycopy(A, 0, result, 0, A.length);
         return result;
     }
     
     // nur für einen rotor
     private static double[] log(double[] X){
-        
-        // B*B = S + T*e1234
         double[] R = rotor(X);
         
         double S = R[0]*R[0]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]-1;

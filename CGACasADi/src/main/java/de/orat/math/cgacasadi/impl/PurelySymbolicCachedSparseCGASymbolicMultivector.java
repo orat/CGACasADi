@@ -47,9 +47,9 @@ public class PurelySymbolicCachedSparseCGASymbolicMultivector extends CachedSpar
             throw new RuntimeException("At least one grade must be given.");
         }
 
-        SparseCGASymbolicMultivector mv = new PurelySymbolicCachedSparseCGASymbolicMultivector("", grades[0]);
+        SparseCGASymbolicMultivector mv = new PurelySymbolicCachedSparseCGASymbolicMultivector( String.valueOf(grades[0]), grades[0]);
         for (int i = 1; i < grades.length; ++i) {
-            mv = mv.add(new PurelySymbolicCachedSparseCGASymbolicMultivector("", grades[i]));
+            mv = mv.add(new PurelySymbolicCachedSparseCGASymbolicMultivector(String.valueOf(grades[i]), grades[i]));
         }
 
         return mv.getSparsity();

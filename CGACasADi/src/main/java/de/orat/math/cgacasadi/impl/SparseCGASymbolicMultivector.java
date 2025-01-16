@@ -192,8 +192,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return baseCayleyTable.getBladesCount();
     }
 
-    
-    public boolean isEven() {
+    public boolean isGeneralEven() {
+        return getSparsity().isGeneralEven();
+    }
+    public boolean isEven(){
         return getSparsity().isEven();
     }
 
@@ -513,15 +515,14 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
             throw new IllegalArgumentException("exp() defined for bivectors only!");
         }
         
-        int[] indizes = CGACayleyTable.getEvenIndizes();
-        SXColVec B = new SXColVec(sx, indizes);
+        SXColVec B = new SXColVec(sx, CGACayleyTable.getBivectorIndizes());
 
         // var S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
         SXScalar S = SXScalar.sumSq(B, new int[]{3,6,8,9}).sub(SXScalar.sumSq(B, new int[]{0,1,2,4,5,7}));
 
         // 2*(B[4]*B[9]-B[5]*B[8]+B[6]*B[7]), //e2345
         SXScalar T1 = SXScalar.sumProd(B, new int[]{4,6}, new int[]{9,7}).
-            sub(SXScalar.sumProd(B, new int[]{5}, new int[]{8})).muls(2d);
+            sub(B.get(5).mul(B.get(8))).muls(2d);
         // 2*(B[1]*B[9]-B[2]*B[8]+B[3]*B[7]), //e1345
         SXScalar T2 = SXScalar.sumProd(B, new int[]{1,3}, new int[]{9,7}).
             sub(B.get(2).mul(B.get(8))).muls(2d);
@@ -547,16 +548,15 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         SXScalar lm = (new SXScalar(-0.5)).mul(S).add((new SXScalar(0.5).mul(norm))).sqrt();
         // The associated trig (depending on sign lambdap)
         // var [cp, sp] = lambdap>0?[cosh(lp), sinh(lp)/lp]:lambdap<0?[cos(lp), sin(lp)/lp]:[1,1]
-        SXScalar[] temp = lambdap.lt(new SXScalar(0d),
+        SXScalar[] temp = lambdap.lt(0d,
             new SXScalar[]{lp.cos(), lp.sin().div(lp)}, 
             new SXScalar[]{new SXScalar(1d), new SXScalar(1d)});
-        SXScalar[] cp_sp = lambdap.gt(new SXScalar(0d), 
-                                      new SXScalar[]{lp.cosh(), lp.sinh().div(lp)}, temp);
+        SXScalar[] cp_sp = lambdap.gt(0d, new SXScalar[]{lp.cosh(), lp.sinh().div(lp)}, temp);
         SXScalar cp = cp_sp[0];
         SXScalar sp = cp_sp[1];
         // var [cm, sm] = [cos(lm), lm==0?1:sin(lm)/lm]
         SXScalar cm = lm.cos();
-        SXScalar sm = lm.eq(new SXScalar(0d), new SXScalar(1d), lm.sin().div(lm));
+        SXScalar sm = lm.eq(0d, new SXScalar(1d), lm.sin().div(lm));
         // Calculate the mixing factors alpha and beta_i.
         //var [cmsp, cpsm, spsm] = [cm*sp,cp*sm,sp*sm/2], D = cmsp-cpsm, E = sc*D;
         SXScalar cmsp = cm.mul(sp);
@@ -574,8 +574,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         SXScalar beta5 = E.mul(T5).negate();
         
         // create SX with sparsity corresponding to a rotor (even element)
-        int rows = getCayleyTable().getBladesCount();
-        SXElem[] values = new SXElem[]{
+        SXElem[] generalRotorValues = new SXElem[]{
             //cp*cm,
             cp.mul(cm).sx.scalar(),
             //(B[0]*alpha+B[7]*beta5-B[8]*beta4+B[9]*beta3),
@@ -612,7 +611,8 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
             spsm.mul(T5).sx.scalar(), spsm.mul(T4).sx.scalar(), spsm.mul(T3).sx.scalar(), 
             spsm.mul(T2).sx.scalar(), spsm.mul(T1).sx.scalar()
         };
-        return create(new SXColVec(rows, values, indizes).sx);
+        return create(new SXColVec(getCayleyTable().getBladesCount(), 
+            generalRotorValues, CGACayleyTable.getEvenIndizes()).sx);
     }
 
    
@@ -628,11 +628,11 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      */
     public SparseCGASymbolicMultivector normalizeRotor() {
         if (!isEven()) {
-            throw new IllegalArgumentException("Multivector must be an even element!");
+            throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
         
-        int[] indizes = CGACayleyTable.getEvenIndizes();
-        SXColVec R = new SXColVec(sx, indizes);
+        int[] evenIndizes = CGACayleyTable.getEvenIndizes();
+        SXColVec R = new SXColVec(sx, evenIndizes);
 
         // var S = R[0]*R[0]-R[10]*R[10]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]+R[1]*R[1]
         // +R[2]*R[2]+R[3]*R[3]-R[4]*R[4]+R[5]*R[5]+R[6]*R[6]-R[7]*R[7]+R[8]*R[8]-R[9]*R[9];
@@ -679,73 +679,88 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         SXScalar B4 = T4.negate().mul(M);
         SXScalar B5 = T5.negate().mul(M);
          
-        int rows = getCayleyTable().getBladesCount();
         
         SXElem[] values = new SXElem[]{
             // A*R[0] + B1*R[11] - B2*R[12] - B3*R[13] - B4*R[14] - B5*R[15],
             A.mul(R.get(0)).add(B1.mul(R.get(11))).sub(B2.mul(R.get(12))).
               sub(B3.mul(R.get(13))).sub(B4.mul(R.get(14))).sub(B5.mul(R.get(15))).sx.scalar(),
             // A*R[1] - B1*R[8] + B2*R[9] + B3*R[10] - B4*R[15] + B5*R[14],
-A.mul(R.get(1)).sub(B1.mul(R.get(8))).add(B2.mul(R.get(9))).
+            A.mul(R.get(1)).sub(B1.mul(R.get(8))).add(B2.mul(R.get(9))).
                 add(B3.mul(R.get(10))).sub(B4.mul(R.get(15))).add(B5.mul(R.get(14))).sx.scalar(),
             // A*R[2] + B1*R[6] - B2*R[7] + B3*R[15] + B4*R[10] - B5*R[13],
-A.mul(R.get(2)).add(B1.mul(R.get(6))).sub(B2.mul(R.get(7))).
+            A.mul(R.get(2)).add(B1.mul(R.get(6))).sub(B2.mul(R.get(7))).
                 add(B3.mul(R.get(15))).add(B4.mul(R.get(10))).sub(B5.mul(R.get(13))).sx.scalar(),
             //A*R[3] - B1*R[5] - B2*R[15] - B3*R[7] - B4*R[9] + B5*R[12],
-A.mul(R.get(3)).sub(B1.mul(R.get(5))).sub(B2.mul(R.get(15))).
+            A.mul(R.get(3)).sub(B1.mul(R.get(5))).sub(B2.mul(R.get(15))).
                 sub(B3.mul(R.get(7))).sub(B4.mul(R.get(9))).add(B5.mul(R.get(12))).sx.scalar(),
             //A*R[4] - B1*R[15] - B2*R[5] - B3*R[6] - B4*R[8] + B5*R[11],
-SXScalar.sumProd(new SXScalar[]{A,B5}, R, new int[]{4,11}).sub(SXScalar.sumProd(new SXScalar[]{B1, B2, B3, B4}, R, new int[]{15,5,6,8})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B5}, R, new int[]{4,11}).
+    sub(SXScalar.sumProd(new SXScalar[]{B1, B2, B3, B4}, R, new int[]{15,5,6,8})).sx.scalar(),
             //A*R[5] - B1*R[3] + B2*R[4] - B3*R[14] + B4*R[13] + B5*R[10],
-SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{5,4,13,10}).sub(SXScalar.sumProd(new SXScalar[]{B1,B3}, R, new int[]{3,14})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{5,4,13,10}).
+    sub(SXScalar.sumProd(new SXScalar[]{B1,B3}, R, new int[]{3,14})).sx.scalar(),
             //A*R[6] + B1*R[2] + B2*R[14] + B3*R[4] - B4*R[12] - B5*R[9],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B3}, R, new int[]{6,2,14,4}).sub(SXScalar.sumProd(new SXScalar[]{B4,B5}, R, new int[]{12,9})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B1,B2,B3}, R, new int[]{6,2,14,4}).
+    sub(SXScalar.sumProd(new SXScalar[]{B4,B5}, R, new int[]{12,9})).sx.scalar(),
             //A*R[7] + B1*R[14] + B2*R[2] + B3*R[3] - B4*R[11] - B5*R[8],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B3}, R, new int[]{7,14,2,3}).sub(SXScalar.sumProd(new SXScalar[]{B4,B5}, R, new int[]{11,8})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B1,B2,B3}, R, new int[]{7,14,2,3}).
+    sub(SXScalar.sumProd(new SXScalar[]{B4,B5}, R, new int[]{11,8})).sx.scalar(),
             //A*R[8] - B1*R[1] - B2*R[13] + B3*R[12] + B4*R[4] + B5*R[7],
-SXScalar.sumProd(new SXScalar[]{A,B3,B4,B5}, R, new int[]{8,12,4,7}).sub(SXScalar.sumProd(new SXScalar[]{B1,B2}, R, new int[]{1,13})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B3,B4,B5}, R, new int[]{8,12,4,7}).
+    sub(SXScalar.sumProd(new SXScalar[]{B1,B2}, R, new int[]{1,13})).sx.scalar(),
             //A*R[9] - B1*R[13] - B2*R[1] + B3*R[11] + B4*R[3] + B5*R[6],
-SXScalar.sumProd(new SXScalar[]{A,B3,B4,B5}, R, new int[]{9,11,3,6}).sub(SXScalar.sumProd(new SXScalar[]{B1,B2}, R, new int[]{13,1})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B3,B4,B5}, R, new int[]{9,11,3,6}).
+    sub(SXScalar.sumProd(new SXScalar[]{B1,B2}, R, new int[]{13,1})).sx.scalar(),
             //A*R[10] + B1*R[12] - B2*R[11] - B3*R[1] - B4*R[2] - B5*R[5],
-SXScalar.sumProd(new SXScalar[]{A,B1}, R, new int[]{10,12}).sub(SXScalar.sumProd(new SXScalar[]{B2,B3,B4,B5}, R, new int[]{11,1,2,5})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B1}, R, new int[]{10,12}).
+    sub(SXScalar.sumProd(new SXScalar[]{B2,B3,B4,B5}, R, new int[]{11,1,2,5})).sx.scalar(),
             //A*R[11] + B1*R[0] + B2*R[10] - B3*R[9] + B4*R[7] - B5*R[4],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B4}, R, new int[]{11,0,10,7}).sub(SXScalar.sumProd(new SXScalar[]{B3,B5}, R, new int[]{9,4})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B1,B2,B4}, R, new int[]{11,0,10,7}).
+    sub(SXScalar.sumProd(new SXScalar[]{B3,B5}, R, new int[]{9,4})).sx.scalar(),
             //A*R[12] + B1*R[10] + B2*R[0] - B3*R[8] + B4*R[6] - B5*R[3],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B4}, R, new int[]{12,10,0,6}).sub(SXScalar.sumProd(new SXScalar[]{B3,B5}, R, new int[]{8,3})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B1,B2,B4}, R, new int[]{12,10,0,6}).
+    sub(SXScalar.sumProd(new SXScalar[]{B3,B5}, R, new int[]{8,3})).sx.scalar(),
             //A*R[13] - B1*R[9] + B2*R[8] + B3*R[0] - B4*R[5] + B5*R[2],
-SXScalar.sumProd(new SXScalar[]{A,B2,B3,B5}, R, new int[]{13,8,0,2}).sub(SXScalar.sumProd(new SXScalar[]{B1,B4}, R, new int[]{9,5})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B2,B3,B5}, R, new int[]{13,8,0,2}).
+    sub(SXScalar.sumProd(new SXScalar[]{B1,B4}, R, new int[]{9,5})).sx.scalar(),
             //A*R[14] + B1*R[7] - B2*R[6] + B3*R[5] + B4*R[0] - B5*R[1],
-SXScalar.sumProd(new SXScalar[]{A,B1,B3,B4}, R, new int[]{14,7,5,0}).sub(SXScalar.sumProd(new SXScalar[]{B2,B5}, R, new int[]{6,1})).sx.scalar(),
+SXScalar.sumProd(new SXScalar[]{A,B1,B3,B4}, R, new int[]{14,7,5,0}).
+    sub(SXScalar.sumProd(new SXScalar[]{B2,B5}, R, new int[]{6,1})).sx.scalar(),
             //A*R[15] - B1*R[4] + B2*R[3] - B3*R[2] + B4*R[1] + B5*R[0]
-SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).sub(SXScalar.sumProd(new SXScalar[]{B1,B3}, R, new int[]{4,2})).sx.scalar()
+SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
+    sub(SXScalar.sumProd(new SXScalar[]{B1,B3}, R, new int[]{4,2})).sx.scalar()
         };
         
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(rows, values, indizes).sx);
+        return create(new SXColVec(getCayleyTable().getBladesCount(), values, evenIndizes).sx);
     }
 
     
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-    // exponential of a bivector only for CGA (R41)
-    // kann aus CGAImplTest.exp() abgeleitet werden
     @Override
     public SparseCGASymbolicMultivector sqrt() {
         if (isEven()) {
-            return add(CONSTANTS.one()).normalizeRotor();
+            if (this.isScalar()){
+                return scalarSqrt();
+            } else {
+                return add(CONSTANTS.one()).normalizeRotor();
+            }
         }
         throw new RuntimeException("sqrt() not yet implemented for non even elements. Should be implemented in the default method of the interface with a generic version.");
     }
 
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
+    // log of a normalized rotor
     @Override
     public SparseCGASymbolicMultivector log() {
       
         if (!isEven()) {
-            throw new IllegalArgumentException("Multivector must be an even element!");
+            throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
         
-        int[] indizes = CGACayleyTable.getEvenIndizes();
-        SXColVec R = new SXColVec(sx, indizes);
+        //int[] indizes = CGACayleyTable.getEvenIndizes();
+        
+        SXColVec R = new SXColVec(sx, CGACayleyTable.getEvenIndizes());
         
         SXScalar S = R.get(0).sq().add(R.get(11).sq()).sub(R.get(12).sq()). 
                      sub(R.get(13).sq()).sub(R.get(14).sq()).sub(R.get(15).sq()).sub(new SXScalar(1d));
@@ -770,12 +785,13 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).sub(SXScala
         SXScalar lp = lambdap.abs().sqrt();
         
         //double lm = Math.sqrt(-0.5*S+0.5*norm);
-        SXScalar lm = (new SXScalar(-0.5d)).mul(S).mul(norm).sqrt();
+        SXScalar lm = (new SXScalar(-0.5d)).mul(S).add((new SXScalar(0.5)).mul(norm)).sqrt();
         
         //double theta2   = lm==0?0:atan2(lm, R[0]); 
         //double theta2 = 0d;
         //if (lm != 0d) theta2 = Math.atan2(lm, R[0]);
-        SXScalar theta2 = lm.eq(0d, new SXScalar(0d),SXScalar.atan2(lm, R.get(0)));
+        //SXScalar theta2 = lm.eq(0d, new SXScalar(0d),SXScalar.atan2(lm, R.get(0)));
+        SXScalar theta2 = lm.ne(0d, SXScalar.atan2(lm, R.get(0)));
         
         // var theta1   = lambdap<0?asin(lp/cos(theta2)):lambdap>0?atanh(lp/R[0]):lp/R[0];
         //double theta1;
@@ -797,8 +813,10 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).sub(SXScala
         //if (lm != 0){
         //    l2 = theta2/lm;
         //}
-        SXScalar l1 = lp.eq(0d, new SXScalar(0d), theta1.div(lp));
-        SXScalar l2 = lp.eq(0d, new SXScalar(0d), theta2.div(lm));
+        //SXScalar l1 = lp.eq(0d, new SXScalar(0d), theta1.div(lp));
+        SXScalar l1 = lp.ne(0d, theta1.div(lp));
+        //SXScalar l2 = lm.eq(0d, new SXScalar(0d), theta2.div(lm));
+        SXScalar l2 = lm.ne(0d, theta2.div(lm));
         
         //var [A, B1, B2, B3, B4, B5]   = [
         //  (l1-l2)*0.5*(1+S/norm) + l2,  -0.5*T1*(l1-l2)/norm, -0.5*T2*(l1-l2)/norm, 
@@ -842,7 +860,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).sub(SXScala
         };
         SXScalar[] B = SXScalar.eq(norm, new SXScalar(0d), S, new SXScalar(0d), Bif, Belse);
          
-        //return bivector(new double[]{
+        //return bivector
         SXElem[] values = conv(B);
         return create(new SXColVec(getCayleyTable().getBladesCount(), 
             values, CGACayleyTable.getBivectorIndizes()).sx);
