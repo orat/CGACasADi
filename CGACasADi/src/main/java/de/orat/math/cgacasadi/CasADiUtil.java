@@ -29,7 +29,8 @@ import de.orat.math.sparsematrix.SparseStringMatrix;
  */
 public class CasADiUtil {
 
-    public static CGAMultivectorSparsity toCGAMultivectorSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
+    public static CGAMultivectorSparsity toCGAMultivectorSparsity(
+                        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
         return new CGAMultivectorSparsity(toIntArr(sxSparsity.get_row()));
     }
 
@@ -60,14 +61,17 @@ public class CasADiUtil {
      *
      * @param mv multivector which is converted into a matrix representation
      * @param cgaCayleyTable Cayley-table representing the specific product
+     *
      */
     public static SX toSXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable) {
 
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
 
-        System.out.println("toSXproductMatrix(input multivector sparsity):  " + mv.getSparsity().toString());
+        System.out.println(mv.getName()+": toSXproductMatrix() input multivector sparsity = " 
+                                + mv.getSparsity().toString());
         MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
-        System.out.println("toSXproductMatrix(product matrix sparsity):  " + matrixSparsity.toString());
+        System.out.println(mv.getName()+": toSXproductMatrix() product matrix sparsity = " 
+                                + matrixSparsity.toString());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
 
         SX result = new SX(sp);
@@ -130,9 +134,8 @@ public class CasADiUtil {
             }
         }
 
-        // testweise
         DenseStringMatrix logMatrix = new DenseStringMatrix(log);
-        System.out.println("toSXProductMatrix: " + logMatrix);
+        System.out.println(mv.getName()+ ": toSXProductMatrix() matrix = " + logMatrix);
 
         return result;
     }
@@ -143,7 +146,7 @@ public class CasADiUtil {
      *
      * @param cayleyTable
      * @param mv sparse multivector
-     * @return matrix sparsity for the given cayley table
+     * @return sparsity of the matrix representation of the given multivector for the given cayley table
      */
     private static MatrixSparsity createSparsity(CayleyTable cayleyTable, SparseCGASymbolicMultivector mv) {
         double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];

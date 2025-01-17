@@ -1106,6 +1106,30 @@ public class CGAImplTest {
         return res;
     }
 
+    
+     @Test
+    public void testGPSparsity() {
+
+        //TestExprGraphFactory fac = TestExprGraphFactory.instance();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // e2
+        System.out.println("sparsity = "+sparsity.toString());
+        // mva hat generisch grade 1 sparsity also e1-e5 und nicht nur e2!!! Ursache: Cache
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity); 
+        
+        sparsity = new ColumnVectorSparsity(new double[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // E3
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity); // E3
+
+        System.out.println("testGPSparsity:");
+        MultivectorSymbolic res = mva.geometricProduct(mvb);
+        // a b = T{00, 00, 00, 00, 00, 00, null, (-(b_0*a_0)), null, null, null, null, null, null, null, null, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, null, null, null, null, null, 00}
+        // aus debugger stimmt überein
+        // [00, 00, 00, 00, 00, 00, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 0, 0, 0, 0, 0, 00]
+        //FIXME mir scheint es, dass die null-Werte 00 sein sollten
+        System.out.println("a b = " + res.toString());
+        System.out.println(res.getSparsity().toString());
+    }
+
     // gradeInvolution==gradeInversion
     @Test
     public void testInvoluteRandom() {
@@ -2213,7 +2237,7 @@ public class CGAImplTest {
         return result;
     }
     
-    // nur für einen rotor
+    // only for rotors
     private static double[] log(double[] X){
         double[] R = rotor(X);
         

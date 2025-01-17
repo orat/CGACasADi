@@ -7,6 +7,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.casadi.SxSubIndex;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -154,7 +155,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     @Override
-    public CGAMultivectorSparsity/*ColumnVectorSparsity*/ getSparsity() {
+    public CGAMultivectorSparsity getSparsity() {
         return CasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
     }
 
@@ -248,12 +249,34 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     @Override
+    public SparseCGASymbolicMultivector up(){
+        // vec + 0.5 vec² εᵢ + ε₀
+        return add(CONSTANTS.half().gp(square()).gp(CONSTANTS.getBaseVectorInfinity()))
+            .add(CONSTANTS.getBaseVectorOrigin());
+    }
+    
+    @Override
+    public SparseCGASymbolicMultivector down(){
+        // -vec/(εᵢ⌋vec)
+        SparseCGASymbolicMultivector result 
+            = negate().div(CONSTANTS.getBaseVectorInfinity().lc(this));
+        // erase e0 and einf, that means e4, d5
+        result.getSX().erase(new StdVectorCasadiInt(new long[]{4l, 5l}));
+        return result;
+    }
+    
+    @Override
     public SparseCGASymbolicMultivector gp(SparseCGASymbolicMultivector b) {
-        //System.out.println("---gp---");
+        System.out.println("---gp()---");
+        System.out.println(getName()+": input multivector sparsity = " 
+                                + getSparsity().toString());
+        System.out.println(getName()+": "+toString());
+        // determine product matrix for the right side argument of the geometric product, the mv b
+        // considering the sparsity of the cayley-table and the input mv b
         SX opm = CasADiUtil.toSXProductMatrix(b, CGACayleyTableGeometricProduct.instance());
         //System.out.println("--- end of gp matrix creation ---");
         SX result = SX.mtimes(opm.T(), this.getSX());
-        return create(result);
+        return create(result); // result sollte die richtige sparsity haben
     }
 
     /**
@@ -514,7 +537,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     @Override
     public SparseCGASymbolicMultivector exp() {
         if (!isBivector()){
-            throw new IllegalArgumentException("exp() defined for bivectors only!");
+            throw new IllegalArgumentException("exp() defined for bivectors only ("+this.toString()+")!");
         }
         
         SXColVec B = new SXColVec(sx, CGACayleyTable.getBivectorIndizes());
@@ -580,9 +603,6 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         SXElem[] generalRotorValues = new SXElem[]{
             //cp*cm,
             cp.mul(cm).sx.scalar(),
-            //new SXScalar(1d).sx.scalar(),
-            //cm.sx.scalar(),
-            //Tsq.sx.scalar(),
             
             //(B[0]*alpha+B[7]*beta5-B[8]*beta4+B[9]*beta3),
             B.get(0).mul(alpha).add(B.get(7).mul(beta5)).sub(B.get(8).mul(beta4)).
@@ -757,15 +777,13 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     }
 
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-    // log of a normalized rotor
+    // log of a normalized rotor, result is a bivector
     @Override
     public SparseCGASymbolicMultivector log() {
       
         if (!isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
-        
-        //int[] indizes = CGACayleyTable.getEvenIndizes();
         
         SXColVec R = new SXColVec(sx, CGACayleyTable.getEvenIndizes());
         
@@ -847,14 +865,11 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
             //(A*R[1]+B3*R[10]+B4*R[9]-B5*R[8]),
             A.mul(R.get(1)).add(B3.mul(R.get(10))).add(B4.mul(R.get(9))).sub(B5.mul(R.get(8))),
             
-            //Tsq, 
             //(A*R[2]+B2*R[10]-B4*R[7]+B5*R[6]),
             A.mul(R.get(2)).add(B2.mul(R.get(10))).sub(B4.mul(R.get(7))).add(B5.mul(R.get(6))),
             //(A*R[3]-B2*R[9]-B3*R[7]-B5*R[5]),
             A.mul(R.get(3)).sub(B2.mul(R.get(9))).sub(B3.mul(R.get(7))).sub(B5.mul(R.get(5))),
             
-
-            //FIXME besonders schlecht
             //(A*R[4]-B2*R[8]-B3*R[6]-B4*R[5]),
             A.mul(R.get(4)).sub(B2.mul(R.get(8))).sub(B3.mul(R.get(6))).sub(B4.mul(R.get(5))),
             //(A*R[5]+B1*R[10]+B4*R[4]-B5*R[3]),
