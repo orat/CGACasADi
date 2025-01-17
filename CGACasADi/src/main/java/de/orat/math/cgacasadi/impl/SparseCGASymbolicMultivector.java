@@ -3,6 +3,7 @@ package de.orat.math.cgacasadi.impl;
 import de.dhbw.rahmlab.casadi.api.SXColVec;
 import de.dhbw.rahmlab.casadi.api.SXScalar;
 import de.dhbw.rahmlab.casadi.api.Trigometry;
+import de.dhbw.rahmlab.casadi.api.Util;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
@@ -468,9 +469,11 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         if (!y.isScalar()) {
             throw new IllegalArgumentException("The argument y of atan2(x,y) is no scalar!");
         }
-        //throw new UnsupportedOperationException("Not supported yet.");
-        // not yet tested
         SX result = SX.atan2(y.getSX(), sx);
+        // sparsity sollte scalar sein, da x,y scalar ist, SX.atan2() macht das aber nicht korrekt
+        // die Werte aller non-scalar indizes sind fälschlicherweise 0, aber nicht 00
+        // WORKAROUND
+        result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
         return create(result);
     }
 

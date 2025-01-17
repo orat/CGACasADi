@@ -11,6 +11,7 @@ import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import java.util.Random;
+import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 
@@ -222,15 +223,22 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     @Override
     public SparseDoubleMatrix createPseudoscalar() {
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{31});
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, new double[]{1d});
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{CGACayleyTable.getPseudoScalarIndex()/*31*/});
+        return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
+    /**
+     * Mikovski Bivector.
+     * 
+     * This is the flat point origin, corresponding to e0^einf.
+     * 
+     * @return 
+     */
     @Override
-    public SparseDoubleMatrix createMinkovskyBiVector() {
+    public SparseDoubleMatrix createMinkovskiBiVector() {
         // 2e45
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{15});
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, new double[]{2d});
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{CGACayleyTable.getMikovskiBivectorIndex()/*15*/});
+        return new SparseDoubleMatrix(sparsity, new double[]{2d});
     }
 
     @Override
