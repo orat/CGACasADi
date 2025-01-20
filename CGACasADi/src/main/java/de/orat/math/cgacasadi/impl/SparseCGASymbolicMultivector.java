@@ -464,10 +464,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     @Override
     public SparseCGASymbolicMultivector scalarAtan2(SparseCGASymbolicMultivector y) {
         if (!isScalar()) {
-            throw new IllegalArgumentException("The argument x of atan2(x,y) is no scalar!");
+            throw new IllegalArgumentException("The argument x of atan2(y,x) is no scalar!");
         }
         if (!y.isScalar()) {
-            throw new IllegalArgumentException("The argument y of atan2(x,y) is no scalar!");
+            throw new IllegalArgumentException("The argument y of atan2(y,x) is no scalar!");
         }
         SX result = SX.atan2(y.getSX(), sx);
         // sparsity sollte scalar sein, da x,y scalar ist, SX.atan2() macht das aber nicht korrekt
@@ -504,7 +504,12 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
-        return create(SX.cos(sx));
+        SX result = SX.cos(sx);
+       // [-0.991076, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        // obwohl alle non scalar sparsity 00 haben wird der cos() auf 1 gesetzt
+        //WORKAROUND
+        result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
+        return create(result);
     }
     public SparseCGASymbolicMultivector scalarTan() {
         if (!isScalar()) {
