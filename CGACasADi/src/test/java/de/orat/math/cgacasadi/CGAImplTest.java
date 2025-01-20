@@ -1117,9 +1117,11 @@ public class CGAImplTest {
         // mva hat generisch grade 1 sparsity also e1-e5 und nicht nur e2!!! Ursache: Cache
         MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity); 
         
-        sparsity = new ColumnVectorSparsity(new double[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // E3
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity); // E3
+        //sparsity = new ColumnVectorSparsity(new double[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // E3
+// E3
 
+         sparsity = new ColumnVectorSparsity(new double[]{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // scalar
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity); // E3
         System.out.println("testGPSparsity:");
         MultivectorSymbolic res = mva.geometricProduct(mvb);
         // a b = T{00, 00, 00, 00, 00, 00, null, (-(b_0*a_0)), null, null, null, null, null, null, null, null, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, null, null, null, null, null, 00}

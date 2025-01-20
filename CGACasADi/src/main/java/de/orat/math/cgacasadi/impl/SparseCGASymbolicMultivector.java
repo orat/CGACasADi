@@ -541,10 +541,14 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     // Graded Symmetry Groups: Plane and Simple. arXiv:2107.03771 [math-ph]
     // https://arxiv.org/pdf/2107.03771
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-    // exponential of a bivector only for CGA (R41)
+    // exponential of a bivector or a scalar for CGA (R41)
     @Override
     public SparseCGASymbolicMultivector exp() {
-        if (!isBivector()){
+        if (isScalar()){
+            SX result = SX.exp(sx);
+            result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
+            return create(result);
+        } else if (!isBivector()){
             throw new IllegalArgumentException("exp() defined for bivectors only ("+this.toString()+")!");
         }
         
