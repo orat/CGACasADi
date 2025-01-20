@@ -38,11 +38,11 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
                 // Convert to purely symbolic multivector.
                 // grades
                 // Is already a CachedSparseCGASymbolicMultivector.
-                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
-                    String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
-                // sparsity
 //                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
-//                    String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
+//                    String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
+                // sparsity
+                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
+                    String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
                 // dense
 //                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
 //                    String.valueOf(PARAM_NAMES.charAt(i)));
