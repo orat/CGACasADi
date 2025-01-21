@@ -121,8 +121,12 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
                 String row = Arrays.stream(mv.getSparsity().getrow())
                     .mapToObj((int i) -> String.valueOf(i))
                     .collect(Collectors.joining("_"));
-                sb.append("_colind_").append(colind);
-                sb.append("_row_").append(row);
+                if (!colind.isEmpty()) {
+                    sb.append("_colind_").append(colind);
+                }
+                if (!row.isEmpty()) {
+                    sb.append("_row_").append(row);
+                }
                 // dense
                 // Comment out: GACalcAPI::MultivectorSymbolic::scalarSqrt()::IllegalArgumentException
                 //
