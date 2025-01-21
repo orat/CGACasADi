@@ -551,7 +551,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
             result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
             return create(result);
         } else if (!isBivector()){
-            throw new IllegalArgumentException("exp() defined for bivectors only ("+this.toString()+")!");
+            throw new IllegalArgumentException("exp() defined for bivectors and scalars only ("+this.toString()+")!");
         }
         
         SXColVec B = new SXColVec(sx, CGACayleyTable.getBivectorIndizes());
