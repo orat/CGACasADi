@@ -31,9 +31,6 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
         if (func == null) {
             final int size = args.size();
             List<PurelySymbolicCachedSparseCGASymbolicMultivector> params = new ArrayList<>(size);
-            if (args.size() > PARAM_NAMES.length()) {
-                throw new RuntimeException("Too many args given.");
-            }
             // create symbolic sx for each input argument
             for (int i = 0; i < size; ++i) {
                 SparseCGASymbolicMultivector arg = args.get(i);
@@ -43,8 +40,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
 //                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
 //                    String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
                 // sparsity
-                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
-                    String.valueOf(PARAM_NAMES.charAt(i)), arg.getSparsity());
+                var param = new PurelySymbolicCachedSparseCGASymbolicMultivector(getParamName(i), arg.getSparsity());
                 // dense
 //                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
 //                    String.valueOf(PARAM_NAMES.charAt(i)));
@@ -78,6 +74,11 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
     }
 
     @Override
+    public int getCacheSize() {
+        return this.functionCache.size();
+    }
+
+    @Override
     public String cachedFunctionUsageToString() {
         SortedMap<String, Integer> cachedFunctionUsage = getSortedUnmodifiableCachedFunctionsUsage();
         int maxKeyLength = cachedFunctionUsage.entrySet().stream()
@@ -89,7 +90,9 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
             .collect(Collectors.joining("\n"));
     }
 
-    private static final String PARAM_NAMES = "abcdef";
+    private static String getParamName(int i) {
+        return String.format("a%s", i);
+    }
 
     /**
      * A valid CasADi function name starts with a letter followed by letters, numbers or non-consecutive
@@ -101,11 +104,8 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
         StringBuilder sb = new StringBuilder();
         sb.append(name);
         sb.append("_");
-        if (params.length > PARAM_NAMES.length()) {
-            throw new RuntimeException("Too many params given.");
-        }
         for (int paramIndex = 0; paramIndex < params.length; ++paramIndex) {
-            sb.append(PARAM_NAMES.charAt(paramIndex));
+            sb.append(getParamName(paramIndex));
             Object param = params[paramIndex];
             if (param instanceof iMultivectorSymbolic mv) {
                 // only grades of the parameter

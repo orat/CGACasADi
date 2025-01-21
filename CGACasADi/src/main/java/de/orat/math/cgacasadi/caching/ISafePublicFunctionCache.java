@@ -11,5 +11,7 @@ public interface ISafePublicFunctionCache {
 
     SortedMap<String, Integer> getSortedUnmodifiableCachedFunctionsUsage();
 
+    int getCacheSize();
+
     String cachedFunctionUsageToString();
 }
