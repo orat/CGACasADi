@@ -546,6 +546,8 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     public SparseCGASymbolicMultivector exp() {
         if (isScalar()){
             SX result = SX.exp(sx);
+            // TODO kann ich nicht alternativ mir das erste element von sx beschaffen und nur dort
+            // den exp() aufrufen?
             result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
             return create(result);
         } else if (!isBivector()){
@@ -1024,10 +1026,10 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     //======================================================
     // wer braucht das überhaupt?
     //FIXME
-    private SparseCGASymbolicMultivector mul(SparseCGASymbolicMultivector b) {
+    /*private SparseCGASymbolicMultivector mul(SparseCGASymbolicMultivector b) {
         SX result = SX.mtimes(sx, (b).getSX());
         return create(result);
-    }
+    }*/
 
     //TODO
     // sollte reverseNorm() nicht default norm() sein? Aber hier gibts ja ein 
@@ -1052,12 +1054,12 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * @param s scalar
      * @return
      */
-    private SparseCGASymbolicMultivector muls(SparseCGASymbolicMultivector s) {
+    /*private SparseCGASymbolicMultivector muls(SparseCGASymbolicMultivector s) {
         if (s.getSX().is_scalar_()) {
             throw new IllegalArgumentException("The argument of muls() must be a scalar!");
         }
         return create(SX.times(sx, s.getSX()));
-    }
+    }*/
 
     /**
      * Elementwise division with a scalar.

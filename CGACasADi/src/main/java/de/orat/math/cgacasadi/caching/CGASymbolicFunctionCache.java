@@ -6,6 +6,7 @@ import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
             if (args.size() > PARAM_NAMES.length()) {
                 throw new RuntimeException("Too many args given.");
             }
+            // create symbolic sx for each input argument
             for (int i = 0; i < size; ++i) {
                 SparseCGASymbolicMultivector arg = args.get(i);
                 // Convert to purely symbolic multivector.
@@ -91,7 +93,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
 
     /**
      * A valid CasADi function name starts with a letter followed by letters, numbers or non-consecutive
-     * underscores. The cache names and CadADi function names do not need to be the same, but currently are.
+     * underscores. The cache names and CasADi function names do not need to be the same, but currently are.
      *
      * @param params Either iMultivectorSymbolic or int
      */
@@ -106,20 +108,21 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
             sb.append(PARAM_NAMES.charAt(paramIndex));
             Object param = params[paramIndex];
             if (param instanceof iMultivectorSymbolic mv) {
-                // grades
-                int[] grades = mv.grades();
+                // only grades of the parameter
+                // funktioniert nicht: siehe testGPSparsity() in de.orat.math.cgacasadi.CGAImplTest
+                /*int[] grades = mv.grades();
                 for (int i = 0; i < grades.length; i++) {
                     sb.append(grades[i]);
-                }
-                // sparsity
-//                String colind = Arrays.stream(mv.getSparsity().getcolind())
-//                    .mapToObj((int i) -> String.valueOf(i))
-//                    .collect(Collectors.joining("_"));
-//                String row = Arrays.stream(mv.getSparsity().getrow())
-//                    .mapToObj((int i) -> String.valueOf(i))
-//                    .collect(Collectors.joining("_"));
-//                sb.append("_colind_").append(colind);
-//                sb.append("_row_").append(row);
+                }*/
+                // complete sparsity of the parameter
+                String colind = Arrays.stream(mv.getSparsity().getcolind())
+                    .mapToObj((int i) -> String.valueOf(i))
+                    .collect(Collectors.joining("_"));
+                String row = Arrays.stream(mv.getSparsity().getrow())
+                    .mapToObj((int i) -> String.valueOf(i))
+                    .collect(Collectors.joining("_"));
+                sb.append("_colind_").append(colind);
+                sb.append("_row_").append(row);
                 // dense
                 // Comment out: GACalcAPI::MultivectorSymbolic::scalarSqrt()::IllegalArgumentException
                 //
