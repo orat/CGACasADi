@@ -1,10 +1,12 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAKVectorSparsity;
 import util.cga.CGAMultivectorSparsity;
 
@@ -15,8 +17,9 @@ public class PurelySymbolicCachedSparseCGASymbolicMultivector extends CachedSpar
         assert super.getSX().is_valid_input();
     }
 
+    private static final Sparsity SPARSITY_EMPTY = CasADiUtil.toCasADiSparsity(ColumnVectorSparsity.empty(CGACayleyTableGeometricProduct.instance().getBladesCount()));
     public PurelySymbolicCachedSparseCGASymbolicMultivector(String name) {
-        super(name, SX.sym(name, de.dhbw.rahmlab.casadi.impl.casadi.Sparsity.dense(32)));
+        super(name, SX.sym(name, SPARSITY_EMPTY));
         assert super.getSX().is_valid_input();
     }
 
