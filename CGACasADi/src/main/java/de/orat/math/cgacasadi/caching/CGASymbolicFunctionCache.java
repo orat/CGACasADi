@@ -47,7 +47,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
                 //
                 params.add(param);
             }
-            func = new CGASymbolicFunction(name, params, List.of(res.apply(params)));
+            func = new CGASymbolicFunction(String.format("cache_func_%s", functionCache.size()), params, List.of(res.apply(params)));
             functionCache.put(name, func);
             cachedFunctionsUsage.put(name, 0);
         }
