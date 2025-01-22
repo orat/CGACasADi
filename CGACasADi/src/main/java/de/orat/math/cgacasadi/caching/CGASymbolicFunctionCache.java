@@ -138,7 +138,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
         sb.append(name);
         sb.append("_");
         for (int paramIndex = 0; paramIndex < params.length; ++paramIndex) {
-            sb.append("_"); // Consecutive "_" not be compatible with casadi function names.
+            sb.append("_"); // Consecutive "_" are not be compatible with casadi function names.
             sb.append(getParamName(indexCorrection.get(paramIndex)));
             Object param = params[paramIndex];
             if (param instanceof iMultivectorSymbolic mv) {
