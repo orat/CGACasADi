@@ -107,31 +107,47 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
     }
 
     /**
-     * A valid CasADi function name starts with a letter followed by letters, numbers or non-consecutive
-     * underscores. The cache names and CasADi function names do not need to be the same, but currently are.
-     *
+     * Example: [0:a, 1:a, 2:b] -> [0:0, 1:0, 2:1]
+     */
+    private static List<Integer> computeIdentityIndexCorrection(Object[] objects) {
+        Map<Object, Integer> uniqueObjectsToIndizes = new IdentityHashMap<>(objects.length);
+        List<Integer> indexCorrection = new ArrayList<>(objects.length);
+        int highestInt = 0;
+        for (int objectIndex = 0; objectIndex < objects.length; ++objectIndex) {
+            Object object = objects[objectIndex];
+            Integer indexOfObject = uniqueObjectsToIndizes.get(object);
+            if (indexOfObject == null) {
+                // Object not seen before.
+                uniqueObjectsToIndizes.put(object, highestInt);
+                indexCorrection.add(highestInt);
+                ++highestInt;
+            } else {
+                // Object seen before.
+                indexCorrection.add(indexOfObject);
+            }
+        }
+        return indexCorrection;
+    }
+
+    /**
      * @param params Either iMultivectorSymbolic or int
      */
     public String createFuncName(String name, Object... params) {
+        List<Integer> indexCorrection = computeIdentityIndexCorrection(params);
         StringBuilder sb = new StringBuilder();
         sb.append(name);
         sb.append("_");
         for (int paramIndex = 0; paramIndex < params.length; ++paramIndex) {
-            sb.append(getParamName(paramIndex));
+            sb.append("_"); // Consecutive "_" would not be compatible with casadi function names.
+            sb.append(getParamName(indexCorrection.get(paramIndex)));
             Object param = params[paramIndex];
             if (param instanceof iMultivectorSymbolic mv) {
-                // only grades of the parameter
-                // funktioniert nicht: siehe testGPSparsity() in de.orat.math.cgacasadi.CGAImplTest
-                /*int[] grades = mv.grades();
-                for (int i = 0; i < grades.length; i++) {
-                    sb.append(grades[i]);
-                }*/
                 // complete sparsity of the parameter
                 String colind = Arrays.stream(mv.getSparsity().getcolind())
-                    .mapToObj((int i) -> String.valueOf(i))
+                    .mapToObj(String::valueOf)
                     .collect(Collectors.joining("_"));
                 String row = Arrays.stream(mv.getSparsity().getrow())
-                    .mapToObj((int i) -> String.valueOf(i))
+                    .mapToObj(String::valueOf)
                     .collect(Collectors.joining("_"));
                 if (!colind.isEmpty()) {
                     sb.append("_colind_").append(colind);
@@ -139,10 +155,8 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
                 if (!row.isEmpty()) {
                     sb.append("_row_").append(row);
                 }
-                // dense
-                // Comment out: GACalcAPI::MultivectorSymbolic::scalarSqrt()::IllegalArgumentException
-                //
             } else if (param instanceof Integer intParam) {
+                sb.append("_");
                 sb.append(intParam);
             } else {
                 throw new RuntimeException("Param of unexpected type.");
