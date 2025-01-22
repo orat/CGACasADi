@@ -660,8 +660,26 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
             spsm.mul(T5).sx.scalar(), spsm.mul(T4).sx.scalar(), spsm.mul(T3).sx.scalar(), 
             spsm.mul(T2).sx.scalar(), spsm.mul(T1).sx.scalar()
         };
-        return create(new SXColVec(getCayleyTable().getBladesCount(), 
-            generalRotorValues, CGACayleyTable.getEvenIndizes()).sx);
+        
+        //TODO
+        // abhängig von den Argumenten kann result mehr spasity haben. Das muss noch bestimmt werden
+        // um result entsprechend gesetzt werden.
+        // Warum das CasADI allein nicht korrekt macht ist unklar, eventuell immer noch Fehler in der Forml, oder zum komplex um strukturelle Nullen zu finden
+        // wenn nur euclidean input, dann darf der output keine grade-4-Element enthalten.
+        //TODO
+        // alle in der exp()-Impl verwendeten casdi-Funktionen überprüfen, ob diese auch wirklich
+        // die richtige sparsity zurückliefern. Hier könnte die Ursache des Problems liegen, z.B. 
+        // insbesondere die trigometrischen Funktionen
+        SX result = new SXColVec(getCayleyTable().getBladesCount(), 
+            generalRotorValues, CGACayleyTable.getEvenIndizes()).sx;
+        
+        //WORKAROUND
+        // bei euclidian only input arguements I got 0-vales in grade-4 elements instead of 
+        // structurell 00-elements
+        /*if (){
+            result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.get4VectorIndizes())));
+        }*/
+        return create(result);
     }
 
    
