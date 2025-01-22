@@ -1107,7 +1107,7 @@ public class CGAImplTest {
     }
 
     
-     @Test
+    @Test
     public void testGPSparsity() {
 
         //TestExprGraphFactory fac = TestExprGraphFactory.instance();
@@ -1132,6 +1132,26 @@ public class CGAImplTest {
         System.out.println(res.getSparsity().toString());
     }
 
+    
+     @Test
+    public void testGPSparsity2() {
+
+        //TestExprGraphFactory fac = TestExprGraphFactory.instance();
+        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // e2+e2+e3
+        System.out.println("sparsity = "+sparsity.toString());
+        // mva hat generisch grade 1 sparsity also e1-e5 und nicht nur e2!!! Ursache: Cache
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity); 
+       
+        
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity); 
+        System.out.println("testGPSparsity:");
+        MultivectorSymbolic res = mva.geometricProduct(mvb);
+        
+        System.out.println("a b = " + res.toString());
+        System.out.println(res.getSparsity().toString());
+    }
+    
     // gradeInvolution==gradeInversion
     @Test
     public void testInvoluteRandom() {
