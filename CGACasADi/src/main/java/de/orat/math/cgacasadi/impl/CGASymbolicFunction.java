@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
@@ -24,6 +25,17 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
 
     private final Function f_sym_casadi;
 
+    private CGASymbolicFunction(Function f_sym_casadi) {
+        this.name = f_sym_casadi.name();
+        this.arity = (int) f_sym_casadi.n_in();
+        this.resultCount = (int) f_sym_casadi.n_out();
+        this.f_sym_casadi = f_sym_casadi;
+    }
+
+    /**
+     * @param name A valid CasADi function name starts with a letter followed by letters, numbers or
+     * non-consecutive underscores.
+     */
     public <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> CGASymbolicFunction(String name, List<MV> parameters, List<? extends SparseCGASymbolicMultivector> returns) {
         try {
             // Only need runtime check, if parameters are not with their type enforced to be purely symbolic.
@@ -79,6 +91,74 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
+    }
+
+    /**
+     * <pre>
+     * for-loop equivalent.
+     * Suppose you are interested in computing a function repeatedly on all columns of a matrix,
+     * and aggregating all results in a result matrix.
+     * The aggregate function can be obtained with the map construct.
+     * n is the number of invocations. With other words: the length of the arguments arrays.
+     *
+     *    Suppose the function has a signature of:
+     *    {@literal
+     *    f: (a, p) -> ( s )
+     *    }
+     *
+     *    The the mapped version has the signature:
+     *    {@literal
+     *    F: (A, P) -> (S )
+     *
+     *    with
+     *       A: horzcat([a0, a1, ..., a_(N-1)])
+     *       P: horzcat([p0, p1, ..., p_(N-1)])
+     *       S: horzcat([s0, s1, ..., s_(N-1)])
+     *    and
+     *       s0 <- f(a0, p0)
+     *       s1 <- f(a1, p1)
+     *       ...
+     *       s_(N-1) <- f(a_(N-1), p_(N-1))
+     *    }
+     * </pre>
+     */
+    public CGASymbolicFunction map(int n) {
+        // unroll | serial | openmp
+        var casadiMapFunc = this.f_sym_casadi.map(n);
+        return new CGASymbolicFunction(casadiMapFunc);
+    }
+
+    public static void mainMap() {
+        var a = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("a");
+        var b = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("b");
+        var sum = a.add(b);
+
+        var sumFunc = CGAExprGraphFactory.instance.createFunctionSymbolic("func", List.of(a, b), List.of(sum));
+        System.out.println(sumFunc.f_sym_casadi);
+
+        var mapSumFunc = sumFunc.map(2);
+        System.out.println(mapSumFunc.f_sym_casadi);
+
+        // 1a+1b=3
+        var arg1a = CGAExprGraphFactory.instance.createMultivectorNumeric(1.0);
+        var arg1b = CGAExprGraphFactory.instance.createMultivectorNumeric(2.0);
+
+        // 2a+2b=7
+        var arg2a = CGAExprGraphFactory.instance.createMultivectorNumeric(3.0);
+        var arg2b = CGAExprGraphFactory.instance.createMultivectorNumeric(4.0);
+
+        var argA = SparseCGANumericMultivector.create(DM.horzcat(new StdVectorDM(new DM[]{arg1a.getDM(), arg2a.getDM()})));
+        var argB = SparseCGANumericMultivector.create(DM.horzcat(new StdVectorDM(new DM[]{arg1b.getDM(), arg2b.getDM()})));
+
+        var mapSumFuncOutDM = mapSumFunc.callNumeric(List.of(argA, argB)).get(0).getDM();
+        var cols = DM.horzsplit_n(mapSumFuncOutDM, mapSumFuncOutDM.columns());
+        System.out.println(mapSumFuncOutDM);
+        System.out.println("------");
+        System.out.println(cols.get(0));
+    }
+
+    public static void main(String[] args) {
+        mainMap();
     }
 
     @Override

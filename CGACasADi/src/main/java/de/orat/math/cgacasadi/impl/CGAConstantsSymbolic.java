@@ -46,11 +46,11 @@ public class CGAConstantsSymbolic implements iCGAConstants<SparseCGASymbolicMult
 
     @Override
     public SparseCGASymbolicMultivector getSparseEmptyInstance() {
-        return cached(PurelySymbolicCachedSparseCGASymbolicMultivector::createSparse);
+        return cached(() -> PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse("SymbolicSparseEmptyInstance"));
     }
 
     @Override
     public SparseCGASymbolicMultivector getDenseEmptyInstance() {
-        return cached(PurelySymbolicCachedSparseCGASymbolicMultivector::createDense);
+        return cached(() -> PurelySymbolicCachedSparseCGASymbolicMultivector.createDense("SymbolicDenseEmptyInstance"));
     }
 }

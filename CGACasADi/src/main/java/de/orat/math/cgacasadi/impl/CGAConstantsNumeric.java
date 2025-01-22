@@ -48,11 +48,11 @@ public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultiv
 
     @Override
     public SparseCGANumericMultivector getSparseEmptyInstance() {
-        return cached(() -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse()));
+        return cached(() -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse("NumericSparseEmptyInstance")));
     }
 
     @Override
     public SparseCGANumericMultivector getDenseEmptyInstance() {
-        return cached(() -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createDense()));
+        return cached(() -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createDense("NumericDenseEmptyInstance")));
     }
 }

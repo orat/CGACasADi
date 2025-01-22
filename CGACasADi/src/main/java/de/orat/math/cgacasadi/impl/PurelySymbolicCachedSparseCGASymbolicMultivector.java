@@ -15,23 +15,19 @@ public class PurelySymbolicCachedSparseCGASymbolicMultivector extends CachedSpar
 
     private static final ColumnVectorSparsity SPARSE = ColumnVectorSparsity.empty(CGACayleyTableGeometricProduct.instance().getBladesCount());
 
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector createSparse() {
-        return new PurelySymbolicCachedSparseCGASymbolicMultivector("", SPARSE);
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector createSparse(String name) {
+        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, SPARSE);
     }
 
     private static final ColumnVectorSparsity DENSE = ColumnVectorSparsity.dense(CGACayleyTableGeometricProduct.instance().getBladesCount());
 
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector createDense() {
-        return new PurelySymbolicCachedSparseCGASymbolicMultivector("", DENSE);
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector createDense(String name) {
+        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, DENSE);
     }
 
     public PurelySymbolicCachedSparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity) {
         super(name, SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity)));
         assert super.getSX().is_valid_input();
-    }
-
-    public PurelySymbolicCachedSparseCGASymbolicMultivector(String name) {
-        this(name, SPARSE);
     }
 
     /**

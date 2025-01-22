@@ -284,8 +284,8 @@ public class CGAImplTest {
     public void testGPRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a"/*, 1*/);
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b"/*, 1*/);
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a"/*, 1*/);
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b"/*, 1*/);
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -330,8 +330,8 @@ public class CGAImplTest {
     public void testScalarProductRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a"/*, 1*/);
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b"/*, 1*/);
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a"/*, 1*/);
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b"/*, 1*/);
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -658,8 +658,8 @@ public class CGAImplTest {
     public void testOPRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b");
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -705,8 +705,8 @@ public class CGAImplTest {
     public void testLCRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b");
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -753,8 +753,8 @@ public class CGAImplTest {
     public void testIPRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b");
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -800,8 +800,8 @@ public class CGAImplTest {
     public void testDotRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b");
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -848,8 +848,8 @@ public class CGAImplTest {
     public void testRCRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b");
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -893,8 +893,8 @@ public class CGAImplTest {
     public void testRegressiveRandom() {
 
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b");
+        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
+        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
         parameters.add(mva);
@@ -1245,7 +1245,7 @@ public class CGAImplTest {
     @Test
     public void testReverseRandom() {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv");
+        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
         System.out.println("reverse (sparsity): " + mv.getSparsity().toString());
         //System.out.println("mv: "+mv.toString());
         MultivectorSymbolic result = mv.reverse();
@@ -1357,7 +1357,7 @@ public class CGAImplTest {
     @Test
     public void testDualRandom() {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv");
+        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
         System.out.println("mv (sparsity für dual): " + mv.getSparsity().toString());
         System.out.println("mv: (dual) " + mv.toString());
         // dual() basiert derzeit auf dot
@@ -1393,7 +1393,7 @@ public class CGAImplTest {
     @Test
     public void testNormRandom() {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv");
+        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
         MultivectorSymbolic result = mv.norm();
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
@@ -1423,7 +1423,7 @@ public class CGAImplTest {
     @Test
     public void testNormalizeRandom() {
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv");
+        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
         MultivectorSymbolic result = mv.normalize(); // normalize by squared norm
 
         List<MultivectorPurelySymbolic> parameters = new ArrayList<>();

@@ -52,11 +52,6 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name) {
-        return SparseCGASymbolicMultivector.create(name);
-    }
-
-    @Override
     public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(
                                 String name, int grade) {
         return SparseCGASymbolicMultivector.create(name, grade);
@@ -73,13 +68,13 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createSparseMultivectorPurelySymbolic() {
-        return PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse();
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicSparse(String name) {
+        return PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name);
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createDenseMultivectorPurelySymbolic() {
-        return PurelySymbolicCachedSparseCGASymbolicMultivector.createDense();
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicDense(String name) {
+        return PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name);
     }
 
     // helper methods

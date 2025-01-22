@@ -108,8 +108,12 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, sparsity);
     }
 
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name) {
-        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name);
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector createDense(String name) {
+        return PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name);
+    }
+
+    public static PurelySymbolicCachedSparseCGASymbolicMultivector createSparse(String name) {
+        return PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name);
     }
 
     public static SparseCGASymbolicMultivector create(DM dm) {
