@@ -262,11 +262,13 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     
     @Override
     public SparseCGASymbolicMultivector down(){
-        // -vec/(εᵢ⌋vec)
+        // normalize: vec/(vec.εᵢ)
         SparseCGASymbolicMultivector result 
-            = negate().div(CONSTANTS.getBaseVectorInfinity().lc(this));
+            = div(this.dot(CONSTANTS.getBaseVectorInfinity()));
+        // rejection from the minkowski plane E0
+        result.op(CONSTANTS.getMinkovskiBiVector()).div(CONSTANTS.getMinkovskiBiVector());
         // erase e0 and einf, that means e4, d5
-        result.getSX().erase(new StdVectorCasadiInt(new long[]{4l, 5l}));
+        //result.getSX().erase(new StdVectorCasadiInt(new long[]{4l, 5l}));
         return result;
     }
     
