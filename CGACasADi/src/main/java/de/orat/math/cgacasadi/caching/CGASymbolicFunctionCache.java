@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -28,30 +29,41 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
 
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<? extends CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
         CGASymbolicFunction func = functionCache.get(name);
+
+        // Create func if not present.
         if (func == null) {
             final int size = args.size();
-            List<PurelySymbolicCachedSparseCGASymbolicMultivector> params = new ArrayList<>(size);
-            // create symbolic sx for each input argument
+            List<PurelySymbolicCachedSparseCGASymbolicMultivector> casadiFuncParams = new ArrayList<>(size);
+            List<PurelySymbolicCachedSparseCGASymbolicMultivector> symbolicMultivectorParams = new ArrayList<>(size);
+            Map<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector> uniqueArgsToParams = new IdentityHashMap<>(size);
+
+            // Convert to purely symbolic multivector.
             for (int i = 0; i < size; ++i) {
                 SparseCGASymbolicMultivector arg = args.get(i);
-                // Convert to purely symbolic multivector.
-                // grades
-                // Is already a CachedSparseCGASymbolicMultivector.
-//                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
-//                    String.valueOf(PARAM_NAMES.charAt(i)), arg.grades());
                 // sparsity
                 var param = new PurelySymbolicCachedSparseCGASymbolicMultivector(getParamName(i), arg.getSparsity());
-                // dense
-//                PurelySymbolicCachedSparseCGASymbolicMultivector param = new PurelySymbolicCachedSparseCGASymbolicMultivector(
-//                    String.valueOf(PARAM_NAMES.charAt(i)));
-                //
-                params.add(param);
+                casadiFuncParams.add(param);
+
+                // Preserve identity for symbolicMultivectorParams.
+                var paramOfArg = uniqueArgsToParams.get(arg);
+                if (paramOfArg == null) {
+                    // Arg not seen before.
+                    symbolicMultivectorParams.add(param);
+                    uniqueArgsToParams.put(arg, param);
+                } else {
+                    // Arg seen before.
+                    symbolicMultivectorParams.add(paramOfArg);
+                }
             }
-            func = new CGASymbolicFunction(String.format("cache_func_%s", functionCache.size()), params, List.of(res.apply(params)));
+
+            // Specific type: CachedSparseCGASymbolicMultivector.
+            SparseCGASymbolicMultivector symbolicReturn = res.apply(symbolicMultivectorParams);
+            func = new CGASymbolicFunction(String.format("cache_func_%s", functionCache.size()), casadiFuncParams, List.of(symbolicReturn));
             functionCache.put(name, func);
             cachedFunctionsUsage.put(name, 0);
         }
-        // Is already a CachedSparseCGASymbolicMultivector.
+
+        // Specific type: CachedSparseCGASymbolicMultivector.
         SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0);
         cachedFunctionsUsage.compute(name, (k, v) -> ++v);
         return new CachedSparseCGASymbolicMultivector(retVal);
