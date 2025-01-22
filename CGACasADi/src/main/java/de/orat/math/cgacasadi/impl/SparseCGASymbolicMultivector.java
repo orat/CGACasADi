@@ -277,6 +277,10 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         SX opm = CasADiUtil.toSXProductMatrix(b, CGACayleyTableGeometricProduct.instance());
         //System.out.println("--- end of gp matrix creation ---");
         SX result = SX.mtimes(opm.T(), this.getSX());
+        if (this == b) {
+            // a*a is always a scalar!
+            result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
+        }
         return create(result); // result sollte die richtige sparsity haben
     }
 
