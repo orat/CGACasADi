@@ -73,19 +73,13 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
-    public SparseCGASymbolicMultivector createSparseEmptyInstance() {
-        // empty vector implementation
-        SX mysx = new SX(CasADiUtil.toCasADiSparsity(
-            ColumnVectorSparsity.empty(baseCayleyTable.getRows())),
-            new SX(new StdVectorVectorDouble(new StdVectorDouble[]{new StdVectorDouble()})));
-        return create(mysx);
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createSparseMultivectorPurelySymbolic() {
+        return PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse();
     }
 
     @Override
-    public SparseCGASymbolicMultivector createDenseEmptyInstance() {
-        SX mysx = new SX(CasADiUtil.toCasADiSparsity(
-            ColumnVectorSparsity.dense(baseCayleyTable.getRows())));
-        return create(mysx);
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createDenseMultivectorPurelySymbolic() {
+        return PurelySymbolicCachedSparseCGASymbolicMultivector.createDense();
     }
 
     // helper methods

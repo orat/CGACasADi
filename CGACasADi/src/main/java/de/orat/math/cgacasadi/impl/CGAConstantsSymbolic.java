@@ -43,4 +43,14 @@ public class CGAConstantsSymbolic implements iCGAConstants<SparseCGASymbolicMult
         }
         return value;
     }
+
+    @Override
+    public SparseCGASymbolicMultivector getSparseEmptyInstance() {
+        return cached(PurelySymbolicCachedSparseCGASymbolicMultivector::createSparse);
+    }
+
+    @Override
+    public SparseCGASymbolicMultivector getDenseEmptyInstance() {
+        return cached(PurelySymbolicCachedSparseCGASymbolicMultivector::createDense);
+    }
 }
