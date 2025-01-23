@@ -22,6 +22,7 @@ import util.cga.CGAMultivectorSparsity;
 public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector, SparseCGANumericMultivector> {
 
     static {
+        // Init JCasADi eagerly to improve profiling.
         NativeLibLoader.load();
     }
 
