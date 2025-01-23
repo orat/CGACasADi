@@ -112,35 +112,33 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
     /**
      * <pre>
      * Computes index of first occurrence of the same object.
-     * Example: [0:a, 1:b, 2:a] -> [0:0, 1:1, 2:0]
+     * Example: [0:a, 1:b, 2:a, 3:c] -> [0:0, 1:1, 2:0, 3:3]
      * </pre>
      */
-    private static List<Integer> computeFirstOccurrence(Object[] objects) {
-        final int size = objects.length;
-        Map<Object, Integer> uniqueObjectsToIndizes = new IdentityHashMap<>(size);
-        List<Integer> indexCorrection = new ArrayList<>(size);
-        int highestInt = 0;
-        for (int objectIndex = 0; objectIndex < size; ++objectIndex) {
-            Object object = objects[objectIndex];
-            Integer indexOfObject = uniqueObjectsToIndizes.get(object);
-            if (indexOfObject == null) {
+    private static List<Integer> computeFirstOccurrence(List<Object> objects) {
+        final int size = objects.size();
+        Map<Object, Integer> objectToFirstOccurrence = new IdentityHashMap<>(size);
+        List<Integer> indexToFirstOccurrence = new ArrayList<>(size);
+        for (int i = 0; i < size; ++i) {
+            Object object = objects.get(i);
+            Integer firstOccurrence = objectToFirstOccurrence.get(object);
+            if (firstOccurrence == null) {
                 // Object not seen before.
-                uniqueObjectsToIndizes.put(object, highestInt);
-                indexCorrection.add(highestInt);
-                ++highestInt;
+                objectToFirstOccurrence.put(object, i);
+                indexToFirstOccurrence.add(i);
             } else {
                 // Object seen before.
-                indexCorrection.add(indexOfObject);
+                indexToFirstOccurrence.add(firstOccurrence);
             }
         }
-        return indexCorrection;
+        return indexToFirstOccurrence;
     }
 
     /**
      * @param params Either iMultivectorSymbolic or int
      */
     public String createFuncName(String name, Object... params) {
-        List<Integer> firstOccurrence = computeFirstOccurrence(params);
+        List<Integer> firstOccurrence = computeFirstOccurrence(Arrays.asList(params));
         StringBuilder sb = new StringBuilder();
         sb.append(name);
         sb.append("_");
