@@ -32,33 +32,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
 
         // Create func if not present.
         if (func == null) {
-            final int size = args.size();
-            List<PurelySymbolicCachedSparseCGASymbolicMultivector> casadiFuncParams = new ArrayList<>(size);
-            List<PurelySymbolicCachedSparseCGASymbolicMultivector> symbolicMultivectorParams = new ArrayList<>(size);
-            Map<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector> uniqueArgsToParams = new IdentityHashMap<>(size);
-
-            // Convert to purely symbolic multivector.
-            for (int i = 0; i < size; ++i) {
-                SparseCGASymbolicMultivector arg = args.get(i);
-                // sparsity
-                var param = new PurelySymbolicCachedSparseCGASymbolicMultivector(getParamName(i), arg.getSparsity());
-                casadiFuncParams.add(param);
-
-                // Preserve identity for symbolicMultivectorParams.
-                var paramOfArg = uniqueArgsToParams.get(arg);
-                if (paramOfArg == null) {
-                    // Arg not seen before.
-                    symbolicMultivectorParams.add(param);
-                    uniqueArgsToParams.put(arg, param);
-                } else {
-                    // Arg seen before.
-                    symbolicMultivectorParams.add(paramOfArg);
-                }
-            }
-
-            // Specific type: CachedSparseCGASymbolicMultivector.
-            SparseCGASymbolicMultivector symbolicReturn = res.apply(symbolicMultivectorParams);
-            func = new CGASymbolicFunction(String.format("cache_func_%s", functionCache.size()), casadiFuncParams, List.of(symbolicReturn));
+            func = createSymbolicFunction(String.format("cache_func_%s", functionCache.size()), args, res);
             functionCache.put(name, func);
             cachedFunctionsUsage.put(name, 0);
         }
@@ -67,6 +41,35 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
         SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0);
         cachedFunctionsUsage.compute(name, (k, v) -> ++v);
         return new CachedSparseCGASymbolicMultivector(retVal);
+    }
+
+    private static CGASymbolicFunction createSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<? extends CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
+        final int size = args.size();
+        List<PurelySymbolicCachedSparseCGASymbolicMultivector> casadiFuncParams = new ArrayList<>(size);
+        List<PurelySymbolicCachedSparseCGASymbolicMultivector> symbolicMultivectorParams = new ArrayList<>(size);
+        Map<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector> uniqueArgsToParams = new IdentityHashMap<>(size);
+        // Convert to purely symbolic multivector.
+        for (int i = 0; i < size; ++i) {
+            SparseCGASymbolicMultivector arg = args.get(i);
+            // sparsity
+            var param = new PurelySymbolicCachedSparseCGASymbolicMultivector(getParamName(i), arg.getSparsity());
+            casadiFuncParams.add(param);
+
+            // Preserve identity for symbolicMultivectorParams.
+            var paramOfArg = uniqueArgsToParams.get(arg);
+            if (paramOfArg == null) {
+                // Arg not seen before.
+                symbolicMultivectorParams.add(param);
+                uniqueArgsToParams.put(arg, param);
+            } else {
+                // Arg seen before.
+                symbolicMultivectorParams.add(paramOfArg);
+            }
+        }
+        // Specific type: CachedSparseCGASymbolicMultivector.
+        SparseCGASymbolicMultivector symbolicReturn = res.apply(symbolicMultivectorParams);
+        CGASymbolicFunction func = new CGASymbolicFunction(name, casadiFuncParams, List.of(symbolicReturn));
+        return func;
     }
 
     @Override
@@ -107,13 +110,17 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
     }
 
     /**
-     * Example: [0:a, 1:a, 2:b] -> [0:0, 1:0, 2:1]
+     * <pre>
+     * Computes index of first occurrence of the same object.
+     * Example: [0:a, 1:b, 2:a] -> [0:0, 1:1, 2:0]
+     * </pre>
      */
-    private static List<Integer> computeIdentityIndexCorrection(Object[] objects) {
-        Map<Object, Integer> uniqueObjectsToIndizes = new IdentityHashMap<>(objects.length);
-        List<Integer> indexCorrection = new ArrayList<>(objects.length);
+    private static List<Integer> computeFirstOccurrence(Object[] objects) {
+        final int size = objects.length;
+        Map<Object, Integer> uniqueObjectsToIndizes = new IdentityHashMap<>(size);
+        List<Integer> indexCorrection = new ArrayList<>(size);
         int highestInt = 0;
-        for (int objectIndex = 0; objectIndex < objects.length; ++objectIndex) {
+        for (int objectIndex = 0; objectIndex < size; ++objectIndex) {
             Object object = objects[objectIndex];
             Integer indexOfObject = uniqueObjectsToIndizes.get(object);
             if (indexOfObject == null) {
@@ -133,13 +140,13 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
      * @param params Either iMultivectorSymbolic or int
      */
     public String createFuncName(String name, Object... params) {
-        List<Integer> indexCorrection = computeIdentityIndexCorrection(params);
+        List<Integer> firstOccurrence = computeFirstOccurrence(params);
         StringBuilder sb = new StringBuilder();
         sb.append(name);
         sb.append("_");
         for (int paramIndex = 0; paramIndex < params.length; ++paramIndex) {
             sb.append("_"); // Consecutive "_" would not be compatible with casadi function names.
-            sb.append(getParamName(indexCorrection.get(paramIndex)));
+            sb.append(getParamName(firstOccurrence.get(paramIndex)));
             Object param = params[paramIndex];
             if (param instanceof iMultivectorSymbolic mv) {
                 // complete sparsity of the parameter
