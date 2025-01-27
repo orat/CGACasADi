@@ -147,19 +147,15 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         double[] nonzeros = new double[]{-0.5d * scalar, 0.5d * scalar};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
-        //CGA e4s = new CGA(4, -0.5*scale);
-        //CGA e5s = new CGA(5, 0.5*scale);
+        return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorInfinity(double scalar) {
         double[] nonzeros = new double[]{scalar, scalar};
-        //CGA e4s = new CGA(4, scale);
-        //CGA e5s = new CGA(5, scale);
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+        return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
     @Override
@@ -195,19 +191,19 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     @Override
     public SparseDoubleMatrix createEpsilonPlus() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{4, 5});
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, new double[]{0d, 1d});
+        return new SparseDoubleMatrix(sparsity, new double[]{1d, 0d});
     }
 
     @Override
     public SparseDoubleMatrix createEpsilonMinus() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{4, 5});
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, new double[]{1d, 0d});
+        return new SparseDoubleMatrix(sparsity, new double[]{0d, 1d});
     }
 
     @Override
     public SparseDoubleMatrix createEuclideanPseudoscalar() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{16});
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, new double[]{1d});
+        return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
     @Override
@@ -217,16 +213,15 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     /**
-     * Mikovski Bivector.
+     * Minkovski Bivector.
      * 
-     * This is the flat point origin, corresponding to e0^einf.
+     * This is the flat point origin, corresponding to einf^e0=e4^e5.
      * 
      * @return 
      */
     @Override
     public SparseDoubleMatrix createMinkovskiBiVector() {
-        // 2e45
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{CGACayleyTable.getMikovskiBivectorIndex()/*15*/});
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{CGACayleyTable.getMikovskiBivectorIndex()});
         return new SparseDoubleMatrix(sparsity, new double[]{2d});
     }
 
@@ -235,15 +230,18 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         double[] nonzeros = new double[]{x, y, z};
         int[] rows = new int[]{1, 2, 3};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+        return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
+    
+    // die folgenden Defs sind noch nicht überprüft
+    
     @Override
     public SparseDoubleMatrix createBaseVectorInfinityDorst() {
         double[] nonzeros = new double[]{-1d, 1d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+        return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
     @Override
@@ -251,7 +249,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         double[] nonzeros = new double[]{0.5d, 0.5d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+        return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
     @Override
@@ -259,7 +257,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         double[] nonzeros = new double[]{1d, 1d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+        return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
     @Override
@@ -267,6 +265,6 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         double[] nonzeros = new double[]{1d, -1d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+        return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 }

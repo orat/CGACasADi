@@ -255,19 +255,29 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     @Override
     public SparseCGASymbolicMultivector up(){
+        if (!isEuclidian()){
+            throw new IllegalArgumentException("Up projection with an argument which is no euclidian vector is not allowed: "+toString());
+        }
         // vec + 0.5 vec² εᵢ + ε₀
         return add(CONSTANTS.half().gp(square()).gp(CONSTANTS.getBaseVectorInfinity()))
             .add(CONSTANTS.getBaseVectorOrigin());
     }
     
+    /**
+     * Down projection into the euclidian space.
+     * 
+     * @return ((vec/(vec⋅εᵢ))∧E₀)/E₀
+     */
     @Override
     public SparseCGASymbolicMultivector down(){
         // normalize: vec/(vec.εᵢ)
+        // Achtung: negate() ist anders als in der Doku der Clifford-lib. Das liegt daran, dass die Clifford-lib
+        // die Metrik anders definiert
         SparseCGASymbolicMultivector result 
-            = div(this.dot(CONSTANTS.getBaseVectorInfinity()));
+            = negate().div(this.dot(CONSTANTS.getBaseVectorInfinity()));
         // rejection from the minkowski plane E0
-        result.op(CONSTANTS.getMinkovskiBiVector()).div(CONSTANTS.getMinkovskiBiVector());
-        // erase e0 and einf, that means e4, d5
+        result = result.op(CONSTANTS.getMinkovskiBiVector()).div(CONSTANTS.getMinkovskiBiVector());
+        // erase e0 and einf, that means e4, d5 not needed
         //result.getSX().erase(new StdVectorCasadiInt(new long[]{4l, 5l}));
         return result;
     }
@@ -516,7 +526,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         }
         SX result = SX.cos(sx);
        // [-0.991076, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        // obwohl alle non scalar sparsity 00 haben wird der cos() auf 1 gesetzt
+        // obwohl alle non scalar von sx die sparsity 00 haben wird der cos() aller elements im result auf 1 gesetzt
         //WORKAROUND
         result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
         return create(result);
@@ -542,8 +552,12 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     public SparseCGASymbolicMultivector scalarAcos() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
-        }
-        return create(SX.acos(sx));
+        } 
+        SX result = SX.acos(sx);
+        // WORKAROUND
+        // [1.36944, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708, 1.5708] for sx=0.2 and all other elements are structural 00
+        result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
+        return create(result);
     }
     
     // non linear operators/functions
@@ -556,8 +570,6 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     public SparseCGASymbolicMultivector exp() {
         if (isScalar()){
             SX result = SX.exp(sx);
-            // TODO kann ich nicht alternativ mir das erste element von sx beschaffen und nur dort
-            // den exp() aufrufen?
             result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
             return create(result);
         } else if (!isBivector()){
@@ -1036,17 +1048,15 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         //FIXME unklar ob isZero überhaupt korrekt implementiert ist, das muss nach
         // structural zero testen... also nicht erst zur Laufzeit
         if (isZero()) {
-            throw new IllegalArgumentException("zero is not allowed!");
+            throw new IllegalArgumentException("Scalar inverse failed, because argument ist structural zero!");
         }
-        //System.out.println("scalar inverse: sparsity="+CasADiUtil.toMatrixSparsity(sx.sparsity()).toString());
-        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
-        //TODO
-        // das sollte aber einfacher gehen
-        SX resultSX = new SX(sx.sparsity());
-        resultSX.at(0).assign(SX.inv(sx.at(0)));
-        SparseCGASymbolicMultivector result = create(resultSX);
-        //System.out.println(CasADiUtil.toStringMatrix(sx).toString(true));
-        return result;
+        //SX result = new SX(sx.sparsity());
+        //result.at(0).assign(SX.inv(sx.at(0)));
+        
+        SX result = SX.inv(sx.at(0));
+        // unklar ob das erase wirklich gebraucht wird
+        //result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
+        return create(result);
     }
 
     //======================================================
