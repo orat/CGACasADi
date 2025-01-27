@@ -24,6 +24,8 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
     private final Map<String, Integer> cachedFunctionsUsage
         = new HashMap<>(1024, 0.5f);
 
+    private static final boolean NOCACHE = false;
+
     /**
      *
      * @param name Used directly as key in the cache. Needs to be unique for combination of actual function
@@ -31,16 +33,21 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
      * Use createFuncName() for this. Example usage is in CachedSparseCGASymbolicMultivector.
      */
     public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<? extends CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
-        CGASymbolicFunction func = functionCache.get(name);
-        if (func == null) {
-            func = createSymbolicFunction(String.format("cache_func_%s", functionCache.size()), args, res);
-            functionCache.put(name, func);
-            cachedFunctionsUsage.put(name, 0);
+        if (NOCACHE) {
+            List<CachedSparseCGASymbolicMultivector> params = args.stream().map(CachedSparseCGASymbolicMultivector::new).toList();
+            return new CachedSparseCGASymbolicMultivector(res.apply(params));
+        } else {
+            CGASymbolicFunction func = functionCache.get(name);
+            if (func == null) {
+                func = createSymbolicFunction(String.format("cache_func_%s", functionCache.size()), args, res);
+                functionCache.put(name, func);
+                cachedFunctionsUsage.put(name, 0);
+            }
+            // Specific type: CachedSparseCGASymbolicMultivector.
+            SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0);
+            cachedFunctionsUsage.compute(name, (k, v) -> ++v);
+            return new CachedSparseCGASymbolicMultivector(retVal);
         }
-        // Specific type: CachedSparseCGASymbolicMultivector.
-        SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0);
-        cachedFunctionsUsage.compute(name, (k, v) -> ++v);
-        return new CachedSparseCGASymbolicMultivector(retVal);
     }
 
     private static CGASymbolicFunction createSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<? extends CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
