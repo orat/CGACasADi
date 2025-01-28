@@ -3,6 +3,7 @@ package de.orat.math.cgacasadi.impl;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
+import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
 import de.orat.math.cgacasadi.CasADiUtil;
 import static de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector.create;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
@@ -19,6 +20,11 @@ import util.cga.CGAMultivectorSparsity;
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector, SparseCGANumericMultivector> {
+
+    static {
+        // Init JCasADi eagerly to improve profiling.
+        NativeLibLoader.load();
+    }
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
