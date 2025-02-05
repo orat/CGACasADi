@@ -9,6 +9,7 @@ import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.gacalc.api.FunctionSymbolic;
 import de.orat.math.gacalc.spi.iFunctionSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -96,6 +97,9 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     /**
      * <pre>
      * for-loop equivalent.
+     *
+     * The map operation exhibits constant graph size and initialization time.
+     *
      * Suppose you are interested in computing a function repeatedly on all columns of a matrix,
      * and aggregating all results in a result matrix.
      * The aggregate function can be obtained with the map construct.
@@ -122,10 +126,88 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
      *    }
      * </pre>
      */
-    public CGASymbolicFunction map(int n) {
+    protected CGASymbolicFunction map(int n) {
         // unroll | serial | openmp
         var casadiMapFunc = this.f_sym_casadi.map(n);
         return new CGASymbolicFunction(casadiMapFunc);
+    }
+
+    /**
+     * Like
+     */
+    protected CGASymbolicFunction mapaccum(int n) {
+        var casadiMapFunc = this.f_sym_casadi.mapaccum(n);
+        return new CGASymbolicFunction(casadiMapFunc);
+    }
+
+    // <SYMV extends SparseCGASymbolicMultivector> extends ArrayList<SYMV>
+    public static class MVArray {
+
+        private final List<? extends SparseCGASymbolicMultivector> mvs;
+
+        public MVArray(List<? extends SparseCGASymbolicMultivector> mvs) {
+            this.mvs = mvs;
+        }
+
+        public List<? extends SparseCGASymbolicMultivector> getMVS() {
+            return this.mvs;
+        }
+
+        protected SX horzcat() {
+            return horzcat(this.mvs);
+        }
+
+        protected static SX horzcat(List<? extends SparseCGASymbolicMultivector> mvs) {
+            StdVectorSX stdVec = transformImpl(mvs);
+            SX sxHorzcat = SX.horzcat(stdVec);
+            return sxHorzcat;
+        }
+
+        protected static List<? extends SparseCGASymbolicMultivector> horzsplit(SX sxHorzcat) {
+            StdVectorSX stdVec = SX.horzsplit_n(sxHorzcat, sxHorzcat.columns());
+            var mvs = stdVec.stream().map(SparseCGASymbolicMultivector::create).toList();
+            return mvs;
+        }
+    }
+
+    // Nur mit Zuweisung auf ein Array.
+    // this.resultCount muss 1 sein.
+    public MVArray callSymbolicWithMapOne(List<MVArray> args, int n) {
+        // Die Arrays müssen gleich lang sein. Und zwar gleich n.
+        // Die Anzahl an args muss gleich der Arity sein.
+        try {
+            var casadiMapFunc = this.f_sym_casadi.map(n);
+            var f_sym_in = new StdVectorSX(args.stream().map(MVArray::horzcat).toList());
+            var f_sym_out = new StdVectorSX();
+            casadiMapFunc.call(f_sym_in, f_sym_out);
+            return new MVArray(f_sym_out.stream().map(MVArray::horzsplit).toList().get(0));
+        } finally {
+            WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
+        }
+    }
+
+    public static void mainMap2() {
+        var a = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("a");
+        var b = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("b");
+        var sum = a.add(b);
+
+        var sumFunc = CGAExprGraphFactory.instance.createFunctionSymbolic("func", List.of(a, b), List.of(sum));
+        System.out.println(sumFunc.f_sym_casadi);
+
+        // a1+b1=3
+        // a2+b2=7
+        var arga1 = CGAExprGraphFactory.instance.createMultivectorSymbolic("a1", 1.0);
+        var arga2 = CGAExprGraphFactory.instance.createMultivectorSymbolic("a2", 3.0);
+        var arga = new MVArray(List.of(arga1, arga2));
+
+        var argb1 = CGAExprGraphFactory.instance.createMultivectorSymbolic("b1", 2.0);
+        var argb2 = CGAExprGraphFactory.instance.createMultivectorSymbolic("b2", 4.0);
+        var argb = new MVArray(List.of(argb1, argb2));
+
+        var res = sumFunc.callSymbolicWithMapOne(List.of(arga, argb), 2);
+
+        res.getMVS().forEach(System.out::println);
+        System.out.println("------");
     }
 
     public static void mainMap() {
@@ -158,7 +240,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     }
 
     public static void main(String[] args) {
-        mainMap();
+        mainMap2();
     }
 
     @Override
