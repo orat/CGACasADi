@@ -7,6 +7,8 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public abstract class CGASymbolicFunctionService {
@@ -119,12 +121,7 @@ public abstract class CGASymbolicFunctionService {
         assert initialAccumValues.size() == func.getArity();
         // Input und Output sparsity muss gleich sein.
 
-        int size = initialAccumValues.size();
-        var accumList = new ArrayList<Long>(size);
-        for (int i = 0; i < size; ++i) {
-            accumList.add((long) i);
-        }
-        var accum = new StdVectorCasadiInt(accumList);
+        var accum = new StdVectorCasadiInt(LongStream.range(0, initialAccumValues.size()).boxed().toList());
         var casadiMapaccumFunc = func.getCasADiFunction().mapaccum("aa", iterations, accum, accum);
         var f_sym_in = new StdVectorSX(initialAccumValues.stream().map(SparseCGASymbolicMultivector::getSX).toList());
         var f_sym_out = new StdVectorSX();
@@ -148,7 +145,7 @@ public abstract class CGASymbolicFunctionService {
         var arga2 = CGAExprGraphFactory.instance.createMultivectorSymbolic("a2", 3.0);
         var arga = new CGAArray(List.of(arga1, arga2));
 
-        var res = mapaccum(func, x0, List.of(arga), 2);
+        var res = mapaccum(func, x0, List.of(arga), 2).get(0).getMVS();;
         res.forEach(System.out::println);
         System.out.println("------");
     }
