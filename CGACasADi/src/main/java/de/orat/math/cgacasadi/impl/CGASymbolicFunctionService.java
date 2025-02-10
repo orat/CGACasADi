@@ -2,7 +2,10 @@ package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
+import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -35,14 +38,18 @@ public abstract class CGASymbolicFunctionService {
             .toList();
     }
 
-    public static List<? extends SparseCGASymbolicMultivector> foldMultipleAccum(CGASymbolicFunction func, List<SparseCGASymbolicMultivector> initialAccumValues, int iterations) {
+    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> List<SparseCGASymbolicMultivector> foldSupreme(
+        List<MV> parameters,
+        List<? extends SparseCGASymbolicMultivector> returns) {
+        return null;
+    }
+
+    public static List<SparseCGASymbolicMultivector> foldMultipleAccum(CGASymbolicFunction func, List<SparseCGASymbolicMultivector> initialAccumValues, int iterations) {
         assert initialAccumValues.size() == func.getArity();
         // Jeder Output wird genau dem Input an der selben Stelle zugewiesen.
         assert func.getArity() == func.getResultCount();
         // Input und Output sparsity muss gleich sein.
 
-        // Mal angenommen, ich habe eine Funktion, bei denen jeder Wert von einem vorherigen Wert abhängt.
-        // Ich brauche die Parameter der alten Funktion. In der Funktion werden sie horzsplittiert. Und bei Übergeben horzcatted.
         var casadiFunc = func.getCasADiFunction();
 
         StdVectorSX oldParams = casadiFunc.sx_in();
@@ -57,7 +64,6 @@ public abstract class CGASymbolicFunctionService {
 
         var newfunc = new Function("foldMultipleAccum", in2, out2);
         var newFoldedFunc = newfunc.fold(iterations);
-        System.out.println(newFoldedFunc);
 
         var f_sym_in = new StdVectorSX(List.of(CGAArray.horzcat(initialAccumValues)));
         var f_sym_out = new StdVectorSX();
@@ -109,6 +115,26 @@ public abstract class CGASymbolicFunctionService {
             .toList();
     }
 
+    public static List<CGAArray> mapaccumWithAccum(CGASymbolicFunction func, List<SparseCGASymbolicMultivector> initialAccumValues, int iterations) {
+        assert initialAccumValues.size() == func.getArity();
+        // Input und Output sparsity muss gleich sein.
+
+        int size = initialAccumValues.size();
+        var accumList = new ArrayList<Long>(size);
+        for (int i = 0; i < size; ++i) {
+            accumList.add((long) i);
+        }
+        var accum = new StdVectorCasadiInt(accumList);
+        var casadiMapaccumFunc = func.getCasADiFunction().mapaccum("aa", iterations, accum, accum);
+        var f_sym_in = new StdVectorSX(initialAccumValues.stream().map(SparseCGASymbolicMultivector::getSX).toList());
+        var f_sym_out = new StdVectorSX();
+        casadiMapaccumFunc.call(f_sym_in, f_sym_out);
+        return f_sym_out.stream()
+            .map(CGAArray::horzsplit)
+            .map(CGAArray::new)
+            .toList();
+    }
+
     public static void mainMapaccum() {
         var xi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("x");
         var a = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("a");
@@ -122,7 +148,7 @@ public abstract class CGASymbolicFunctionService {
         var arga2 = CGAExprGraphFactory.instance.createMultivectorSymbolic("a2", 3.0);
         var arga = new CGAArray(List.of(arga1, arga2));
 
-        var res = mapaccum(func, x0, List.of(arga), 2).get(0).getMVS();
+        var res = mapaccum(func, x0, List.of(arga), 2);
         res.forEach(System.out::println);
         System.out.println("------");
     }
@@ -140,6 +166,23 @@ public abstract class CGASymbolicFunctionService {
 
         var res = foldMultipleAccum(func, List.of(x0, a0), 2);
         res.forEach(System.out::println);
+        System.out.println("------");
+    }
+
+    public static void mainMapaccumWithAccum() {
+        var xi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("x");
+        var ai = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("a");
+        var xi1 = xi.add(xi);
+        var ai1 = ai.add(ai);
+
+        var func = CGAExprGraphFactory.instance.createFunctionSymbolic("func", List.of(xi, ai), List.of(xi1, ai1));
+
+        var x0 = CGAExprGraphFactory.instance.createMultivectorSymbolic("x0", 1.0);
+        var a0 = CGAExprGraphFactory.instance.createMultivectorSymbolic("a1", 2.0);
+
+        var res = mapaccumWithAccum(func, List.of(x0, a0), 2);
+        res.stream().map(CGAArray::getMVS).forEach(l -> l.forEach(System.out::println));
+        // res.forEach(System.out::println);
         System.out.println("------");
     }
 
@@ -186,6 +229,7 @@ public abstract class CGASymbolicFunctionService {
     }
 
     public static void main(String[] args) {
+        mainMapaccumWithAccum();
         mainFoldMultipleAccum();
     }
 }
