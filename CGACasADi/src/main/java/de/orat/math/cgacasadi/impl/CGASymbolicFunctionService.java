@@ -5,9 +5,8 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -40,12 +39,56 @@ public abstract class CGASymbolicFunctionService {
             .toList();
     }
 
-    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> List<SparseCGASymbolicMultivector> foldSupreme(
-        List<MV> parameters,
-        List<? extends SparseCGASymbolicMultivector> returns) {
-        return null;
+    private static StdVectorSX combineToSXVector1(List<? extends ISparseCGASymbolicMultivector> accum, List<? extends ISparseCGASymbolicMultivector> array) {
+        return new StdVectorSX(Stream.concat(Stream.of(
+            CGAArray.horzcat(accum)),
+            array.stream().map(ISparseCGASymbolicMultivector::getSX)
+        ).toList());
     }
 
+    private static StdVectorSX combineToSXVector2(List<? extends ISparseCGASymbolicMultivector> accum, List<CGAArray> array) {
+        return new StdVectorSX(Stream.concat(Stream.of(
+            CGAArray.horzcat(accum)),
+            array.stream().map(CGAArray::horzcat)
+        ).toList());
+    }
+
+    public static record FoldSupremeReturn(List<SparseCGASymbolicMultivector> returnsAccum, List<CGAArray> returnsOther) {
+
+    }
+
+    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> FoldSupremeReturn foldSupreme(
+        List<MV> paramsAccum,
+        List<MV> paramsArray,
+        List<? extends SparseCGASymbolicMultivector> returnsAccum,
+        List<? extends SparseCGASymbolicMultivector> returnsOther,
+        List<? extends SparseCGASymbolicMultivector> argsAccumInital,
+        List<CGAArray> argsArray,
+        int iterations) {
+        assert paramsAccum.size() >= 1;
+        assert paramsAccum.size() == returnsAccum.size();
+        assert paramsAccum.size() == argsAccumInital.size();
+        assert paramsArray.size() == argsArray.size();
+        for (var arr : argsArray) {
+            assert arr.getMVS().size() == iterations;
+        }
+
+        var def_sym_in = combineToSXVector1(paramsAccum, paramsArray);
+        var def_sym_out = combineToSXVector1(returnsAccum, returnsOther);
+        var f_sym_casadi = new Function("foldSupremeBase", def_sym_in, def_sym_out);
+
+        var call_sym_in = combineToSXVector2(argsAccumInital, argsArray);
+        var call_sym_out = new StdVectorSX();
+        f_sym_casadi.fold(iterations).call(call_sym_in, call_sym_out);
+        var call_out_list = call_sym_out.stream().toList();
+        var call_out_accum = CGAArray.horzsplit(call_out_list.get(0)).stream().map(SparseCGASymbolicMultivector::create).toList();
+        var call_out_other = call_out_list.subList(1, call_out_list.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        var call_out = new FoldSupremeReturn(call_out_accum, call_out_other);
+        return call_out;
+    }
+
+    // Das könnte ich in eine Utility Methode in SymbolicFunction sichern.
+    // Nur den Teil, der eine Funktion mit mehreren Argumenten mappt auf eine Funktion mit einem Array an Argumenten.
     public static List<SparseCGASymbolicMultivector> foldMultipleAccum(CGASymbolicFunction func, List<SparseCGASymbolicMultivector> initialAccumValues, int iterations) {
         assert initialAccumValues.size() == func.getArity();
         // Jeder Output wird genau dem Input an der selben Stelle zugewiesen.
@@ -150,6 +193,38 @@ public abstract class CGASymbolicFunctionService {
         System.out.println("------");
     }
 
+    public static void mainFoldSupreme() {
+        var xi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("xi");
+        var ai = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("ai");
+        var bi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("bi");
+        var xi1 = xi.add(xi);
+        var ai1 = ai.add(bi);
+        var c = CGAExprGraphFactory.instance.createMultivectorSymbolic("C", 2.7);
+
+        var paramsAccum = List.of(xi, ai);
+        var paramsArray = List.of(bi);
+        var returnsAccum = List.of(xi1, ai1);
+        var returnsOther = List.of(c);
+
+        var x0 = CGAExprGraphFactory.instance.createMultivectorSymbolic("x0", 3.0);
+        var a0 = CGAExprGraphFactory.instance.createMultivectorSymbolic("a0", 5.0);
+        var argb1 = CGAExprGraphFactory.instance.createMultivectorSymbolic("b1", 7.0);
+        var argb2 = CGAExprGraphFactory.instance.createMultivectorSymbolic("b2", 11.0);
+        var arga = new CGAArray(List.of(argb1, argb2));
+
+        var argsAccumInitial = List.of(x0, a0);
+        var argsArray = List.of(arga);
+        int iteration = 2;
+
+        var res = foldSupreme(paramsAccum, paramsArray, returnsAccum, returnsOther, argsAccumInitial, argsArray, iteration);
+        res.returnsAccum.forEach(System.out::println);
+        res.returnsOther.forEach(o -> {
+            System.out.println("..");
+            o.getMVS().forEach(System.out::println);
+        });
+        System.out.println("------");
+    }
+
     public static void mainFoldMultipleAccum() {
         var xi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("x");
         var ai = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("a");
@@ -228,5 +303,6 @@ public abstract class CGASymbolicFunctionService {
     public static void main(String[] args) {
         mainMapaccumWithAccum();
         mainFoldMultipleAccum();
+        mainFoldSupreme();
     }
 }

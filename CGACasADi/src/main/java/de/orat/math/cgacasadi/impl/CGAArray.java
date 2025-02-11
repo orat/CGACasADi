@@ -21,7 +21,7 @@ public class CGAArray {
         return horzcat(this.mvs);
     }
 
-    protected static SX horzcat(List<? extends SparseCGASymbolicMultivector> mvs) {
+    protected static SX horzcat(List<? extends ISparseCGASymbolicMultivector> mvs) {
         StdVectorSX stdVec = transformImpl(mvs);
         SX sxHorzcat = SX.horzcat(stdVec);
         return sxHorzcat;

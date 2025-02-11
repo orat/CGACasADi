@@ -42,13 +42,13 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
 //                }
 //            }
 
-            var f_sym_in = transformImpl(parameters);
-            var f_sym_out = transformImpl(returns);
+            var def_sym_in = transformImpl(parameters);
+            var def_sym_out = transformImpl(returns);
             //String name = callback.getName();
             this.name = name;
             arity = parameters.size();
             resultCount = returns.size();
-            this.f_sym_casadi = new Function(name, f_sym_in, f_sym_out);
+            this.f_sym_casadi = new Function(name, def_sym_in, def_sym_out);
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
@@ -65,10 +65,10 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     @Override
     public List<? extends SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
         try {
-            var f_sym_in = transformImpl(arguments);
-            var f_sym_out = new StdVectorSX();
-            this.f_sym_casadi.call(f_sym_in, f_sym_out);
-            return f_sym_out.stream().map(SparseCGASymbolicMultivector::create).toList();
+            var call_sym_in = transformImpl(arguments);
+            var call_sym_out = new StdVectorSX();
+            this.f_sym_casadi.call(call_sym_in, call_sym_out);
+            return call_sym_out.stream().map(SparseCGASymbolicMultivector::create).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
@@ -80,10 +80,10 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     @Override
     public List<? extends SparseCGANumericMultivector> callNumeric(List<? extends SparseCGANumericMultivector> arguments) {
         try {
-            var f_num_in = new StdVectorDM(arguments.stream().map(SparseCGANumericMultivector::getDM).toList());
-            var f_num_out = new StdVectorDM();
-            this.f_sym_casadi.call(f_num_in, f_num_out);
-            return f_num_out.stream().map(SparseCGANumericMultivector::create).toList();
+            var call_num_in = new StdVectorDM(arguments.stream().map(SparseCGANumericMultivector::getDM).toList());
+            var call_num_out = new StdVectorDM();
+            this.f_sym_casadi.call(call_num_in, call_num_out);
+            return call_num_out.stream().map(SparseCGANumericMultivector::create).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
