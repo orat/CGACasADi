@@ -53,7 +53,7 @@ public abstract class CGASymbolicFunctionService {
         ).toList());
     }
 
-    public static record FoldSupremeReturn(List<SparseCGASymbolicMultivector> returnsAccum, List<CGAArray> returnsOther) {
+    public static record FoldSupremeReturn(List<SparseCGASymbolicMultivector> returnsAccum, List<CGAArray> returnsArray) {
 
     }
 
@@ -61,7 +61,7 @@ public abstract class CGASymbolicFunctionService {
         List<MV> paramsAccum,
         List<MV> paramsArray,
         List<? extends SparseCGASymbolicMultivector> returnsAccum,
-        List<? extends SparseCGASymbolicMultivector> returnsOther,
+        List<? extends SparseCGASymbolicMultivector> returnsArray,
         List<? extends SparseCGASymbolicMultivector> argsAccumInital,
         List<CGAArray> argsArray,
         int iterations) {
@@ -74,16 +74,16 @@ public abstract class CGASymbolicFunctionService {
         }
 
         var def_sym_in = combineToSXVector1(paramsAccum, paramsArray);
-        var def_sym_out = combineToSXVector1(returnsAccum, returnsOther);
+        var def_sym_out = combineToSXVector1(returnsAccum, returnsArray);
         var f_sym_casadi = new Function("foldSupremeBase", def_sym_in, def_sym_out);
 
         var call_sym_in = combineToSXVector2(argsAccumInital, argsArray);
         var call_sym_out = new StdVectorSX();
         f_sym_casadi.fold(iterations).call(call_sym_in, call_sym_out);
-        var call_out_list = call_sym_out.stream().toList();
-        var call_out_accum = CGAArray.horzsplit(call_out_list.get(0)).stream().map(SparseCGASymbolicMultivector::create).toList();
-        var call_out_other = call_out_list.subList(1, call_out_list.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
-        var call_out = new FoldSupremeReturn(call_out_accum, call_out_other);
+        var call_out_all = call_sym_out.stream().toList();
+        var call_out_accum = CGAArray.horzsplit(call_out_all.get(0)).stream().map(SparseCGASymbolicMultivector::create).toList();
+        var call_out_array = call_out_all.subList(1, call_out_all.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        var call_out = new FoldSupremeReturn(call_out_accum, call_out_array);
         return call_out;
     }
 
@@ -204,7 +204,7 @@ public abstract class CGASymbolicFunctionService {
         var paramsAccum = List.of(xi, ai);
         var paramsArray = List.of(bi);
         var returnsAccum = List.of(xi1, ai1);
-        var returnsOther = List.of(c);
+        var returnsArray = List.of(c);
 
         var x0 = CGAExprGraphFactory.instance.createMultivectorSymbolic("x0", 3.0);
         var a0 = CGAExprGraphFactory.instance.createMultivectorSymbolic("a0", 5.0);
@@ -216,9 +216,9 @@ public abstract class CGASymbolicFunctionService {
         var argsArray = List.of(arga);
         int iteration = 2;
 
-        var res = foldSupreme(paramsAccum, paramsArray, returnsAccum, returnsOther, argsAccumInitial, argsArray, iteration);
+        var res = foldSupreme(paramsAccum, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsArray, iteration);
         res.returnsAccum.forEach(System.out::println);
-        res.returnsOther.forEach(o -> {
+        res.returnsArray.forEach(o -> {
             System.out.println("..");
             o.getMVS().forEach(System.out::println);
         });
