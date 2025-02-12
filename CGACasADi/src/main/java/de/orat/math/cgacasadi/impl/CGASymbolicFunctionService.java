@@ -245,8 +245,8 @@ public abstract class CGASymbolicFunctionService {
         f_sym_casadi.mapaccum("MapaccumSupremeMapaccum", iterations, accumVars, accumVars).call(call_sym_in, call_sym_out);
 
         var call_out_all = call_sym_out.stream().toList();
-        var call_out_accum = call_out_all.subList(0, argsAccumInital.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
-        var call_out_array = call_out_all.subList(argsAccumInital.size(), call_out_all.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        var call_out_accum = call_out_all.subList(0, returnsAccum.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        var call_out_array = call_out_all.subList(returnsAccum.size(), call_out_all.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
         var call_out = new MapaccumSupremeReturn(call_out_accum, call_out_array);
         return call_out;
     }
