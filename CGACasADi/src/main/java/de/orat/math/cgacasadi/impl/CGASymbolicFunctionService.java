@@ -14,13 +14,14 @@ public abstract class CGASymbolicFunctionService {
     /**
      * <pre>
      * for-loop equivalent.
-     * Computes the function for each array element.
      *
      * The map operation exhibits constant graph size and initialization time.
-     *
-     * The size of args list needs to be equal to the arity of the function.
-     * The size of the arrays needs to be equal to the number of iterations.
      * </pre>
+     *
+     * @param paramsSimple Plain variables.
+     * @param paramsArray Array variables.
+     * @param argsArray Hint: Index of element used in the computation is equal to the current iteration.
+     * @return One array element for each iteration for the variables of the returnsArray parameter.
      */
     public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> List<CGAArray> map(
         List<MV> paramsSimple,
@@ -68,6 +69,21 @@ public abstract class CGASymbolicFunctionService {
 
     }
 
+    /**
+     * <pre>
+     * for-loop equivalent.
+     *
+     * The fold operation exhibits a graph size and initialization time that scales logarithmically with n.
+     * </pre>
+     *
+     * @param paramsAccum Variables (fold) or array elements (mapaccum) which depend on the previous
+     * iteration.
+     * @param paramsSimple Plain variables.
+     * @param paramsArray Array variables.
+     * @param argsArray Hint: Index of element used in the computation is equal to the current iteration.
+     * @return Only end results of accum Variables. One array element for each iteration for the variables of
+     * the returnsArray parameter.
+     */
     public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> FoldReturn fold(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
@@ -125,6 +141,21 @@ public abstract class CGASymbolicFunctionService {
 
     }
 
+    /**
+     * <pre>
+     * for-loop equivalent.
+     *
+     * The mapaccum operation exhibits a graph size and initialization time that scales logarithmically with n.
+     * </pre>
+     *
+     * @param paramsAccum Variables (fold) or array elements (mapaccum) which depend on the previous
+     * iteration.
+     * @param paramsSimple Plain variables.
+     * @param paramsArray Array variables.
+     * @param argsArray Hint: Index of element used in the computation is equal to the current iteration.
+     * @return Results of all iterations of accum Variables. One array element for each iteration for the
+     * variables of the returnsArray parameter.
+     */
     public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> MapaccumReturn mapaccum(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
