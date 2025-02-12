@@ -35,8 +35,7 @@ public class PurelySymbolicCachedSparseCGASymbolicMultivector extends CachedSpar
     }
 
     public PurelySymbolicCachedSparseCGASymbolicMultivector(String name, SparseCGASymbolicMultivector from) {
-        super(name, SX.sym(name, from.getSX().sparsity()));
-        assert super.getSX().is_valid_input();
+        this(name, from.getSX().sparsity());
     }
 
     /**
