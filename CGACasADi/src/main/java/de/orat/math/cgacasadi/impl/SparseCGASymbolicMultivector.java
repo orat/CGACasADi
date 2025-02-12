@@ -2,18 +2,13 @@ package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.api.SXColVec;
 import de.dhbw.rahmlab.casadi.api.SXScalar;
-import de.dhbw.rahmlab.casadi.api.Trigometry;
 import de.dhbw.rahmlab.casadi.api.Util;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
-import de.dhbw.rahmlab.casadi.impl.casadi.SxSubIndex;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import util.cga.CGACayleyTableGeometricProduct;
-import util.cga.CGAMultivectorSparsity;
-import util.cga.CGAOperatorMatrixUtils;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
@@ -26,8 +21,10 @@ import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.Objects;
 import util.CayleyTable;
 import util.cga.CGACayleyTable;
-//import util.cga.CGACayleyTableOuterProduct;
+import util.cga.CGACayleyTableGeometricProduct;
+import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperations;
+import util.cga.CGAOperatorMatrixUtils;
 
 /**
  * <pre>

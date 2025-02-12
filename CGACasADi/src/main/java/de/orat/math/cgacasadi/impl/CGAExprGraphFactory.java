@@ -1,11 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
-import de.orat.math.cgacasadi.CasADiUtil;
-import static de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector.create;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
@@ -52,6 +47,11 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     // create symbolic multivectors
+    @Override
+    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicFrom(String name, SparseCGASymbolicMultivector from) {
+        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, from);
+    }
+
     @Override
     public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name, MatrixSparsity sparsity) {
         return SparseCGASymbolicMultivector.create(name, ColumnVectorSparsity.instance(sparsity));
