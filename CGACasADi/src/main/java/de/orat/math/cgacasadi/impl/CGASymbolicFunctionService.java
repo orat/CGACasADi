@@ -22,7 +22,7 @@ public abstract class CGASymbolicFunctionService {
      * The size of the arrays needs to be equal to the number of iterations.
      * </pre>
      */
-    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> List<CGAArray> mapSupreme(
+    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> List<CGAArray> map(
         List<MV> paramsSimple,
         List<MV> paramsArray,
         List<? extends SparseCGASymbolicMultivector> returnsArray,
@@ -42,7 +42,7 @@ public abstract class CGASymbolicFunctionService {
             ).toList()
         );
         var def_sym_out = new StdVectorSX(returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX).toList());
-        var f_sym_casadi = new Function("MapSupremeBase", def_sym_in, def_sym_out);
+        var f_sym_casadi = new Function("MapBase", def_sym_in, def_sym_out);
 
         var call_sym_in = new StdVectorSX(
             Stream.concat(
@@ -54,7 +54,7 @@ public abstract class CGASymbolicFunctionService {
         // Works as long as they are first in def_sym_in and call_sym_in.
         var nonRepeated = new StdVectorCasadiInt(LongStream.range(0, paramsSimple.size()).boxed().toList());
         // parallelization = unroll|serial|openmp
-        f_sym_casadi.map("MapSupremeMap", "serial", iterations, nonRepeated, new StdVectorCasadiInt()).call(call_sym_in, call_sym_out);
+        f_sym_casadi.map("MapMap", "serial", iterations, nonRepeated, new StdVectorCasadiInt()).call(call_sym_in, call_sym_out);
 
         var call_out = call_sym_out.stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
         return call_out;
@@ -64,11 +64,11 @@ public abstract class CGASymbolicFunctionService {
         return Stream.concat(a, Stream.concat(b, c));
     }
 
-    public static record FoldSupremeReturn(List<SparseCGASymbolicMultivector> returnsAccum, List<CGAArray> returnsArray) {
+    public static record FoldReturn(List<SparseCGASymbolicMultivector> returnsAccum, List<CGAArray> returnsArray) {
 
     }
 
-    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> FoldSupremeReturn foldSupreme(
+    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> FoldReturn fold(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
@@ -100,7 +100,7 @@ public abstract class CGASymbolicFunctionService {
                 returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
             ).toList()
         );
-        var f_sym_casadi = new Function("foldSupremeBase", def_sym_in, def_sym_out);
+        var f_sym_casadi = new Function("foldBase", def_sym_in, def_sym_out);
 
         var call_sym_in = new StdVectorSX(
             StreamConcat(
@@ -117,15 +117,15 @@ public abstract class CGASymbolicFunctionService {
         var call_out_all = call_sym_out.stream().toList();
         var call_out_accum = CGAArray.horzsplit(call_out_all.get(0)).stream().map(SparseCGASymbolicMultivector::create).toList();
         var call_out_array = call_out_all.subList(1, call_out_all.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
-        var call_out = new FoldSupremeReturn(call_out_accum, call_out_array);
+        var call_out = new FoldReturn(call_out_accum, call_out_array);
         return call_out;
     }
 
-    public static record MapaccumSupremeReturn(List<CGAArray> returnsAccum, List<CGAArray> returnsArray) {
+    public static record MapaccumReturn(List<CGAArray> returnsAccum, List<CGAArray> returnsArray) {
 
     }
 
-    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> MapaccumSupremeReturn mapaccumSupreme(
+    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> MapaccumReturn mapaccum(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
@@ -158,7 +158,7 @@ public abstract class CGASymbolicFunctionService {
                 returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
             ).toList()
         );
-        var f_sym_casadi = new Function("MapaccumSupremeBase", def_sym_in, def_sym_out);
+        var f_sym_casadi = new Function("MapaccumBase", def_sym_in, def_sym_out);
 
         var call_sym_in = new StdVectorSX(
             StreamConcat(
@@ -172,16 +172,16 @@ public abstract class CGASymbolicFunctionService {
         var call_sym_out = new StdVectorSX();
         // Works as long as they are first in def_sym_in and call_sym_in.
         var accumVars = new StdVectorCasadiInt(LongStream.range(0, paramsAccum.size()).boxed().toList());
-        f_sym_casadi.mapaccum("MapaccumSupremeMapaccum", iterations, accumVars, accumVars).call(call_sym_in, call_sym_out);
+        f_sym_casadi.mapaccum("MapaccumMapaccum", iterations, accumVars, accumVars).call(call_sym_in, call_sym_out);
 
         var call_out_all = call_sym_out.stream().toList();
         var call_out_accum = call_out_all.subList(0, returnsAccum.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
         var call_out_array = call_out_all.subList(returnsAccum.size(), call_out_all.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
-        var call_out = new MapaccumSupremeReturn(call_out_accum, call_out_array);
+        var call_out = new MapaccumReturn(call_out_accum, call_out_array);
         return call_out;
     }
 
-    public static void mainMapaccumSupreme() {
+    public static void mainMapaccum() {
         var xi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("xi");
         var ai = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("ai");
         var bi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("bi");
@@ -209,7 +209,7 @@ public abstract class CGASymbolicFunctionService {
         var argsArray = List.of(arga);
         int iteration = 2;
 
-        var res = mapaccumSupreme(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iteration);
+        var res = mapaccum(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iteration);
         res.returnsAccum.forEach(o -> {
             System.out.println("..");
             o.getMVS().forEach(System.out::println);
@@ -222,7 +222,7 @@ public abstract class CGASymbolicFunctionService {
         System.out.println("------");
     }
 
-    public static void mainFoldSupreme() {
+    public static void mainFold() {
         var xi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("xi");
         var ai = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("ai");
         var bi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("bi");
@@ -250,7 +250,7 @@ public abstract class CGASymbolicFunctionService {
         var argsArray = List.of(arga);
         int iteration = 2;
 
-        var res = foldSupreme(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iteration);
+        var res = fold(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iteration);
         res.returnsAccum.forEach(System.out::println);
         res.returnsArray.forEach(o -> {
             System.out.println("..");
@@ -259,7 +259,7 @@ public abstract class CGASymbolicFunctionService {
         System.out.println("------");
     }
 
-    public static void mainMapSupreme() {
+    public static void mainMap() {
         var bi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("bi");
         var h = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("h");
         var xi = bi.add(bi);
@@ -279,7 +279,7 @@ public abstract class CGASymbolicFunctionService {
         var argsArray = List.of(argb);
         int iteration = 2;
 
-        var res = mapSupreme(paramsSimple, paramsArray, returnsArray, argsSimple, argsArray, iteration);
+        var res = map(paramsSimple, paramsArray, returnsArray, argsSimple, argsArray, iteration);
         res.forEach(o -> {
             System.out.println("..");
             o.getMVS().forEach(System.out::println);
@@ -288,8 +288,8 @@ public abstract class CGASymbolicFunctionService {
     }
 
     public static void main(String[] args) {
-        mainMapSupreme();
-        mainFoldSupreme();
-        mainMapaccumSupreme();
+        mainMap();
+        mainFold();
+        mainMapaccum();
     }
 }
