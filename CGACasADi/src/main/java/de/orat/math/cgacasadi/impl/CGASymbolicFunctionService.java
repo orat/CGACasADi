@@ -81,28 +81,6 @@ public abstract class CGASymbolicFunctionService {
         return Stream.concat(a, Stream.concat(b, c));
     }
 
-    private static StdVectorSX combineToSXVector1(List<? extends ISparseCGASymbolicMultivector> accum, List<? extends ISparseCGASymbolicMultivector> simple, List<? extends ISparseCGASymbolicMultivector> array) {
-        return new StdVectorSX(
-            StreamConcat(
-                Stream.of(CGAArray.horzcat(accum)),
-                simple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                array.stream().map(ISparseCGASymbolicMultivector::getSX)
-            ).toList()
-        );
-    }
-
-    private static StdVectorSX combineToSXVector2(List<? extends ISparseCGASymbolicMultivector> accum, List<? extends ISparseCGASymbolicMultivector> simple, List<CGAArray> array) {
-        return new StdVectorSX(
-            StreamConcat(
-                Stream.of(CGAArray.horzcat(accum)),
-                // CasADi treats a SX as an arbitrary long List of SX.
-                // No need to use repmat.
-                simple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                array.stream().map(CGAArray::horzcat)
-            ).toList()
-        );
-    }
-
     public static record FoldSupremeReturn(List<SparseCGASymbolicMultivector> returnsAccum, List<CGAArray> returnsArray) {
 
     }
@@ -126,11 +104,30 @@ public abstract class CGASymbolicFunctionService {
             assert arr.getMVS().size() == iterations;
         }
 
-        var def_sym_in = combineToSXVector1(paramsAccum, paramsSimple, paramsArray);
-        var def_sym_out = combineToSXVector1(returnsAccum, Collections.EMPTY_LIST, returnsArray);
+        var def_sym_in = new StdVectorSX(
+            StreamConcat(
+                Stream.of(CGAArray.horzcat(paramsAccum)),
+                paramsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
+                paramsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+            ).toList()
+        );
+        var def_sym_out = new StdVectorSX(
+            Stream.concat(
+                Stream.of(CGAArray.horzcat(returnsAccum)),
+                returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+            ).toList()
+        );
         var f_sym_casadi = new Function("foldSupremeBase", def_sym_in, def_sym_out);
 
-        var call_sym_in = combineToSXVector2(argsAccumInital, argsSimple, argsArray);
+        var call_sym_in = new StdVectorSX(
+            StreamConcat(
+                Stream.of(CGAArray.horzcat(argsAccumInital)),
+                // CasADi treats a SX as an arbitrary long List of SX.
+                // No need to use repmat.
+                argsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
+                argsArray.stream().map(CGAArray::horzcat)
+            ).toList()
+        );
         var call_sym_out = new StdVectorSX();
         f_sym_casadi.fold(iterations).call(call_sym_in, call_sym_out);
 
