@@ -39,6 +39,44 @@ public abstract class CGASymbolicFunctionService {
             .toList();
     }
 
+    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> List<CGAArray> mapSupreme(
+        List<MV> paramsSimple,
+        List<MV> paramsArray,
+        List<? extends SparseCGASymbolicMultivector> returnsArray,
+        List<? extends SparseCGASymbolicMultivector> argsSimple,
+        List<CGAArray> argsArray,
+        int iterations) {
+        assert paramsSimple.size() == argsSimple.size();
+        assert paramsArray.size() == argsArray.size();
+        for (var arr : argsArray) {
+            assert arr.getMVS().size() == iterations;
+        }
+
+        var def_sym_in = new StdVectorSX(
+            Stream.concat(
+                paramsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
+                paramsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+            ).toList()
+        );
+        var def_sym_out = new StdVectorSX(returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX).toList());
+        var f_sym_casadi = new Function("MapSupremeBase", def_sym_in, def_sym_out);
+
+        var call_sym_in = new StdVectorSX(
+            Stream.concat(
+                argsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
+                argsArray.stream().map(CGAArray::horzcat)
+            ).toList()
+        );
+        var call_sym_out = new StdVectorSX();
+        // Works as long as they are first in def_sym_in and call_sym_in.
+        var nonRepeated = new StdVectorCasadiInt(LongStream.range(0, paramsSimple.size()).boxed().toList());
+        // parallelization = unroll|serial|openmp
+        f_sym_casadi.map("MapSupremeMap", "serial", iterations, nonRepeated, new StdVectorCasadiInt()).call(call_sym_in, call_sym_out);
+
+        var call_out = call_sym_out.stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        return call_out;
+    }
+
     private static <T> Stream<T> StreamConcat(Stream<? extends T> a, Stream<? extends T> b, Stream<? extends T> c) {
         return Stream.concat(a, Stream.concat(b, c));
     }
@@ -422,9 +460,36 @@ public abstract class CGASymbolicFunctionService {
         System.out.println("------");
     }
 
+    public static void mainMapSupreme() {
+        var bi = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("bi");
+        var h = CGAExprGraphFactory.instance.createMultivectorPurelySymbolicDense("h");
+        var xi = bi.add(bi);
+        var yi = bi.add(h);
+
+        var paramsSimple = List.of(h);
+        var paramsArray = List.of(bi);
+        var returnsArray = List.of(xi, yi);
+
+        var argb1 = CGAExprGraphFactory.instance.createMultivectorSymbolic("b1", 7.0);
+        var argb2 = CGAExprGraphFactory.instance.createMultivectorSymbolic("b2", 11.0);
+        var argb = new CGAArray(List.of(argb1, argb2));
+
+        var argh = CGAExprGraphFactory.instance.createMultivectorSymbolic("h", 2.7);
+
+        var argsSimple = List.of(argh);
+        var argsArray = List.of(argb);
+        int iteration = 2;
+
+        var res = mapSupreme(paramsSimple, paramsArray, returnsArray, argsSimple, argsArray, iteration);
+        res.forEach(o -> {
+            System.out.println("..");
+            o.getMVS().forEach(System.out::println);
+        });
+        System.out.println("------");
+    }
+
     public static void main(String[] args) {
-        mainMapaccum();
-        mainMapaccumWithAccum();
-        mainMapaccumSupreme();
+        mainMap();
+        mainMapSupreme();
     }
 }
