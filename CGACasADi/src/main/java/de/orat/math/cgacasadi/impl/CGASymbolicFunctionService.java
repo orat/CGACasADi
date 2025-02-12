@@ -241,7 +241,7 @@ public abstract class CGASymbolicFunctionService {
         );
         var call_sym_out = new StdVectorSX();
         // Works as long as they are first in def_sym_in and call_sym_in.
-        var accumVars = new StdVectorCasadiInt(LongStream.range(0, argsAccumInital.size()).boxed().toList());
+        var accumVars = new StdVectorCasadiInt(LongStream.range(0, paramsAccum.size()).boxed().toList());
         f_sym_casadi.mapaccum("MapaccumSupremeMapaccum", iterations, accumVars, accumVars).call(call_sym_in, call_sym_out);
 
         var call_out_all = call_sym_out.stream().toList();
