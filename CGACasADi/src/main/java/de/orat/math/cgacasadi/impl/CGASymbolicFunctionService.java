@@ -4,7 +4,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -183,9 +182,8 @@ public abstract class CGASymbolicFunctionService {
             ).toList()
         );
         var def_sym_out = new StdVectorSX(
-            StreamConcat(
+            Stream.concat(
                 returnsAccum.stream().map(ISparseCGASymbolicMultivector::getSX),
-                Collections.<ISparseCGASymbolicMultivector>emptyList().stream().map(ISparseCGASymbolicMultivector::getSX),
                 returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
             ).toList()
         );
