@@ -46,6 +46,11 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         return CGAConstantsNumeric.instance;
     }
 
+    @Override
+    public CGASymbolicFunctionService getLoopService() {
+        return CGASymbolicFunctionService.instance;
+    }
+
     // create symbolic multivectors
     @Override
     public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicFrom(String name, SparseCGASymbolicMultivector from) {

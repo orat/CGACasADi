@@ -3,22 +3,19 @@ package de.orat.math.cgacasadi.impl;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import static de.orat.math.cgacasadi.impl.CGASymbolicFunction.transformImpl;
+import de.orat.math.gacalc.spi.iMultivectorSymbolicArray;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class CGAArray {
+public class CGAArray extends ArrayList<SparseCGASymbolicMultivector> implements iMultivectorSymbolicArray<SparseCGASymbolicMultivector> {
 
-    private final List<? extends SparseCGASymbolicMultivector> mvs;
-
-    public CGAArray(List<? extends SparseCGASymbolicMultivector> mvs) {
-        this.mvs = mvs;
+    public CGAArray() {
+        super();
     }
 
-    public List<? extends SparseCGASymbolicMultivector> getMVS() {
-        return this.mvs;
-    }
-
-    protected SX horzcat() {
-        return horzcat(this.mvs);
+    public CGAArray(Collection<? extends SparseCGASymbolicMultivector> mvs) {
+        super(mvs);
     }
 
     protected static SX horzcat(List<? extends ISparseCGASymbolicMultivector> mvs) {
