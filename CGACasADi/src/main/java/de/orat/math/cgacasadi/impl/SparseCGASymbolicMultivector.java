@@ -428,6 +428,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return create(sxres);
     }
 
+    // ist nicht CGA-spezifisch
     /**
      * Add.
      *
@@ -446,6 +447,15 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return create(result);
     }
 
+    // ist nicht CGA-spezifisch
+    @Override
+    public SparseCGASymbolicMultivector map(SparseCGASymbolicMultivector b) {
+        // element-wise mulitplication (linear mapping)
+        SX result = SX.times(sx, b.getSX());
+        return create(result);
+    }
+    
+    // ist nicht CGA-spezifisch
     /**
      * Multivector subtraction.
      *
