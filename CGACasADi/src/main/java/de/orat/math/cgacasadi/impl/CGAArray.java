@@ -18,13 +18,13 @@ public class CGAArray extends ArrayList<SparseCGASymbolicMultivector> implements
         super(mvs);
     }
 
-    protected static SX horzcat(List<? extends ISparseCGASymbolicMultivector> mvs) {
+    public static SX horzcat(List<? extends ISparseCGASymbolicMultivector> mvs) {
         StdVectorSX stdVec = transformImpl(mvs);
         SX sxHorzcat = SX.horzcat(stdVec);
         return sxHorzcat;
     }
 
-    protected static List<? extends SparseCGASymbolicMultivector> horzsplit(SX sxHorzcat) {
+    public static List<? extends SparseCGASymbolicMultivector> horzsplit(SX sxHorzcat) {
         StdVectorSX stdVec = SX.horzsplit_n(sxHorzcat, sxHorzcat.columns());
         var mvs = stdVec.stream().map(SparseCGASymbolicMultivector::create).toList();
         return mvs;
