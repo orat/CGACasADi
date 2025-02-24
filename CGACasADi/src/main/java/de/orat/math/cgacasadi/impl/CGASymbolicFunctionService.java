@@ -10,6 +10,12 @@ import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+/**
+ * <pre>
+ * https://web.casadi.org/docs/#for-loop-equivalents
+ * https://web.casadi.org/api/html/da/da4/classcasadi_1_1Function.html
+ * </pre>
+ */
 public class CGASymbolicFunctionService implements iLoopService<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector, CGAArray> {
 
     private CGASymbolicFunctionService() {
