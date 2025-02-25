@@ -410,11 +410,11 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         // eventuell sollte ich ip() explizit implementieren und hier verwenden,
         // damit scp() unabhängig von der Reihenfolge der Argumente wird
         // return ip(x, LEFT_CONTRACTION).scalarPart();
+        SX result = createSparse("").getSX();
         SX sxres = (lc(rhs)).getSX().at(0);
-        CGAMultivectorSparsity scalarSparsity = new CGAMultivectorSparsity(new int[]{0});
-        SX result = new SX(CasADiUtil.toCasADiSparsity(scalarSparsity));
-        result.assign(sxres);
-        return create(sxres);
+        result.at(0).assign(sxres);
+
+        return create(result);
     }
 
     // ist nicht CGA-spezifisch
