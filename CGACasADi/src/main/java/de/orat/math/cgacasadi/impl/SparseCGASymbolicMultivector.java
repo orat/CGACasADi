@@ -76,7 +76,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
             throw new IllegalArgumentException(String.format("Invalid row count: %s", sx.rows()));
         }
         if (sx.columns() != 1l) {
-            throw new IllegalArgumentException(String.format("Invalid column count: %s", sx.rows()));
+            throw new IllegalArgumentException(String.format("Invalid column count: %s", sx.columns()));
         }
     }
 
