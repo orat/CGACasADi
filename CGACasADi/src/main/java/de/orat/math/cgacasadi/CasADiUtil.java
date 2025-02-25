@@ -4,30 +4,55 @@ import de.dhbw.rahmlab.casadi.api.Util;
 import static de.dhbw.rahmlab.casadi.api.Util.toIntArr;
 import static de.dhbw.rahmlab.casadi.api.Util.toLongArr;
 import static de.dhbw.rahmlab.casadi.api.Util.toStdVectorDouble;
-import util.cga.CGACayleyTable;
-import util.cga.CGAMultivectorSparsity;
-import util.cga.DenseCGAColumnVector;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import util.CayleyTable;
-import util.CayleyTable.Cell;
+import de.orat.math.cgacasadi.impl.ISparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
+import java.util.List;
+import util.CayleyTable;
+import util.CayleyTable.Cell;
+import util.cga.CGACayleyTable;
+import util.cga.CGAMultivectorSparsity;
+import util.cga.DenseCGAColumnVector;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class CasADiUtil {
+
+    public static List<Sparsity> toSparsities(List<? extends ISparseCGASymbolicMultivector> mvs) {
+        return mvs.stream().map(ISparseCGASymbolicMultivector::getSX).map(SX::sparsity).toList();
+    }
+
+    public static boolean areMVSparsitiesSupersetsOfSubsets(List<? extends ISparseCGASymbolicMultivector> supersets, List<? extends ISparseCGASymbolicMultivector> subsets) {
+        var supersetsSparsities = toSparsities(supersets);
+        var subsetSparsities = toSparsities(subsets);
+        return areSparsitiesSupersetsOfSubsets(supersetsSparsities, subsetSparsities);
+    }
+
+    public static boolean areSparsitiesSupersetsOfSubsets(List<Sparsity> supersets, List<Sparsity> subsets) {
+        final int size = supersets.size();
+        if (size != subsets.size()) {
+            return false;
+        }
+        for (int i = 0; i < size; ++i) {
+            var superset = supersets.get(i);
+            var subset = subsets.get(i);
+            if (!subset.is_subset(superset)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public static CGAMultivectorSparsity toCGAMultivectorSparsity(
                         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {

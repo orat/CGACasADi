@@ -1,6 +1,7 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import static de.orat.math.cgacasadi.impl.CGASymbolicFunction.transformImpl;
 import de.orat.math.gacalc.spi.iMultivectorSymbolicArray;
@@ -14,8 +15,21 @@ public class CGAArray extends ArrayList<SparseCGASymbolicMultivector> implements
         super();
     }
 
+    /**
+     *
+     * @param mvs all elements must have equal sparsity.
+     */
     public CGAArray(Collection<? extends SparseCGASymbolicMultivector> mvs) {
         super(mvs);
+    }
+
+    public final boolean areSparsitiesSubsetsOf(Sparsity sparsity) {
+        for (var e : this) {
+            if (!e.getSX().sparsity().is_subset(sparsity)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static SX horzcat(List<? extends ISparseCGASymbolicMultivector> mvs) {

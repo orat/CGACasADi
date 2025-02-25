@@ -3,6 +3,7 @@ package de.orat.math.cgacasadi.impl;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
+import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.spi.iLoopService;
 import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolicArray;
@@ -87,11 +88,16 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
         List<? extends SparseCGASymbolicMultivector> argsSimple,
         List<CGAArray> argsArray,
         int iterations) {
+        assert iterations >= 1;
         assert paramsSimple.size() == argsSimple.size();
         assert paramsArray.size() == argsArray.size();
-        for (var arr : argsArray) {
-            assert arr.size() == iterations;
+        for (int i = 0; i < paramsArray.size(); ++i) {
+            var param = paramsArray.get(i);
+            var argsArr = argsArray.get(i);
+            assert argsArr.size() == iterations;
+            assert argsArr.areSparsitiesSubsetsOf(param.getSX().sparsity());
         }
+        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
 
         var def_sym_in = new StdVectorSX(
             Stream.concat(
@@ -147,14 +153,21 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
         List<? extends SparseCGASymbolicMultivector> argsSimple,
         List<CGAArray> argsArray,
         int iterations) {
+        assert iterations >= 1;
         assert paramsAccum.size() >= 1;
         assert paramsAccum.size() == returnsAccum.size();
         assert paramsAccum.size() == argsAccumInitial.size();
         assert paramsSimple.size() == argsSimple.size();
         assert paramsArray.size() == argsArray.size();
-        for (var arr : argsArray) {
-            assert arr.size() == iterations;
+        for (int i = 0; i < paramsArray.size(); ++i) {
+            var param = paramsArray.get(i);
+            var argsArr = argsArray.get(i);
+            assert argsArr.size() == iterations;
+            assert argsArr.areSparsitiesSubsetsOf(param.getSX().sparsity());
         }
+        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, returnsAccum);
+        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, argsAccumInitial);
+        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
 
         var def_sym_in = new StdVectorSX(
             StreamConcat(
@@ -215,14 +228,21 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
         List<? extends SparseCGASymbolicMultivector> argsSimple,
         List<CGAArray> argsArray,
         int iterations) {
+        assert iterations >= 1;
         assert paramsAccum.size() >= 1;
         assert paramsAccum.size() == returnsAccum.size();
         assert paramsAccum.size() == argsAccumInitial.size();
         assert paramsSimple.size() == argsSimple.size();
         assert paramsArray.size() == argsArray.size();
-        for (var arr : argsArray) {
-            assert arr.size() == iterations;
+        for (int i = 0; i < paramsArray.size(); ++i) {
+            var param = paramsArray.get(i);
+            var argsArr = argsArray.get(i);
+            assert argsArr.size() == iterations;
+            assert argsArr.areSparsitiesSubsetsOf(param.getSX().sparsity());
         }
+        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, returnsAccum);
+        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, argsAccumInitial);
+        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
 
         var def_sym_in = new StdVectorSX(
             StreamConcat(

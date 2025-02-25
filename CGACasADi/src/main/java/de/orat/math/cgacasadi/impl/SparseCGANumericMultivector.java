@@ -17,7 +17,7 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
  * Achtung: Es können Objekte mit und ohne sparsity erzeugt werden.
  */
 @GenerateDelegate(to = SparseCGASymbolicMultivector.class)
-public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMultivector implements iMultivectorNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector> {
+public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMultivector implements iMultivectorNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector>, ISparseCGASymbolicMultivector {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
@@ -33,7 +33,8 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     // -> Constructors must only used within subclasses.
     //======================================================
     /**
-     * Constructors must only used within subclasses.
+     * Constructors must only used within subclasses. Can create invalid (not numeric)
+     * SparseCGANumericMultivector if used wrong.
      */
     @Deprecated
     protected SparseCGANumericMultivector(SparseCGASymbolicMultivector sym) {
@@ -43,11 +44,14 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     /**
      * Constructors must only used within subclasses.
      */
-    @Deprecated
     private SparseCGANumericMultivector(DM dm) {
         super(SparseCGASymbolicMultivector.create(dm));
     }
 
+    /**
+     * Can create invalid (not numeric) SparseCGANumericMultivector if used wrong.
+     */
+    @Deprecated
     @Override
     protected SparseCGANumericMultivector create(SparseCGASymbolicMultivector sym) {
         return new SparseCGANumericMultivector(sym);
@@ -116,5 +120,10 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     @Override
     public iConstantsFactory<SparseCGANumericMultivector> constants() {
         return CGAExprGraphFactory.instance.constantsNumeric();
+    }
+
+    @Override
+    public SX getSX() {
+        return this.toSymbolic().getSX();
     }
 }
