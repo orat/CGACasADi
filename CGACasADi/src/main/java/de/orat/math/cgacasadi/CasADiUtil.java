@@ -219,8 +219,6 @@ public class CasADiUtil {
         String[][] stringArr = new String[(int) m.rows()][(int) m.columns()];
         for (int i = 0; i < m.rows(); i++) {
             for (int j = 0; j < m.columns(); j++) {
-                // was passiert wenn eine Zelle structurell null ist (sparsity)?
-                // bekomme ich dann 00?
                 SxSubMatrix cell = m.at(i, j);
                 stringArr[i][j] = cell.toString();
             }
