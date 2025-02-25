@@ -205,17 +205,6 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     public boolean isBivector(){
         return (grade() == 2);
     }
-    
-    /**
-     * Is structural zero.
-     * 
-     * @return true if the multivector is structurel zero.
-     */
-    public boolean isZero() {
-        //TODO unklar ob das so korrekt ist, hier muss auf struktural zero getestet werden
-        // nicht erst auf zero zur Laufzeit
-        return sx.is_zero();
-    }
 
     private static final CGAConstantsSymbolic CONSTANTS = CGAConstantsSymbolic.instance;
 
@@ -1044,25 +1033,19 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     /**
      * Scalar inverse.
      *
-     * @throws IllegalArgumentException if the multivector is null.
+     * @throws IllegalArgumentException if the multivector is no scalar.
      * @return scalar inverse
      */
     @Override
     public SparseCGASymbolicMultivector scalarInverse() {
+        // Throws exception for an empty sparse multivector, too.
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
-        //FIXME unklar ob isZero überhaupt korrekt implementiert ist, das muss nach
-        // structural zero testen... also nicht erst zur Laufzeit
-        if (isZero()) {
-            throw new IllegalArgumentException("Scalar inverse failed, because argument ist structural zero!");
-        }
-        //SX result = new SX(sx.sparsity());
-        //result.at(0).assign(SX.inv(sx.at(0)));
-        
-        SX result = SX.inv(sx.at(0));
-        // unklar ob das erase wirklich gebraucht wird
-        //result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
+
+        SX result = createSparse("").getSX();
+        result.at(0).assign(SX.inv(sx.at(0)));
+
         return create(result);
     }
 
