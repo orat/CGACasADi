@@ -72,6 +72,12 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         Objects.requireNonNull(sx);
         this.name = name;
         this.sx = sx;
+        if (sx.rows() != baseCayleyTable.getBladesCount()) {
+            throw new IllegalArgumentException(String.format("Invalid row count: %s", sx.rows()));
+        }
+        if (sx.columns() != 1l) {
+            throw new IllegalArgumentException(String.format("Invalid column count: %s", sx.rows()));
+        }
     }
 
     public static SparseCGASymbolicMultivector create(SparseCGASymbolicMultivector other) {
