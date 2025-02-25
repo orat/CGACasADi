@@ -57,7 +57,10 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     @Override
     public List<? extends SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
         try {
-            assert arguments.size() == this.paramsSparsities.size();
+            if (arguments.size() != this.arity) {
+                throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
+                    this.arity, arguments.size()));
+            }
             assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
 
             var call_sym_in = transformImpl(arguments);
@@ -72,7 +75,10 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     @Override
     public List<? extends SparseCGANumericMultivector> callNumeric(List<? extends SparseCGANumericMultivector> arguments) {
         try {
-            assert arguments.size() == this.paramsSparsities.size();
+            if (arguments.size() != this.arity) {
+                throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
+                    this.arity, arguments.size()));
+            }
             assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
 
             var call_num_in = new StdVectorDM(arguments.stream().map(SparseCGANumericMultivector::getDM).toList());
