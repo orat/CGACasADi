@@ -148,7 +148,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
-    public String getName() {
+    public String getImplementationName() {
         return "cgacasadisx";
     }
 
