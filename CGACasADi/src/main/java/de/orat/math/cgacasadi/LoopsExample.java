@@ -8,7 +8,7 @@ import java.util.List;
 public class LoopsExample {
 
     public static void mapaccum() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing();
+        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
 
         var xi = fac.createMultivectorPurelySymbolicDense("xi");
         var ai = fac.createMultivectorPurelySymbolicDense("ai");
@@ -51,7 +51,7 @@ public class LoopsExample {
     }
 
     public static void fold() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing();
+        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
 
         var xi = fac.createMultivectorPurelySymbolicDense("xi");
         var ai = fac.createMultivectorPurelySymbolicDense("ai");
@@ -90,7 +90,7 @@ public class LoopsExample {
     }
 
     public static void map() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing();
+        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
 
         var bi = fac.createMultivectorPurelySymbolicDense("bi");
         var h = fac.createMultivectorPurelySymbolicDense("h");

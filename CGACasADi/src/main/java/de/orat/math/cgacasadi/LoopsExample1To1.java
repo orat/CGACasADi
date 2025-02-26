@@ -7,7 +7,7 @@ import java.util.List;
 public class LoopsExample1To1 {
 
     public static void mapaccum1To1() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing();
+        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
 
         // Lokale Variablen vor dem Loop.
         var aSim = fac.createScalarLiteral("aSim", 5);
