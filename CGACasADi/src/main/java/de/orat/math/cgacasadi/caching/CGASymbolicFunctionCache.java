@@ -59,7 +59,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
         for (int i = 0; i < size; ++i) {
             SparseCGASymbolicMultivector arg = args.get(i);
             // sparsity
-            var param = new PurelySymbolicCachedSparseCGASymbolicMultivector(getParamName(i), arg.getSparsity());
+            var param = new PurelySymbolicCachedSparseCGASymbolicMultivector(getParamName(i), arg);
             casadiFuncParams.add(param);
 
             // Preserve identity for symbolicMultivectorParams.
