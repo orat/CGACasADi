@@ -19,7 +19,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import util.CayleyTable;
+import de.orat.math.gacalc.util.CayleyTable;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 

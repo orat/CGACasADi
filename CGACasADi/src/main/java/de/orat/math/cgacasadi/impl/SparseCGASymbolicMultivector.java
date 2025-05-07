@@ -24,7 +24,7 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.Objects;
-import util.CayleyTable;
+import de.orat.math.gacalc.util.CayleyTable;
 import util.cga.CGACayleyTable;
 //import util.cga.CGACayleyTableOuterProduct;
 import util.cga.CGAOperations;
