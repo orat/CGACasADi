@@ -1,6 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
@@ -25,12 +25,12 @@ public class PurelySymbolicCachedSparseCGASymbolicMultivector extends CachedSpar
     }
 
     public PurelySymbolicCachedSparseCGASymbolicMultivector(String name, ColumnVectorSparsity sparsity) {
-        super(name, SX.sym(name, CasADiUtil.toCasADiSparsity(sparsity)));
+        super(name, SxStatic.sym(name, CasADiUtil.toCasADiSparsity(sparsity)));
         assert super.getSX().is_valid_input();
     }
 
     public PurelySymbolicCachedSparseCGASymbolicMultivector(String name, Sparsity sparsity) {
-        super(name, SX.sym(name, sparsity));
+        super(name, SxStatic.sym(name, sparsity));
         assert super.getSX().is_valid_input();
     }
 

@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -91,7 +92,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
             * Evaluates the expression numerically.
             * An error is raised when the expression contains symbols.
              */
-            this.lazyDM = SX.evalf(super.delegate.getSX());
+            this.lazyDM = SxStatic.evalf(super.delegate.getSX());
         }
         return lazyDM;
     }

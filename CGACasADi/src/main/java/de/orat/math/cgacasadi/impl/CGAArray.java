@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
@@ -34,12 +35,12 @@ public class CGAArray extends ArrayList<SparseCGASymbolicMultivector> implements
 
     public static SX horzcat(List<? extends ISparseCGASymbolicMultivector> mvs) {
         StdVectorSX stdVec = transformImpl(mvs);
-        SX sxHorzcat = SX.horzcat(stdVec);
+        SX sxHorzcat = SxStatic.horzcat(stdVec);
         return sxHorzcat;
     }
 
     public static List<? extends SparseCGASymbolicMultivector> horzsplit(SX sxHorzcat) {
-        StdVectorSX stdVec = SX.horzsplit_n(sxHorzcat, sxHorzcat.columns());
+        StdVectorSX stdVec = SxStatic.horzsplit_n(sxHorzcat, sxHorzcat.columns());
         var mvs = stdVec.stream().map(SparseCGASymbolicMultivector::create).toList();
         return mvs;
     }

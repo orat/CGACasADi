@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi;
 
+import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.Util;
 import static de.dhbw.rahmlab.casadi.api.Util.toIntArr;
 import static de.dhbw.rahmlab.casadi.api.Util.toLongArr;
@@ -141,12 +142,12 @@ public class CasADiUtil {
                             // Zelle der Cayleytable steht. Dieser muss multipliziert werden
                             // mit dem Wert der Zelle des korrespondierenden Multivektors. Das
                             // Zell-Objekt enthält dazu den index im Column-Vector.
-                            result.at(i, j).assign(SX.mtimes(new SX(cell.Value()),
+                            result.at(i, j).assign(SxStatic.mtimes(new SX(cell.Value()),
                                 mv.getSX().at(cell.bladeIndex(), 0)));
                             //System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
-                            //      SX.times(new SX(cell.Value()), 
+                            //      SxStatic.times(new SX(cell.Value()), 
                             //      new SX(mv.getSX().at(cell.bladeIndex(),0)) ).toString());
-                            log[i][j] = SX.mtimes(new SX(cell.Value()),
+                            log[i][j] = SxStatic.mtimes(new SX(cell.Value()),
                                 new SX(mv.getSX().at(cell.bladeIndex(), 0))).toString();
                         }
                         // wegen sparsity 0 muss kein Wert gesetzt werden

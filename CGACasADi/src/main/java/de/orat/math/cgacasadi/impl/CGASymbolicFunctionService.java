@@ -187,7 +187,7 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
         var call_sym_in = new StdVectorSX(
             StreamConcat(
                 Stream.of(CGAArray.horzcat(argsAccumInitial)),
-                // CasADi treats a SX as an arbitrary long List of SX.
+                // CasADi treats a SX as an arbitrary long List of SxStatic.
                 // No need to use repmat.
                 argsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
                 argsArray.stream().map(CGAArray::horzcat)
@@ -262,7 +262,7 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
         var call_sym_in = new StdVectorSX(
             StreamConcat(
                 argsAccumInitial.stream().map(ISparseCGASymbolicMultivector::getSX),
-                // CasADi treats a SX as an arbitrary long List of SX.
+                // CasADi treats a SX as an arbitrary long List of SxStatic.
                 // No need to use repmat.
                 argsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
                 argsArray.stream().map(CGAArray::horzcat)

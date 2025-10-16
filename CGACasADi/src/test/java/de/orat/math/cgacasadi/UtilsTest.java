@@ -1,18 +1,11 @@
 package de.orat.math.cgacasadi;
 
-import util.cga.CGACayleyTableGeometricProduct;
-import util.cga.CGAKVectorSparsity;
-import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
-import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.dhbw.rahmlab.casadi.impl.casadi.Function;
+import de.dhbw.rahmlab.casadi.MxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.MX;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorMX;
-import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import util.cga.CGACayleyTableGeometricProduct;
+import util.cga.CGAKVectorSparsity;
 
 /**
  *
@@ -25,10 +18,10 @@ public class UtilsTest {
 
     @Test
     public void testMatrixExpr() {
-        MX x = MX.sym("x", 2);
+        MX x = MxStatic.sym("x", 2);
         MX A = new MX(2, 2);
         A.at(0, 0).assign(x.at(0));
-        A.at(1, 1).assign(MX.mtimes(x.at(0), new MX(3)));
+        A.at(1, 1).assign(MxStatic.mtimes(x.at(0), new MX(3)));
 
         // A:(project((zeros(2x2,1nz)[0] = x[0]))[1] = (x[0]+x[1]))
         System.out.println("A:" + A);
