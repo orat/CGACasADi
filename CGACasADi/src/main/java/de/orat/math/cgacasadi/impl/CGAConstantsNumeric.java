@@ -2,7 +2,6 @@ package de.orat.math.cgacasadi.impl;
 
 import de.orat.math.gacalc.spi.iConstantsFactoryNumeric;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -14,45 +13,52 @@ public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultiv
 
     }
 
-    // Numeric multivectors don't have names.
-    @Override
-    public SparseCGANumericMultivector newConstant(String name, SparseDoubleMatrix definition) {
-        return fac().createMultivectorNumeric(definition);
-    }
-
-    // Numeric multivectors don't have names.
-    @Override
-    public SparseCGANumericMultivector newConstant(String name, SparseCGANumericMultivector definition) {
-        return definition;
-    }
-
     @Override
     public CGAExprGraphFactory fac() {
         return CGAExprGraphFactory.instance;
     }
 
+    @Override
+    public SparseCGANumericMultivector getSparseEmptyInstance() {
+        String name = "NumericSparseEmptyInstance";
+        return cached2(name, () -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name)));
+    }
+
+    @Override
+    public SparseCGANumericMultivector getDenseEmptyInstance() {
+        String name = "NumericDenseEmptyInstance";
+        return cached2(name, () -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name)));
+    }
+
     // ConcurrentHashMap to avoid ConcurrentModificationException while testing.
-    private final Map<Supplier<SparseCGANumericMultivector>, SparseCGANumericMultivector> cache
+    private final ConcurrentHashMap<String, SparseCGANumericMultivector> cache2
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
-    public synchronized SparseCGANumericMultivector cached(Supplier<SparseCGANumericMultivector> creator) {
+    public SparseCGANumericMultivector cached(String name, Supplier<SparseDoubleMatrix> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
-        var value = this.cache.get(creator);
+        var value = this.cache2.get(name);
         if (value == null) {
-            value = creator.get();
-            this.cache.put(creator, value);
+            var sparseDoubleMatrix = creator.get();
+            value = fac().createMultivectorNumeric(sparseDoubleMatrix);
+            this.cache2.putIfAbsent(name, value);
         }
         return value;
     }
 
     @Override
-    public SparseCGANumericMultivector getSparseEmptyInstance() {
-        return cached(() -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse("NumericSparseEmptyInstance")));
+    public SparseCGANumericMultivector cached2(String name, Supplier<SparseCGANumericMultivector> creator) {
+        // Avoid Recursive Update exception happening with computeIfAbsent.
+        var value = this.cache2.get(name);
+        if (value == null) {
+            value = creator.get();
+            this.cache2.putIfAbsent(name, value);
+        }
+        return value;
     }
 
-    @Override
-    public SparseCGANumericMultivector getDenseEmptyInstance() {
-        return cached(() -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createDense("NumericDenseEmptyInstance")));
+    public void testCache() {
+        cache2.values().forEach(mv -> System.out.println(mv));
+        System.out.println("------------------------");
     }
 }
