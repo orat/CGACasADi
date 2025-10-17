@@ -20,13 +20,13 @@ public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultiv
 
     @Override
     public SparseCGANumericMultivector getSparseEmptyInstance() {
-        String name = "NumericSparseEmptyInstance";
+        String name = "SparseEmptyInstance";
         return cached2(name, () -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name)));
     }
 
     @Override
     public SparseCGANumericMultivector getDenseEmptyInstance() {
-        String name = "NumericDenseEmptyInstance";
+        String name = "DenseEmptyInstance";
         return cached2(name, () -> new SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name)));
     }
 
@@ -39,8 +39,8 @@ public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultiv
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache2.get(name);
         if (value == null) {
-            var sparseDoubleMatrix = creator.get();
-            value = fac().createMultivectorNumeric(sparseDoubleMatrix);
+            var mvSym = CGAConstantsSymbolic.instance.cached(name, creator);
+            value = new SparseCGANumericMultivector(mvSym);
             this.cache2.putIfAbsent(name, value);
         }
         return value;
@@ -51,7 +51,8 @@ public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultiv
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache2.get(name);
         if (value == null) {
-            value = creator.get();
+            var mvSym = CGAConstantsSymbolic.instance.cached2(name, () -> creator.get().toSymbolic());
+            value = new SparseCGANumericMultivector(mvSym);
             this.cache2.putIfAbsent(name, value);
         }
         return value;

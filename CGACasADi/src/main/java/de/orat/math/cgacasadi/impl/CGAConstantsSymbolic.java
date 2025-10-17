@@ -20,13 +20,13 @@ public class CGAConstantsSymbolic implements iCGAConstants<SparseCGASymbolicMult
 
     @Override
     public SparseCGASymbolicMultivector getSparseEmptyInstance() {
-        String name = "SymbolicSparseEmptyInstance";
+        String name = "SparseEmptyInstance";
         return cached2(name, () -> PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name));
     }
 
     @Override
     public SparseCGASymbolicMultivector getDenseEmptyInstance() {
-        String name = "SymbolicDenseEmptyInstance";
+        String name = "DenseEmptyInstance";
         return cached2(name, () -> PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name));
     }
 
