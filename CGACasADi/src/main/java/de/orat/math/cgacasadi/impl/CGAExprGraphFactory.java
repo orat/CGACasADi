@@ -72,11 +72,6 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
                                 String name, int[] grades) {
         return SparseCGASymbolicMultivector.create(name, grades);
     }
-    
-    @Override
-    public SparseCGASymbolicMultivector createMultivectorSymbolic(String name, SparseDoubleMatrix sparseVector) {
-        return SparseCGASymbolicMultivector.create(name, sparseVector);
-    }
 
     @Override
     public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicSparse(String name) {
@@ -124,13 +119,18 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
 
     @Override
+    public SparseCGANumericMultivector createMultivectorNumeric(double scalar) {
+        return SparseCGANumericMultivector.create(scalar);
+    }
+
+    @Override
     public SparseCGANumericMultivector createRandomMultivectorNumeric() {
         return createMultivectorNumeric(createRandomKVector(baseCayleyTable.getBladesCount()));
     }
 
     @Override
     public SparseCGANumericMultivector createMultivectorNumeric(SparseDoubleMatrix vec) {
-        return SparseCGANumericMultivector.create(vec.nonzeros(), vec.getSparsity().getrow());
+        return SparseCGANumericMultivector.create(vec);
     }
 
     // create function

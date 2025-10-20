@@ -11,6 +11,7 @@ import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.spi.iConstantsFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import util.cga.CGAMultivectorSparsity;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -47,6 +48,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
      */
     private SparseCGANumericMultivector(DM dm) {
         super(SparseCGASymbolicMultivector.create(dm));
+        this.lazyDM = dm;
     }
 
     /**
@@ -81,6 +83,18 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         }
         var dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
         return new SparseCGANumericMultivector(dm);
+    }
+
+    public static SparseCGANumericMultivector create(SparseDoubleMatrix vec) {
+        var sym = SparseCGASymbolicMultivector.create("", vec);
+        return new SparseCGANumericMultivector(sym);
+    }
+
+    public static SparseCGANumericMultivector create(double scalar) {
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
+        SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
+        var sym = SparseCGASymbolicMultivector.create("", sdm);
+        return new SparseCGANumericMultivector(sym);
     }
 
     private DM lazyDM = null;
