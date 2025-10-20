@@ -85,6 +85,14 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
 
     private DM lazyDM = null;
 
+    /**
+     * Can lead to inconsistencies, if used wrong! Because delegate will be different.
+     */
+    @Deprecated
+    protected void setDM(DM dm) {
+        this.lazyDM = dm;
+    }
+
     public DM getDM() {
         if (this.lazyDM == null) {
             /*

@@ -7,14 +7,14 @@ import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
 public class ConstCacheTest {
 
     public static void main(String[] args) {
-        var sx = new SX(new Sparsity(1, 1));
-        System.out.println(sx);
+        //var sx = new SX(new Sparsity(1, 1));
+        //System.out.println(sx);
 
         var con = CGAExprGraphFactory.instance.constantsNumeric();
         con.testCache();
-        var a = con.getPi();
+        var a = con.getDenseEmptyInstance();
         con.testCache();
-        var b = con.getPi();
+        var b = con.getSparseEmptyInstance();
         con.testCache();
         System.out.println(a.add(b));
     }

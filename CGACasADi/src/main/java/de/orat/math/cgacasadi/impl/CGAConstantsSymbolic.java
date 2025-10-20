@@ -20,38 +20,38 @@ public class CGAConstantsSymbolic implements iConstantsFactorySymbolic<SparseCGA
 
     @Override
     public SparseCGASymbolicMultivector getSparseEmptyInstance() {
-        String name = "SparseEmptyInstance";
+        final String name = "SparseEmptyInstance";
         return cached2(name, () -> PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name));
     }
 
     @Override
     public SparseCGASymbolicMultivector getDenseEmptyInstance() {
-        String name = "DenseEmptyInstance";
+        final String name = "DenseEmptyInstance";
         return cached2(name, () -> PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name));
     }
 
     // ConcurrentHashMap to avoid ConcurrentModificationException while testing.
-    private final ConcurrentHashMap<String, SparseCGASymbolicMultivector> cache2
+    private final ConcurrentHashMap<String, SparseCGASymbolicMultivector> cache
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
     public SparseCGASymbolicMultivector cached(String name, Supplier<SparseDoubleMatrix> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
-        var value = this.cache2.get(name);
+        var value = this.cache.get(name);
         if (value == null) {
             var sparseDoubleMatrix = creator.get();
             value = SparseCGASymbolicMultivector.create(name, sparseDoubleMatrix);
-            this.cache2.putIfAbsent(name, value);
+            this.cache.putIfAbsent(name, value);
         }
         return value;
     }
 
     protected SparseCGASymbolicMultivector cached2(String name, Supplier<SparseCGASymbolicMultivector> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
-        var value = this.cache2.get(name);
+        var value = this.cache.get(name);
         if (value == null) {
             value = creator.get();
-            this.cache2.putIfAbsent(name, value);
+            this.cache.putIfAbsent(name, value);
         }
         return value;
     }
