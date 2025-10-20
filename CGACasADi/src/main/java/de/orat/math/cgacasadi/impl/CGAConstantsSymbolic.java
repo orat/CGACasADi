@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import java.util.concurrent.ConcurrentHashMap;
 import de.orat.math.gacalc.spi.iConstantsFactorySymbolic;
 
-public class CGAConstantsSymbolic implements iCGAConstants<SparseCGASymbolicMultivector>, iConstantsFactorySymbolic<SparseCGASymbolicMultivector> {
+public class CGAConstantsSymbolic implements iConstantsFactorySymbolic<SparseCGASymbolicMultivector> {
 
     public static final CGAConstantsSymbolic instance = new CGAConstantsSymbolic();
 
@@ -46,8 +46,7 @@ public class CGAConstantsSymbolic implements iCGAConstants<SparseCGASymbolicMult
         return value;
     }
 
-    @Override
-    public SparseCGASymbolicMultivector cached2(String name, Supplier<SparseCGASymbolicMultivector> creator) {
+    protected SparseCGASymbolicMultivector cached2(String name, Supplier<SparseCGASymbolicMultivector> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache2.get(name);
         if (value == null) {

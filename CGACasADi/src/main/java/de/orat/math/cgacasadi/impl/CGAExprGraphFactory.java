@@ -223,6 +223,15 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
+    //TODO
+    // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
+    // vielleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
+    // geht nur für CGA?
+    @Override
+    public SparseDoubleMatrix createInversePseudoscalar() {
+        return this.constantsNumeric().getPseudoscalar().reverse().elements();
+    }
+
     /**
      * Minkovski Bivector.
      * 

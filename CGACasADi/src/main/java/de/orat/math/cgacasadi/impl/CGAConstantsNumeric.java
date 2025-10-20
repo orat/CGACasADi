@@ -5,7 +5,7 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultivector>, iConstantsFactoryNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector> {
+public class CGAConstantsNumeric implements iConstantsFactoryNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector> {
 
     public static final CGAConstantsNumeric instance = new CGAConstantsNumeric();
 
@@ -46,8 +46,7 @@ public class CGAConstantsNumeric implements iCGAConstants<SparseCGANumericMultiv
         return value;
     }
 
-    @Override
-    public SparseCGANumericMultivector cached2(String name, Supplier<SparseCGANumericMultivector> creator) {
+    protected SparseCGANumericMultivector cached2(String name, Supplier<SparseCGANumericMultivector> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache2.get(name);
         if (value == null) {
