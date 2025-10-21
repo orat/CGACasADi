@@ -2,7 +2,9 @@ package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
+import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
@@ -30,38 +32,55 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         this.callback = callback;
     }
 
-    //======================================================
-    // Constructors and static creators.
-    // -> Constructors must only used within subclasses.
-    //======================================================
     /**
-     * Constructors must only used within subclasses. Can create invalid (not numeric)
-     * SparseCGANumericMultivector if used wrong.
+     * Only to be used by non-static create Method for DelegatingSparseCGANumericMultivector.
      */
     @Deprecated
-    protected SparseCGANumericMultivector(SparseCGASymbolicMultivector sym) {
+    private SparseCGANumericMultivector(SparseCGASymbolicMultivector sym) {
         super(sym);
+        this.isInputParent = false;
     }
 
     /**
-     * Constructors must only used within subclasses.
-     */
-    private SparseCGANumericMultivector(DM dm) {
-        super(SparseCGASymbolicMultivector.create(dm));
-        this.lazyDM = dm;
-    }
-
-    /**
-     * Can create invalid (not numeric) SparseCGANumericMultivector if used wrong.
+     * Only to be used from DelegatingSparseCGANumericMultivector! Otherwise will lead to inconsistencies!
      */
     @Deprecated
     @Override
     protected SparseCGANumericMultivector create(SparseCGASymbolicMultivector sym) {
+        // Call permitted here.
         return new SparseCGANumericMultivector(sym);
     }
 
+    private final boolean isInputParent;
+
+    /**
+     * Only to be used by static create Method with DM input.
+     */
+    @Deprecated
+    private SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector pureSym, DM dm) {
+        super(pureSym);
+        this.lazyDM = dm;
+        this.isInputParent = true;
+    }
+
+    private static int num = 0;
+
     public static SparseCGANumericMultivector create(DM dm) {
-        return new SparseCGANumericMultivector(dm);
+        var nameSym = String.format("x%s", String.valueOf(num));
+        ++num;
+        var pureSym = new PurelySymbolicCachedSparseCGASymbolicMultivector(nameSym, dm.sparsity());
+        // Call permittet here.
+        return new SparseCGANumericMultivector(pureSym, dm);
+    }
+
+    public static SparseCGANumericMultivector createFrom(SparseCGASymbolicMultivector sym) {
+        /*
+         * https://github.com/casadi/casadi/wiki/L_rf
+         * Evaluates the expression numerically.
+         * An error is raised when the expression contains symbols.
+         */
+        var dm = SxStatic.evalf(sym.getSX());
+        return create(dm);
     }
 
     public static SparseCGANumericMultivector create(double[] values) {
@@ -70,7 +89,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
                 + String.valueOf(values.length));
         }
         var dm = CasADiUtil.toDM(values);
-        return new SparseCGANumericMultivector(dm);
+        return create(dm);
     }
 
     public static SparseCGANumericMultivector create(double[] nonzeros, int[] rows) {
@@ -82,25 +101,35 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
             throw new IllegalArgumentException("Construction of CGA multivector failed because nonzeros.length != rows.length!");
         }
         var dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
-        return new SparseCGANumericMultivector(dm);
+        return create(dm);
     }
 
     public static SparseCGANumericMultivector create(SparseDoubleMatrix vec) {
-        var sym = SparseCGASymbolicMultivector.create("", vec);
-        return new SparseCGANumericMultivector(sym);
+        return create(vec.nonzeros(), vec.getSparsity().getrow());
     }
 
     public static SparseCGANumericMultivector create(double scalar) {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
         SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
-        var sym = SparseCGASymbolicMultivector.create("", sdm);
-        return new SparseCGANumericMultivector(sym);
+        return create(sdm);
     }
 
     private DM lazyDM = null;
 
     public DM getDM() {
         if (this.lazyDM == null) {
+            /*
+            StdVectorSX in = new StdVectorSX();
+            StdVectorSX out = new StdVectorSX(new SX[]{super.delegate.getSX()});
+            var options = new de.dhbw.rahmlab.casadi.impl.std.Dict();
+            options.put("allow_free", new de.dhbw.rahmlab.casadi.impl.casadi.GenericType(true));
+            var func = new Function("ddd", in, out, options);
+            var freeList = func.free_sx();
+            System.out.println(freeList.size());
+            for (var free : freeList) {
+                System.out.println(free.name());
+            }
+             */
             /*
             * https://github.com/casadi/casadi/wiki/L_rf
             * Evaluates the expression numerically.

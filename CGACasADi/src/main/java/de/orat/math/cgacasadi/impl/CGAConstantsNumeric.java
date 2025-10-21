@@ -21,7 +21,7 @@ public class CGAConstantsNumeric implements iConstantsFactoryNumeric<SparseCGANu
 
     private static SparseCGANumericMultivector createSparseEmptyInstance() {
         var sparseSym = CGAConstantsSymbolic.instance.getSparseEmptyInstance();
-        var sparseNum = new SparseCGANumericMultivector(sparseSym);
+        var sparseNum = SparseCGANumericMultivector.createFrom(sparseSym);
         return sparseNum;
     }
 
@@ -54,7 +54,7 @@ public class CGAConstantsNumeric implements iConstantsFactoryNumeric<SparseCGANu
         var value = this.cache.get(name);
         if (value == null) {
             var mvSym = CGAConstantsSymbolic.instance.cached(name, creator);
-            value = new SparseCGANumericMultivector(mvSym);
+            value = SparseCGANumericMultivector.createFrom(mvSym);
             this.cache.putIfAbsent(name, value);
         }
         return value;
