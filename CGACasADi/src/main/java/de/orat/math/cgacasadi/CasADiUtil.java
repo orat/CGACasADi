@@ -227,7 +227,7 @@ public class CasADiUtil {
                 stringArr[i][j] = cell.toString();
             }
         }
-        return new SparseStringMatrix(stringArr);
+        return new SparseStringMatrix(toCGAMultivectorSparsity(m.sparsity()), stringArr);
     }
 
     public static Sparsity toCasADiSparsity(de.orat.math.sparsematrix.MatrixSparsity sparsity) {

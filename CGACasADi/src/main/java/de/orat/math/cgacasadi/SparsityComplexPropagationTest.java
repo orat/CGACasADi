@@ -14,6 +14,7 @@ public class SparsityComplexPropagationTest {
         var a = fac.createMultivectorPurelySymbolic("a", 0);
         var b = fac.createMultivectorPurelySymbolic("b", 0);
 
+        /*
         SX withScalar = a.add(a.gpWithScalar(-2)).add(a).getSX();
         SX simpleSX = SxStatic.simplify(withScalar); // Evaluiert zu numerischer Null.
         System.out.println(withScalar);
@@ -44,7 +45,7 @@ public class SparsityComplexPropagationTest {
         var resSym = SxStatic.minus(xSym, xSym);
         System.out.println(resNum);
         System.out.println(resSym); // Numerische Null. Unerwartet.
-
+         */
         var withoutNum = a.sub(a);
         System.out.println(withoutNum.toString()); // SymbolicMV printet strukturelle Null
         System.out.println(withoutNum.getSX()); // SX printet numerische Null. Widersprüchlich!
