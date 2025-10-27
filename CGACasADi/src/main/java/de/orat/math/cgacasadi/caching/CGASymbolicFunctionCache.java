@@ -44,7 +44,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
                 cachedFunctionsUsage.put(name, 0);
             }
             // Specific type: CachedSparseCGASymbolicMultivector.
-            SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0);
+            SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0).simplifySparsify();
             cachedFunctionsUsage.compute(name, (k, v) -> ++v);
             return new CachedSparseCGASymbolicMultivector(retVal);
         }
@@ -70,7 +70,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
             symbolicMultivectorParams.add(symbolicMultivectorParam);
         }
         // Specific type: CachedSparseCGASymbolicMultivector.
-        SparseCGASymbolicMultivector symbolicReturn = res.apply(symbolicMultivectorParams);
+        SparseCGASymbolicMultivector symbolicReturn = res.apply(symbolicMultivectorParams).simplifySparsify();
         CGASymbolicFunction func = new CGASymbolicFunction(name, casadiFuncParams, List.of(symbolicReturn));
         return func;
     }

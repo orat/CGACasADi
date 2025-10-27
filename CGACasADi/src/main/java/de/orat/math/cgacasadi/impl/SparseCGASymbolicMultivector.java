@@ -16,13 +16,12 @@ import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
 import de.orat.math.gacalc.spi.iMultivectorSymbolic;
+import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
-import java.util.Objects;
-import de.orat.math.gacalc.util.CayleyTable;
 import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.Objects;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
@@ -182,6 +181,13 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     public SX getSX() {
         return this.sx;
+    }
+
+    @Uncached
+    public SparseCGASymbolicMultivector simplifySparsify() {
+        SX simple = SxStatic.simplify(this.sx);
+        SX sparse = SxStatic.sparsify(simple);
+        return create(sparse);
     }
 
     /**
