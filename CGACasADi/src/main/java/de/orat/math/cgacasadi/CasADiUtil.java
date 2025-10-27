@@ -245,9 +245,10 @@ public class CasADiUtil {
         // das habe ich aber noch nicht verifiziert
         StdVectorDouble nonzeros = new StdVectorDouble();
         for (int i = 0; i < values.length; i++) {
-            if (values[i] != 0d) {
-                nonzeros.add(values[i]);
+            if (sparsify && (values[i] == 0d)) {
+                continue;
             }
+            nonzeros.add(values[i]);
         }
         return new DM(toCasADiSparsity(sparsity), nonzeros, false);
     }
@@ -259,17 +260,11 @@ public class CasADiUtil {
 
     /**
      * @param sparsity
-     * @param values only nonzeros
+     * @param nonzeros only nonzeros
      * @return
      */
-    public static DM toDM(ColumnVectorSparsity sparsity, double[] values) {
-        //TODO
-        // Achtung: Hier gehe ich davon aus, dass einfach nur die non-values zu übergeben sind
-        // das habe ich aber noch nicht verifiziert
-        StdVectorDouble stdVectorDoubles = new StdVectorDouble();
-        for (int i = 0; i < values.length; i++) {
-            stdVectorDoubles.add(values[i]);
-        }
-        return new DM(toCasADiSparsity(sparsity), stdVectorDoubles, false);
+    public static DM toDM(ColumnVectorSparsity sparsity, double[] nonzeros) {
+        StdVectorDouble nonzeroVec = new StdVectorDouble(nonzeros);
+        return new DM(toCasADiSparsity(sparsity), nonzeroVec, false);
     }
 }
