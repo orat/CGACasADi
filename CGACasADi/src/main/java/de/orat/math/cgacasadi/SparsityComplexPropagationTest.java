@@ -3,9 +3,7 @@ package de.orat.math.cgacasadi;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
-import de.orat.math.sparsematrix.SparseDoubleMatrix;
-import util.cga.CGACayleyTableGeometricProduct;
-import util.cga.CGAOperatorMatrixUtils;
+import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
 
 public class SparsityComplexPropagationTest {
 
@@ -14,12 +12,17 @@ public class SparsityComplexPropagationTest {
         var a = fac.createMultivectorPurelySymbolic("a", 0);
         var b = fac.createMultivectorPurelySymbolic("b", 0);
 
-        /*
-
         SX withScalar = a.add(a.gpWithScalar(-2)).add(a).getSX();
-        SX simpleSX = SxStatic.simplify(withScalar); // Evaluiert zu numerischer Null.
-        System.out.println(withScalar);
-        System.out.println(simpleSX);
+        System.out.println(withScalar); // Strukturelle Null.
+
+        var yy = fac.createMultivectorNumeric(3);
+        var zz = fac.createMultivectorNumeric(3);
+
+        var yyOut = yy.add(yy.gpWithScalar(-2)).add(yy);
+        System.out.println(yyOut); // Strukturelle Null
+
+        var yyzzOut = yy.add(zz.gpWithScalar(-2)).add(yy);
+        System.out.println(yyzzOut); // Numerische Null
 
         ////////////
 
@@ -34,16 +37,18 @@ public class SparsityComplexPropagationTest {
         System.out.println(xSym);
         var resNum = SxStatic.minus(xNum, xNum);
         var resSym = SxStatic.minus(xSym, xSym);
-        System.out.println(resNum);
+        System.out.println(resNum); // Numerische Null.
         System.out.println(resSym); // Numerische Null.
 
         ////////////
-         */
 
         var withoutNum = a.sub(a);
-        System.out.println(withoutNum.toString()); // SymbolicMV printet numerische Null
-        System.out.println(withoutNum.getSX()); // SX printet numerische Null.
-        System.out.println(withoutNum.getSX().at(0, 0));
-        System.out.println(SX.sparsify(withoutNum.getSX())); // Strukturelle Null.
+        System.out.println(withoutNum.toString()); // SymbolicMV printet strukturelle Null
+        System.out.println(withoutNum.getSX()); // SX printet strukturelle Null.
+
+        ////////////
+
+        String caching = CachedSparseCGASymbolicMultivector.getCache().cachedFunctionUsageToString();
+        System.out.println(caching);
     }
 }

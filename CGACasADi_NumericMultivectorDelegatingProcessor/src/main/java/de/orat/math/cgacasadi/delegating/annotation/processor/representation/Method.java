@@ -1,6 +1,7 @@
 package de.orat.math.cgacasadi.delegating.annotation.processor.representation;
 
 import de.orat.math.cgacasadi.delegating.annotation.processor.GenerateDelegatingProcessor.Utils;
+import de.orat.math.cgacasadi.delegating.annotation.processor.common.ErrorException;
 import de.orat.math.cgacasadi.delegating.annotation.processor.common.WarningException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public final class Method {
      */
     public final List<Parameter> parameters;
 
-    protected Method(ExecutableElement correspondingElement, TypeParametersToArguments typeParametersToArguments, Utils utils) throws WarningException {
+    protected Method(ExecutableElement correspondingElement, TypeParametersToArguments typeParametersToArguments, Utils utils) throws WarningException, ErrorException {
         assert correspondingElement.getKind() == ElementKind.METHOD : String.format(
             "Expected \"%s\" to be a method, but was \"%s\".",
             correspondingElement.getSimpleName(), correspondingElement.getKind());
@@ -59,6 +60,12 @@ public final class Method {
         }
 
         this.parameters = computeParameters(correspondingElement, typeParametersToArguments, utils);
+
+        if (this.parameters.size() > 1) {
+            // ClassGenerator currently creates only a create Method with at most one MVnum as an parameter.
+            throw ErrorException.create(correspondingElement,
+                "\"%s\": more parameters than 1 are not supported.", this.name);
+        }
     }
 
     private static List<Parameter> computeParameters(ExecutableElement correspondingElement, TypeParametersToArguments typeParametersToArguments, Utils utils) {

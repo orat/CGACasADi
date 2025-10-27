@@ -41,8 +41,16 @@ final class ClassGenerator {
             .returns(T_c)
             .build();
 
+        MethodSpec create2Method = MethodSpec.methodBuilder("create")
+            .addModifiers(Modifier.PROTECTED, Modifier.ABSTRACT)
+            .addParameter(annotatedToType, "delegate")
+            .addParameter(T_c, "other")
+            .returns(T_c)
+            .build();
+
         List<MethodSpec> methods = new ArrayList<>(c.methods.size() + 1);
         methods.add(createMethod);
+        methods.add(create2Method);
         for (Method m : c.methods) {
             MethodSpec delegateMethod = delegateMethod(m, T_c);
             methods.add(delegateMethod);
@@ -113,8 +121,19 @@ final class ClassGenerator {
         }
         String argsString = args.stream().collect(Collectors.joining(", "));
 
+        boolean binOp = false;
+        if (m.parameters.size() == 1) {
+            if (m.parameters.get(0).type.toString().equals(annotatedClassName)) {
+                binOp = true;
+            }
+        }
+
         if (m.returnType.toString().equals(annotatedClassName)) {
-            methodBuilder.addStatement("return create(this.delegate.$L($L))", m.name, argsString);
+            if (binOp) {
+                methodBuilder.addStatement("return create(this.delegate.$L($L), $L)", m.name, argsString, m.parameters.get(0).identifier);
+            } else {
+                methodBuilder.addStatement("return create(this.delegate.$L($L))", m.name, argsString);
+            }
         } else {
             methodBuilder.addStatement("return this.delegate.$L($L)", m.name, argsString);
         }

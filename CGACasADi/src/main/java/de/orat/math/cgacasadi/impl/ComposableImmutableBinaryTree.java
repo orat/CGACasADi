@@ -2,9 +2,9 @@ package de.orat.math.cgacasadi.impl;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.SequencedCollection;
-import java.util.Set;
+import java.util.SequencedSet;
 
 public final class ComposableImmutableBinaryTree<T> {
 
@@ -58,9 +58,9 @@ public final class ComposableImmutableBinaryTree<T> {
     /**
      * This is an expensive operation.
      */
-    public Set<T> computeUniqueLeafs() {
+    public SequencedSet<T> computeUniqueLeafs() {
         var leafs = this.dfsPostorderIterative();
-        Set<T> uniqueLeafs = new HashSet<>(leafs);
+        SequencedSet<T> uniqueLeafs = new LinkedHashSet<>(leafs);
         return uniqueLeafs;
     }
 }

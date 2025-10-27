@@ -2,10 +2,7 @@ package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.cgacasadi.impl.gen.DelegatingSparseCGANumericMultivector;
@@ -13,6 +10,8 @@ import de.orat.math.gacalc.api.MultivectorNumeric;
 import de.orat.math.gacalc.spi.iConstantsFactory;
 import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import java.util.List;
+import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 
 /**
@@ -32,13 +31,15 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         this.callback = callback;
     }
 
+    private final ComposableImmutableBinaryTree<SparseCGANumericMultivector> inputs;
+
     /**
      * Only to be used by non-static create Method for DelegatingSparseCGANumericMultivector.
      */
     @Deprecated
-    private SparseCGANumericMultivector(SparseCGASymbolicMultivector sym) {
+    private SparseCGANumericMultivector(SparseCGASymbolicMultivector sym, ComposableImmutableBinaryTree<SparseCGANumericMultivector> inputs) {
         super(sym);
-        this.isInputParent = false;
+        this.inputs = inputs;
     }
 
     /**
@@ -48,29 +49,42 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     @Override
     protected SparseCGANumericMultivector create(SparseCGASymbolicMultivector sym) {
         // Call permitted here.
-        return new SparseCGANumericMultivector(sym);
+        return new SparseCGANumericMultivector(sym, this.inputs);
     }
 
-    private final boolean isInputParent;
-
     /**
-     * Only to be used by static create Method with DM input.
+     * Only to be used from DelegatingSparseCGANumericMultivector! Otherwise will lead to inconsistencies!
      */
     @Deprecated
-    private SparseCGANumericMultivector(PurelySymbolicCachedSparseCGASymbolicMultivector pureSym, DM dm) {
-        super(pureSym);
+    @Override
+    protected SparseCGANumericMultivector create(SparseCGASymbolicMultivector sym, SparseCGANumericMultivector other) {
+        var combinedInputs = this.inputs.append(other.inputs);
+        // Call permitted here.
+        return new SparseCGANumericMultivector(sym, combinedInputs);
+    }
+
+    /**
+     * Creates a leafe. Only to be used by static create Method with DM input.
+     */
+    private SparseCGANumericMultivector(DM dm) {
+        super(dmToPureSym(dm));
         this.lazyDM = dm;
-        this.isInputParent = true;
+        // Not "leaking this", because the passed "this" will not be used before fully constructed.
+        // Because ComposableImmutableBinaryTree instance just stores the "this" and is itself not visible from outside the constructor.
+        this.inputs = new ComposableImmutableBinaryTree<>(this);
     }
 
     private static int num = 0;
 
-    public static SparseCGANumericMultivector create(DM dm) {
+    private static PurelySymbolicCachedSparseCGASymbolicMultivector dmToPureSym(DM dm) {
         var nameSym = String.format("x%s", String.valueOf(num));
         ++num;
         var pureSym = new PurelySymbolicCachedSparseCGASymbolicMultivector(nameSym, dm.sparsity());
-        // Call permittet here.
-        return new SparseCGANumericMultivector(pureSym, dm);
+        return pureSym;
+    }
+
+    public static SparseCGANumericMultivector create(DM dm) {
+        return new SparseCGANumericMultivector(dm);
     }
 
     public static SparseCGANumericMultivector createFrom(SparseCGASymbolicMultivector sym) {
@@ -114,39 +128,36 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         return create(sdm);
     }
 
+    /**
+     * Nullable!
+     */
     private DM lazyDM = null;
 
+    /**
+     * Expensive for MVnum, which are not created directly from a numerical constructor, but through method
+     * chaining.
+     */
     public DM getDM() {
         if (this.lazyDM == null) {
-            /*
-            StdVectorSX in = new StdVectorSX();
-            StdVectorSX out = new StdVectorSX(new SX[]{super.delegate.getSX()});
-            var options = new de.dhbw.rahmlab.casadi.impl.std.Dict();
-            options.put("allow_free", new de.dhbw.rahmlab.casadi.impl.casadi.GenericType(true));
-            var func = new Function("ddd", in, out, options);
-            var freeList = func.free_sx();
-            System.out.println(freeList.size());
-            for (var free : freeList) {
-                System.out.println(free.name());
-            }
-             */
-            /*
-            * https://github.com/casadi/casadi/wiki/L_rf
-            * Evaluates the expression numerically.
-            * An error is raised when the expression contains symbols.
-             */
-            this.lazyDM = SxStatic.evalf(super.delegate.getSX());
+            var allInputs = this.inputs.computeUniqueLeafs().stream().toList();
+            var allInputsParams = allInputs.stream().map(SparseCGANumericMultivector::delegatePurelySym).toList();
+            var func = new CGASymbolicFunction("getDM", allInputsParams, List.of(this.delegate));
+            var evalMV = func.callNumeric(allInputs).get(0);
+            this.lazyDM = evalMV.lazyDM; // lazyDM is set for all leafs.
         }
         return lazyDM;
     }
 
+    /**
+     * Can be expensive.
+     */
     @Override
     public String toString() {
         return this.getDM().toString();
     }
 
     /**
-     * Get a complete multivector as double[], inclusive structural 0 values.
+     * Get a complete multivector as double[], inclusive structural 0 values. Can be expensive!
      *
      * @return double[32] elements corresponding to the underlaying implementation specific coordindate
      * system.
@@ -159,6 +170,17 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     @Override
     public SparseCGASymbolicMultivector toSymbolic() {
         return super.delegate;
+    }
+
+    private SparseCGASymbolicMultivector delegate() {
+        return super.delegate;
+    }
+
+    /**
+     * Only works on MVnum which were constructed from a DM.
+     */
+    private PurelySymbolicCachedSparseCGASymbolicMultivector delegatePurelySym() {
+        return (PurelySymbolicCachedSparseCGASymbolicMultivector) super.delegate;
     }
 
     @Override
