@@ -1112,7 +1112,7 @@ public class CGAImplTest {
 
         //TestExprGraphFactory fac = TestExprGraphFactory.instance();
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // e2
+        MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, true); // e2
         System.out.println("sparsity = "+sparsity.toString());
         // mva hat generisch grade 1 sparsity also e1-e5 und nicht nur e2!!! Ursache: Cache
         MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity); 
@@ -1120,7 +1120,7 @@ public class CGAImplTest {
         //sparsity = new ColumnVectorSparsity(new double[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // E3
 // E3
 
-         sparsity = new ColumnVectorSparsity(new double[]{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // scalar
+        sparsity = new ColumnVectorSparsity(new double[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, true); // scalar
         MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity); // E3
         System.out.println("testGPSparsity:");
         MultivectorSymbolic res = mva.geometricProduct(mvb);
@@ -1138,7 +1138,7 @@ public class CGAImplTest {
 
         //TestExprGraphFactory fac = TestExprGraphFactory.instance();
         ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // e2+e2+e3
+         MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, true); // e2+e2+e3
         System.out.println("sparsity = "+sparsity.toString());
         // mva hat generisch grade 1 sparsity also e1-e5 und nicht nur e2!!! Ursache: Cache
         MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity); 

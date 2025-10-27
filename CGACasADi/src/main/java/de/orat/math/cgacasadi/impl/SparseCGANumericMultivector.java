@@ -88,7 +88,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(values.length));
         }
-        var dm = CasADiUtil.toDM(values);
+        var dm = CasADiUtil.toDM(values, true);
         return create(dm);
     }
 

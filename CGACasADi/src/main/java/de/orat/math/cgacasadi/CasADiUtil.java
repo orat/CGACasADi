@@ -191,7 +191,7 @@ public class CasADiUtil {
                 }
             }
         }
-        return new MatrixSparsity(values);
+        return new MatrixSparsity(values, true);
     }
 
     public static double[] nonzeros(DM dm) {
@@ -238,14 +238,14 @@ public class CasADiUtil {
         return result;
     }
 
-    public static DM toDM(double[] values) {
-        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(values);
+    public static DM toDM(double[] values, boolean sparsify) {
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(values, sparsify);
         //TODO
         // Achtung: Hier gehe ich davon aus, dass einfach nur die nonzero-values zu übergeben sind
         // das habe ich aber noch nicht verifiziert
         StdVectorDouble nonzeros = new StdVectorDouble();
         for (int i = 0; i < values.length; i++) {
-            if (values[i] != 0) {
+            if (values[i] != 0d) {
                 nonzeros.add(values[i]);
             }
         }
