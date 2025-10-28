@@ -2,8 +2,10 @@ package de.orat.math.cgacasadi;
 
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
+import util.cga.SparseCGAColumnVector;
 
 public class SparsityComplexPropagationTest {
 
@@ -45,6 +47,20 @@ public class SparsityComplexPropagationTest {
         var withoutNum = a.sub(a);
         System.out.println(withoutNum.toString()); // SymbolicMV printet strukturelle Null
         System.out.println(withoutNum.getSX()); // SX printet strukturelle Null.
+
+        ////////////
+
+        /*
+        SparseCGAColumnVector pVec = SparseCGAColumnVector.createEuclid(new double[]{0.5, 0.5, 0.5});
+        var p = fac.createMultivectorNumeric(pVec);
+        var translator = fac.createMultivectorNumeric(-0.5).gp(p).gp(fac.constantsNumeric().getBaseVectorInfinity());
+        //translator.getSX().at(10).assign(new SX(0.1));
+        //var translator = fac.createMultivectorPurelySymbolic("bivec", 2);
+        var exp = translator.exp();
+        System.out.println(p);
+        System.out.println(translator);
+        System.out.println(exp);
+        */
 
         ////////////
 

@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.DmStatic;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
@@ -64,7 +65,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     }
 
     /**
-     * Creates a leafe. Only to be used by static create Method with DM input.
+     * Creates a leaf. Only to be used by static create Method with DM input.
      */
     private SparseCGANumericMultivector(DM dm) {
         super(dmToPureSym(dm));
@@ -143,7 +144,8 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
             var allInputsParams = allInputs.stream().map(SparseCGANumericMultivector::delegatePurelySym).toList();
             var func = new CGASymbolicFunction("getDM", allInputsParams, List.of(this.delegate));
             var evalMV = func.callNumeric(allInputs).get(0);
-            this.lazyDM = evalMV.lazyDM; // lazyDM is set for all leafs.
+            // lazyDM is set for all leafs.
+            this.lazyDM = evalMV.lazyDM;
         }
         return lazyDM;
     }
@@ -190,6 +192,6 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
 
     @Override
     public SX getSX() {
-        return this.toSymbolic().getSX();
+        return super.delegate.getSX();
     }
 }
