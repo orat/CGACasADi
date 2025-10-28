@@ -136,8 +136,8 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     // create function
     @Override
     public CGASymbolicFunction createFunctionSymbolic(String name, 
-                List<PurelySymbolicCachedSparseCGASymbolicMultivector> parameters, 
-                List<SparseCGASymbolicMultivector> returns) {
+        List<? extends PurelySymbolicCachedSparseCGASymbolicMultivector> parameters,
+        List<? extends SparseCGASymbolicMultivector> returns) {
         return new CGASymbolicFunction(name, parameters, returns);
     }
 

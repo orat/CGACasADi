@@ -55,7 +55,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     }
 
     @Override
-    public List<? extends SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
+    public List<SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
         try {
             if (arguments.size() != this.arity) {
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
@@ -73,7 +73,7 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
     }
 
     @Override
-    public List<? extends SparseCGANumericMultivector> callNumeric(List<? extends SparseCGANumericMultivector> arguments) {
+    public List<SparseCGANumericMultivector> callNumeric(List<? extends SparseCGANumericMultivector> arguments) {
         try {
             if (arguments.size() != this.arity) {
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
