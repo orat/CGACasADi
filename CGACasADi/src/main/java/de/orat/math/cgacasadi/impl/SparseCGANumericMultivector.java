@@ -1,6 +1,5 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.dhbw.rahmlab.casadi.DmStatic;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
@@ -159,7 +158,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     }
 
     /**
-     * Get a complete multivector as double[], inclusive structural 0 values. Can be expensive!
+     * Get a complete multivector as double[], inclusive structural 0 values. Can be expensive.
      *
      * @return double[32] elements corresponding to the underlaying implementation specific coordindate
      * system.
@@ -169,9 +168,14 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         return CasADiUtil.elements(this.getDM());
     }
 
+    /**
+     * Can be expensive.
+     */
     @Override
     public SparseCGASymbolicMultivector toSymbolic() {
-        return super.delegate;
+        var dm = this.getDM();
+        var mv = SparseCGASymbolicMultivector.create(dm).simplifySparsify();
+        return mv;
     }
 
     private SparseCGASymbolicMultivector delegate() {
