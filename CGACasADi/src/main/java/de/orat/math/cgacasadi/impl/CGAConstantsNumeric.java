@@ -53,8 +53,7 @@ public class CGAConstantsNumeric implements iConstantsFactoryNumeric<SparseCGANu
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache.get(name);
         if (value == null) {
-            var mvSym = CGAConstantsSymbolic.instance.cached(name, creator);
-            value = SparseCGANumericMultivector.createFrom(mvSym);
+            value = SparseCGANumericMultivector.create(creator.get());
             this.cache.putIfAbsent(name, value);
         }
         return value;

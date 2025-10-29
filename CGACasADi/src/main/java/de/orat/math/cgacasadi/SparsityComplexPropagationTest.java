@@ -4,7 +4,9 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
+import de.orat.math.cgacasadi.impl.CGASymbolicFunction;
 import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
+import java.util.List;
 import util.cga.SparseCGAColumnVector;
 
 public class SparsityComplexPropagationTest {
@@ -50,21 +52,15 @@ public class SparsityComplexPropagationTest {
 
         ////////////
 
-        /*
-        SparseCGAColumnVector pVec = SparseCGAColumnVector.createEuclid(new double[]{0.5, 0.5, 0.5});
-        var p = fac.createMultivectorNumeric(pVec);
-        var translator = fac.createMultivectorNumeric(-0.5).gp(p).gp(fac.constantsNumeric().getBaseVectorInfinity());
-        //translator.getSX().at(10).assign(new SX(0.1));
-        //var translator = fac.createMultivectorPurelySymbolic("bivec", 2);
-        var exp = translator.exp();
-        System.out.println(p);
-        System.out.println(translator);
-        System.out.println(exp);
-        */
+        String caching = CachedSparseCGASymbolicMultivector.getCache().cachedFunctionUsageToString();
+        System.out.println(caching);
 
         ////////////
 
-        String caching = CachedSparseCGASymbolicMultivector.getCache().cachedFunctionUsageToString();
-        System.out.println(caching);
+        var aa1 = fac.createMultivectorPurelySymbolic("a", 0);
+        var aa2 = fac.createMultivectorPurelySymbolic("a", 0);
+        var bb = aa1.add(aa2).simplifySparsify();
+        System.out.println(bb);
+        //new CGASymbolicFunction("ffff", List.of(aa1), List.of(bb));
     }
 }
