@@ -6,7 +6,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.cgacasadi.impl.gen.DelegatingCgaMvValue;
-import de.orat.math.gacalc.api.MultivectorNumeric;
+import de.orat.math.gacalc.api.MultivectorValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -24,10 +24,10 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
-    private MultivectorNumeric.Callback callback;
+    private MultivectorValue.Callback callback;
 
     @Override
-    public void init(MultivectorNumeric.Callback callback) {
+    public void init(MultivectorValue.Callback callback) {
         this.callback = callback;
     }
 

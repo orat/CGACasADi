@@ -7,7 +7,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.cgacasadi.CasADiUtil;
-import de.orat.math.gacalc.api.FunctionSymbolic;
+import de.orat.math.gacalc.api.GAFunction;
 import java.util.List;
 import de.orat.math.gacalc.spi.IGAFunction;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
@@ -23,7 +23,7 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
     private final List<Sparsity> paramsSparsities;
 
     // available after plugging the impl into the api object
-    private FunctionSymbolic.Callback callback;
+    private GAFunction.Callback callback;
 
     private final Function f_sym_casadi;
 
@@ -96,7 +96,7 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
     }
 
     @Override
-    public void init(FunctionSymbolic.Callback callback) {
+    public void init(GAFunction.Callback callback) {
         this.callback = callback;
     }
 

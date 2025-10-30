@@ -3,9 +3,9 @@ package de.orat.math.cgacasadi.impl;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.function.Supplier;
 import java.util.concurrent.ConcurrentHashMap;
-import de.orat.math.gacalc.spi.IConstantsExpr;
+import de.orat.math.gacalc.spi.IConstantsExpression;
 
-public class CgaConstantsExpr implements IConstantsExpr<CgaMvExpr> {
+public class CgaConstantsExpr implements IConstantsExpression<CgaMvExpr> {
 
     public static final CgaConstantsExpr instance = new CgaConstantsExpr();
 

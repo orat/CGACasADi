@@ -1,34 +1,34 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.gacalc.api.GAExprGraphFactoryService;
-import de.orat.math.gacalc.api.MultivectorSymbolicArray;
+import de.orat.math.gacalc.api.GAServiceLoader;
+import de.orat.math.gacalc.api.MultivectorExpressionArray;
 import java.util.List;
 
 public class LoopsExample1To1 {
 
     public static void mapaccum1To1() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
+        var fac = GAServiceLoader.getGAFactoryThrowing("cga", "cgacasadisx");
 
         // Lokale Variablen vor dem Loop.
-        var aSim = fac.createScalarLiteral("aSim", 5);
-        var aArr0 = fac.createScalarLiteral("aArr0", 7);
-        var aArr1 = fac.createScalarLiteral("aArr1", 11);
-        var aArr = new MultivectorSymbolicArray(List.of(aArr0, aArr1));
-        var arAcc = new MultivectorSymbolicArray();
-        var arAcc0 = fac.createScalarLiteral("arAcc0", 3);
-        arAcc.ensureSize(1, fac.constantsSymbolic().getSparseEmptyInstance());
+        var aSim = fac.createExpr("aSim", 5);
+        var aArr0 = fac.createExpr("aArr0", 7);
+        var aArr1 = fac.createExpr("aArr1", 11);
+        var aArr = new MultivectorExpressionArray(List.of(aArr0, aArr1));
+        var arAcc = new MultivectorExpressionArray();
+        var arAcc0 = fac.createExpr("arAcc0", 3);
+        arAcc.ensureSize(1, fac.constantsExpr().getSparseEmptyInstance());
         arAcc.set(0, arAcc0);
-        var rArr = new MultivectorSymbolicArray();
+        var rArr = new MultivectorExpressionArray();
 
         // Loop: Abbildung der Variablen auf rein symbolische Parameter.
         // Nebenbedingung: Array Elemente müssen die gleiche Sparsity haben.
-        var sym_arAcc = fac.createMultivectorPurelySymbolicFrom("sym_arAcc", arAcc0);
-        var sym_aSim = fac.createMultivectorPurelySymbolicFrom("sym_aSim", aSim);
-        var sym_aArr = fac.createMultivectorPurelySymbolicFrom("sym_aArr", aArr0);
+        var sym_arAcc = fac.createVariable("sym_arAcc", arAcc0);
+        var sym_aSim = fac.createVariable("sym_aSim", aSim);
+        var sym_aArr = fac.createVariable("sym_aArr", aArr0);
 
         // Loop: Definition der "inneren Funktion".
         var arAcc_i1 = sym_arAcc.addition(sym_aArr);
-        var rArr_i = sym_arAcc.addition(sym_aSim).addition(fac.createScalarLiteral("2", 2));
+        var rArr_i = sym_arAcc.addition(sym_aSim).addition(fac.createExpr("2", 2));
 
         // Loop: Erzeugung der Argumente für den Aufruf der Loop API.
         var paramsAccum = List.of(sym_arAcc);

@@ -1,19 +1,19 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.gacalc.api.GAExprGraphFactoryService;
-import de.orat.math.gacalc.api.MultivectorSymbolic;
-import de.orat.math.gacalc.api.MultivectorSymbolicArray;
+import de.orat.math.gacalc.api.GAServiceLoader;
+import de.orat.math.gacalc.api.MultivectorExpression;
+import de.orat.math.gacalc.api.MultivectorExpressionArray;
 import java.util.List;
 
 public class LoopsExample {
 
     public static void mapaccum() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
+        var fac = GAServiceLoader.getGAFactoryThrowing("cga", "cgacasadisx");
 
-        var xi = fac.createMultivectorPurelySymbolicDense("xi");
-        var ai = fac.createMultivectorPurelySymbolicDense("ai");
-        var bi = fac.createMultivectorPurelySymbolicDense("bi");
-        var h = fac.createMultivectorPurelySymbolicDense("h");
+        var xi = fac.createVariableDense("xi");
+        var ai = fac.createVariableDense("ai");
+        var bi = fac.createVariableDense("bi");
+        var h = fac.createVariableDense("h");
         var xi1 = xi.addition(xi);
         var ai1 = ai.addition(bi);
         var c = h;
@@ -22,15 +22,15 @@ public class LoopsExample {
         var paramsSimple = List.of(h);
         var paramsArray = List.of(bi);
         var returnsAccum = List.of(xi1, ai1);
-        var returnsArray = List.<MultivectorSymbolic>of(c);
+        var returnsArray = List.<MultivectorExpression>of(c);
 
-        var x0 = fac.createScalarLiteral("x0", 3.0);
-        var a0 = fac.createScalarLiteral("a0", 5.0);
-        var argb1 = fac.createScalarLiteral("b1", 7.0);
-        var argb2 = fac.createScalarLiteral("b2", 11.0);
-        var arga = new MultivectorSymbolicArray(List.of(argb1, argb2));
+        var x0 = fac.createExpr("x0", 3.0);
+        var a0 = fac.createExpr("a0", 5.0);
+        var argb1 = fac.createExpr("b1", 7.0);
+        var argb2 = fac.createExpr("b2", 11.0);
+        var arga = new MultivectorExpressionArray(List.of(argb1, argb2));
 
-        var harg = fac.createScalarLiteral("h", 2.7);
+        var harg = fac.createExpr("h", 2.7);
 
         var argsAccumInitial = List.of(x0, a0);
         var argsSimple = List.of(harg);
@@ -51,12 +51,12 @@ public class LoopsExample {
     }
 
     public static void fold() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
+        var fac = GAServiceLoader.getGAFactoryThrowing("cga", "cgacasadisx");
 
-        var xi = fac.createMultivectorPurelySymbolicDense("xi");
-        var ai = fac.createMultivectorPurelySymbolicDense("ai");
-        var bi = fac.createMultivectorPurelySymbolicDense("bi");
-        var h = fac.createMultivectorPurelySymbolicDense("h");
+        var xi = fac.createVariableDense("xi");
+        var ai = fac.createVariableDense("ai");
+        var bi = fac.createVariableDense("bi");
+        var h = fac.createVariableDense("h");
         var xi1 = xi.addition(xi);
         var ai1 = ai.addition(bi);
         var c = h;
@@ -65,15 +65,15 @@ public class LoopsExample {
         var paramsSimple = List.of(h);
         var paramsArray = List.of(bi);
         var returnsAccum = List.of(xi1, ai1);
-        var returnsArray = List.<MultivectorSymbolic>of(c);
+        var returnsArray = List.<MultivectorExpression>of(c);
 
-        var x0 = fac.createScalarLiteral("x0", 3.0);
-        var a0 = fac.createScalarLiteral("a0", 5.0);
-        var argb1 = fac.createScalarLiteral("b1", 7.0);
-        var argb2 = fac.createScalarLiteral("b2", 11.0);
-        var arga = new MultivectorSymbolicArray(List.of(argb1, argb2));
+        var x0 = fac.createExpr("x0", 3.0);
+        var a0 = fac.createExpr("a0", 5.0);
+        var argb1 = fac.createExpr("b1", 7.0);
+        var argb2 = fac.createExpr("b2", 11.0);
+        var arga = new MultivectorExpressionArray(List.of(argb1, argb2));
 
-        var harg = fac.createScalarLiteral("h", 2.7);
+        var harg = fac.createExpr("h", 2.7);
 
         var argsAccumInitial = List.of(x0, a0);
         var argsSimple = List.of(harg);
@@ -90,10 +90,10 @@ public class LoopsExample {
     }
 
     public static void map() {
-        var fac = GAExprGraphFactoryService.getExprGraphFactoryThrowing("cga", "cgacasadisx");
+        var fac = GAServiceLoader.getGAFactoryThrowing("cga", "cgacasadisx");
 
-        var bi = fac.createMultivectorPurelySymbolicDense("bi");
-        var h = fac.createMultivectorPurelySymbolicDense("h");
+        var bi = fac.createVariableDense("bi");
+        var h = fac.createVariableDense("h");
         var xi = bi.addition(bi);
         var yi = bi.addition(h);
 
@@ -101,11 +101,11 @@ public class LoopsExample {
         var paramsArray = List.of(bi);
         var returnsArray = List.of(xi, yi);
 
-        var argb1 = fac.createScalarLiteral("b1", 7.0);
-        var argb2 = fac.createScalarLiteral("b2", 11.0);
-        var argb = new MultivectorSymbolicArray(List.of(argb1, argb2));
+        var argb1 = fac.createExpr("b1", 7.0);
+        var argb2 = fac.createExpr("b2", 11.0);
+        var argb = new MultivectorExpressionArray(List.of(argb1, argb2));
 
-        var argh = fac.createScalarLiteral("h", 2.7);
+        var argh = fac.createExpr("h", 2.7);
 
         var argsSimple = List.of(argh);
         var argsArray = List.of(argb);

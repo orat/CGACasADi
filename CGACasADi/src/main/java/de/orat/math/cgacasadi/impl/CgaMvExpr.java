@@ -14,7 +14,7 @@ import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
 import de.orat.math.cgacasadi.impl.gen.CachedCgaMvExpr;
-import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -38,7 +38,7 @@ import de.orat.math.gacalc.spi.IMultivectorExpression;
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
 public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IGetSX {
 
-    private MultivectorSymbolic.Callback callback;
+    private MultivectorExpression.Callback callback;
     private final String name;
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable
@@ -149,7 +149,7 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
     // Other methods
     //======================================================
     @Override
-    public void init(MultivectorSymbolic.Callback callback) {
+    public void init(MultivectorExpression.Callback callback) {
         this.callback = callback;
     }
 

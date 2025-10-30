@@ -2,11 +2,11 @@ package de.orat.math.cgacasadi;
 
 import de.dhbw.rahmlab.casadi.api.Trigometry;
 import util.cga.CGAMultivectorSparsity;
-import de.orat.math.gacalc.api.ExprGraphFactory;
-import de.orat.math.gacalc.api.FunctionSymbolic;
-import de.orat.math.gacalc.api.MultivectorNumeric;
-import de.orat.math.gacalc.api.MultivectorPurelySymbolic;
-import de.orat.math.gacalc.api.MultivectorSymbolic;
+import de.orat.math.gacalc.api.GAFactory;
+import de.orat.math.gacalc.api.GAFunction;
+import de.orat.math.gacalc.api.MultivectorValue;
+import de.orat.math.gacalc.api.MultivectorVariable;
+import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseDoubleColumnVector;
 import de.orat.math.sparsematrix.MatrixSparsity;
@@ -36,29 +36,29 @@ public class CGAImplTest {
 
     @Test
     public void testAdd() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1, 2, 3});
-        MultivectorPurelySymbolic mvsa = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity_a);
+        MultivectorVariable mvsa = exprGraphFactory.createVariable("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1, 3, 4});
-        MultivectorPurelySymbolic mvsb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity_b);
+        MultivectorVariable mvsb = exprGraphFactory.createVariable("b", sparsity_b);
 
-        MultivectorSymbolic mvsc = mvsa.addition(mvsb);
+        MultivectorExpression mvsc = mvsa.addition(mvsb);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mvsa);
         parameters.add(mvsb);
-        List<MultivectorSymbolic> returns = new ArrayList<>();
+        List<MultivectorExpression> returns = new ArrayList<>();
         returns.add(mvsc);
 
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("c", parameters, returns);
+        GAFunction f = exprGraphFactory.createFunction("c", parameters, returns);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = new double[baseCayleyTable.getBladesCount()];
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         System.out.println("a=" + arg_a.toString());
         arguments.add(arg_a);
 
@@ -66,7 +66,7 @@ public class CGAImplTest {
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         System.out.println("b=" + arg_b.toString());
         arguments.add(arg_b);
 
@@ -74,7 +74,7 @@ public class CGAImplTest {
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
 
         try {
-            List<MultivectorNumeric> mv = f.callNumeric(arguments);
+            List<MultivectorValue> mv = f.callValue(arguments);
             System.out.println("c=a+b=" + mv.iterator().next().toString());
             System.out.println("test=" + testMatrix.toString());
             assertTrue(equals((new SparseDoubleColumnVector(mv.iterator().next().elements())).toArray(), test));
@@ -84,29 +84,29 @@ public class CGAImplTest {
 
     @Test
     public void testSub() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1, 2, 3});
-        MultivectorPurelySymbolic mvsa = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity_a);
+        MultivectorVariable mvsa = exprGraphFactory.createVariable("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1, 3, 4});
-        MultivectorPurelySymbolic mvsb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity_b);
+        MultivectorVariable mvsb = exprGraphFactory.createVariable("b", sparsity_b);
 
-        MultivectorSymbolic mvsc = mvsa.subtraction(mvsb);
+        MultivectorExpression mvsc = mvsa.subtraction(mvsb);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mvsa);
         parameters.add(mvsb);
-        List<MultivectorSymbolic> returns = new ArrayList<>();
+        List<MultivectorExpression> returns = new ArrayList<>();
         returns.add(mvsc);
 
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("c", parameters, returns);
+        GAFunction f = exprGraphFactory.createFunction("c", parameters, returns);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = new double[baseCayleyTable.getBladesCount()];
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         System.out.println("a=" + arg_a.toString());
         arguments.add(arg_a);
 
@@ -114,7 +114,7 @@ public class CGAImplTest {
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         System.out.println("b=" + arg_b.toString());
         arguments.add(arg_b);
 
@@ -122,7 +122,7 @@ public class CGAImplTest {
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
 
         try {
-            List<MultivectorNumeric> mv = f.callNumeric(arguments);
+            List<MultivectorValue> mv = f.callValue(arguments);
             System.out.println("c=a-b=" + mv.iterator().next().toString());
             System.out.println("test=" + testMatrix.toString());
             assertTrue(equals((new SparseDoubleColumnVector(mv.iterator().next().elements())).toArray(), test));
@@ -132,23 +132,23 @@ public class CGAImplTest {
 
     @Test
     public void testOP() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1, 2, 3});
-        MultivectorPurelySymbolic mvsa = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity_a);
+        MultivectorVariable mvsa = exprGraphFactory.createVariable("a", sparsity_a);
         CGAMultivectorSparsity sparsity_b = new CGAMultivectorSparsity(new int[]{1, 3, 4});
-        MultivectorPurelySymbolic mvsb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity_b);
+        MultivectorVariable mvsb = exprGraphFactory.createVariable("b", sparsity_b);
 
-        MultivectorSymbolic mvsc = mvsa.outerProduct(mvsb);
+        MultivectorExpression mvsc = mvsa.outerProduct(mvsb);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mvsa);
         parameters.add(mvsb);
-        List<MultivectorSymbolic> returns = new ArrayList<>();
+        List<MultivectorExpression> returns = new ArrayList<>();
         returns.add(mvsc);
 
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, returns);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, returns);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = new double[baseCayleyTable.getBladesCount()];
         values_A[1] = 1;
@@ -156,7 +156,7 @@ public class CGAImplTest {
         values_A[3] = 3;
         //values_A = exprGraphFactory.createRandomCGAKVector(1);
 
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         System.out.println("a=" + arg_a.toString());
         arguments.add(arg_a);
 
@@ -166,7 +166,7 @@ public class CGAImplTest {
         values_B[4] = 1;
         //values_B = exprGraphFactory.createRandomCGAKVector(1);
 
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         System.out.println("b=" + arg_b.toString());
         arguments.add(arg_b);
 
@@ -174,8 +174,8 @@ public class CGAImplTest {
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("a^b=" + mv.toString());
             System.out.println("test==" + testMatrix.toString());
             assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test));
@@ -185,35 +185,35 @@ public class CGAImplTest {
 
     @Test
     public void testGradeSelectionRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         CGAMultivectorSparsity sparsity_a = CGAMultivectorSparsity.dense();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity_a);
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", sparsity_a);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         //TODO
         // random auswählen
         int grade = 5;
-        MultivectorSymbolic res = mva.gradeExtraction(grade);
+        MultivectorExpression res = mva.gradeExtraction(grade);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
         double[] test = gradeSelection(values_A, grade);
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
         //System.out.println(testMatrix.toString());
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("gradeSelection()=" + mv.toString());
             System.out.println("test=" + testMatrix.toString());
             assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test));
@@ -224,36 +224,36 @@ public class CGAImplTest {
     @Test
     public void testGPVec1Fix() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         //CGAMultivectorSparsity sparsity_a = new CGAMultivectorSparsity(new int[]{1,2,3});
         //MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
 
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", 1);
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", 1);
         //System.out.println("a (sparsity): "+mva.getSparsity().toString());
         //System.out.println("a: "+mva.toString());
 
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", 1);
+        MultivectorVariable mvb = exprGraphFactory.createVariable("b", 1);
         //System.out.println("b (sparsity): "+mvb.getSparsity().toString());
         //System.out.println("b: "+mvb.toString());
 
-        MultivectorSymbolic res = mva.geometricProduct(mvb);
+        MultivectorExpression res = mva.geometricProduct(mvb);
         System.out.println("result (sym vec1fix): " + res.toString());
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb); // vertauschen von a und be hatte keinen Effekt
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = new double[baseCayleyTable.getBladesCount()];
         values_A[1] = 1;
         values_A[2] = 2;
         values_A[3] = 3;
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         //System.out.println("a="+arg_a.toString());
         arguments.add(arg_a);
 
@@ -261,7 +261,7 @@ public class CGAImplTest {
         values_B[1] = 1;
         values_B[3] = 1;
         values_B[4] = 1;
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         //System.out.println("b="+arg_b.toString());
         arguments.add(arg_b);
 
@@ -270,8 +270,8 @@ public class CGAImplTest {
         //System.out.println(testMatrix.toString());
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("a b=" + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -283,29 +283,29 @@ public class CGAImplTest {
     @Test
     public void testGPRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a"/*, 1*/);
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b"/*, 1*/);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a"/*, 1*/);
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b"/*, 1*/);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.geometricProduct(mvb);
+        MultivectorExpression res = mva.geometricProduct(mvb);
         System.out.println("gprandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = gp(values_A, values_B);
@@ -315,8 +315,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (gp): a b=" + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -329,29 +329,29 @@ public class CGAImplTest {
     @Test
     public void testScalarProductRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a"/*, 1*/);
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b"/*, 1*/);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a"/*, 1*/);
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b"/*, 1*/);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.scalarProduct(mvb);
+        MultivectorExpression res = mva.scalarProduct(mvb);
         System.out.println("scprandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double test = scp(values_A, values_B);
@@ -361,8 +361,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (scp): a*b=" + mv.toString());
             System.out.println("test=" + String.valueOf(test));
 
@@ -377,23 +377,23 @@ public class CGAImplTest {
     @Test
     public void testAbsRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", 0);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", 0);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
 
-        MultivectorSymbolic res = mva.scalarAbs();
+        MultivectorExpression res = mva.scalarAbs();
         System.out.println("absRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector(0);
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] test = abs(values_A);
@@ -402,8 +402,8 @@ public class CGAImplTest {
 
         try {
             System.out.println("a=" + arg_a.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (abs): =" + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -417,25 +417,25 @@ public class CGAImplTest {
     //@Disabled
     public void testExpOfBivectorRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is bivector is grade 2
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a",2);
+        MultivectorVariable mva = exprGraphFactory.createVariable("a",2);
         
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         
-        MultivectorSymbolic res = mva.exp();
+        MultivectorExpression res = mva.exp();
         System.out.println("expOfBivectorRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         // input is bivector
         double[] bivector = exprGraphFactory.createRandomMultivector(2);
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(bivector);
+        MultivectorValue arg_a = exprGraphFactory.createValue(bivector);
         arguments.add(arg_a);
 
         double[] test = exp(bivector);
@@ -444,8 +444,8 @@ public class CGAImplTest {
 
         try {
             System.out.println("random a (bivector)=" + arg_a.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("exp(a)=" + mv.toString());
             System.out.println("test exp(a)=" + testMatrix.toString());
 
@@ -459,25 +459,24 @@ public class CGAImplTest {
     //@Disabled
     public void testExpLogOfNormalizedRotorRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.
-            createMultivectorPurelySymbolic("a",CGACayleyTable.getEvenGrades());
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariable("a",CGACayleyTable.getEvenGrades());
         
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         
-        MultivectorSymbolic res = mva.log().exp();
+        MultivectorExpression res = mva.log().exp();
         System.out.println("ExpLogOfNormalizedRotorRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] normalizedRotor =normalizeRotor(exprGraphFactory.
             createRandomMultivector(CGACayleyTable.getEvenIndizes()));
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(normalizedRotor);
+        MultivectorValue arg_a = exprGraphFactory.createValue(normalizedRotor);
         arguments.add(arg_a);
 
         double[] test = exp(log(normalizedRotor));
@@ -486,8 +485,8 @@ public class CGAImplTest {
 
         try {
             System.out.println("random a (normalized rotor)=" + arg_a.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("exp(log(normalizedRotor(a)))=" + mv.toString());
             System.out.println("test exp(log(normalizedRotor(a)))=" + testMatrix.toString());
 
@@ -501,24 +500,24 @@ public class CGAImplTest {
     //@Disabled
     public void testLogExpOfBivectorRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a",2);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariable("a",2);
         
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         
-        MultivectorSymbolic res = mva.exp().log();
+        MultivectorExpression res = mva.exp().log();
         System.out.println("logExpOfBivectorRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         // input is bivector
         double[] values_A = exprGraphFactory.createRandomMultivector(2);
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] test = log(exp(values_A));
@@ -527,8 +526,8 @@ public class CGAImplTest {
 
         try {
             System.out.println("random a=" + arg_a.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("log(exp(a))=" + mv.toString());
             System.out.println("test log(exp(a))=" + testMatrix.toString());
 
@@ -541,7 +540,7 @@ public class CGAImplTest {
     // test only array based implementations
     @Test
     public void testLogExpOfBivectorRandomArrayBased() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is bivector
         double[] values_A = exprGraphFactory.createRandomMultivector(2);
         DenseDoubleColumnVector valuesMatrix = new DenseDoubleColumnVector(values_A);
@@ -556,7 +555,7 @@ public class CGAImplTest {
     }
     
     public void testExpOfBivectorRandomArrayBasedByTaylorSeries() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is bivector
         double[] values_A = exprGraphFactory.createRandomMultivector(2);
         DenseDoubleColumnVector valuesMatrix = new DenseDoubleColumnVector(values_A);
@@ -577,34 +576,33 @@ public class CGAImplTest {
     //@Disabled
     public void testLogOfNormalizedRotorRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is rotor 
-        MultivectorPurelySymbolic mva = exprGraphFactory.
-            createMultivectorPurelySymbolic("a", CGACayleyTable.getEvenGrades());
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", CGACayleyTable.getEvenGrades());
         
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         
-        MultivectorSymbolic res = mva.log();
+        MultivectorExpression res = mva.log();
         System.out.println("logOfNormalizedRotorRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] normalizedRotor = normalizeRotor(createRandomRotor());
         
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(normalizedRotor);
+        MultivectorValue arg_a = exprGraphFactory.createValue(normalizedRotor);
         arguments.add(arg_a);
 
         double[] test = log(normalizedRotor);
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
         try {
             System.out.println("random a (normalized rotor) =" + arg_a.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("log(normalizedRotor(a))=" + mv.toString());
             System.out.println("test log(normalizedRotor(a))=" + testMatrix.toString());
 
@@ -657,29 +655,29 @@ public class CGAImplTest {
     @Test
     public void testOPRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a");
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b");
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.outerProduct(mvb);
+        MultivectorExpression res = mva.outerProduct(mvb);
         System.out.println("oprandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = op(values_A, values_B);
@@ -689,8 +687,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (op): a^b=" + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -704,29 +702,29 @@ public class CGAImplTest {
     //@Test
     public void testLCRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a");
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b");
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.leftContraction(mvb);
+        MultivectorExpression res = mva.leftContraction(mvb);
         System.out.println("lcrandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = dot(values_A, values_B);
@@ -735,8 +733,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (lc): " + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -752,29 +750,29 @@ public class CGAImplTest {
     //@Test
     public void testIPRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a");
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b");
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.innerProduct(mvb);
+        MultivectorExpression res = mva.innerProduct(mvb);
         System.out.println("iprandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = dot(values_A, values_B);
@@ -783,8 +781,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (ip): " + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -799,29 +797,29 @@ public class CGAImplTest {
     @Test
     public void testDotRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a");
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b");
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.dotProduct(mvb);
+        MultivectorExpression res = mva.dotProduct(mvb);
         System.out.println("dotRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = dot(values_A, values_B);
@@ -830,8 +828,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (dot): " + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -847,29 +845,29 @@ public class CGAImplTest {
     //@Test
     public void testRCRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a");
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b");
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.rightContraction(mvb);
+        MultivectorExpression res = mva.rightContraction(mvb);
         System.out.println("rcrandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = rc(values_A, values_B);
@@ -878,8 +876,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (rc): " + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -892,27 +890,27 @@ public class CGAImplTest {
     @Test
     public void testRegressiveRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolicDense("a");
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolicDense("b");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a");
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b");
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.regressiveProduct(mvb);
+        MultivectorExpression res = mva.regressiveProduct(mvb);
         System.out.println("regressiverandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] values_A = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
         double[] values_B = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = vee(values_A, values_B);
@@ -921,8 +919,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random (vee): " + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -1018,29 +1016,29 @@ public class CGAImplTest {
     public void testGPRandom1Vec() {
 
         //TestExprGraphFactory fac = TestExprGraphFactory.instance();
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", 1);
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", 1);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", 1);
+        MultivectorVariable mvb = exprGraphFactory.createVariable("b", 1);
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         parameters.add(mvb);
 
-        MultivectorSymbolic res = mva.geometricProduct(mvb);
+        MultivectorExpression res = mva.geometricProduct(mvb);
         System.out.println("radmon1vec: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = exprGraphFactory.createRandomMultivector(1);
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] values_B = exprGraphFactory.createRandomMultivector(1);
-        MultivectorNumeric arg_b = exprGraphFactory.createMultivectorNumeric(values_B);
+        MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
         double[] test = gp(values_A, values_B);
@@ -1050,8 +1048,8 @@ public class CGAImplTest {
         try {
             System.out.println("a=" + arg_a.toString());
             System.out.println("b=" + arg_b.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("random 1-vec: a b=" + mv.toString());
             System.out.println("test=" + testMatrix.toString());
 
@@ -1111,19 +1109,19 @@ public class CGAImplTest {
     public void testGPSparsity() {
 
         //TestExprGraphFactory fac = TestExprGraphFactory.instance();
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, true); // e2
         System.out.println("sparsity = "+sparsity.toString());
         // mva hat generisch grade 1 sparsity also e1-e5 und nicht nur e2!!! Ursache: Cache
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity); 
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", sparsity); 
         
         //sparsity = new ColumnVectorSparsity(new double[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}); // E3
 // E3
 
         sparsity = new ColumnVectorSparsity(new double[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, true); // scalar
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity); // E3
+        MultivectorVariable mvb = exprGraphFactory.createVariable("b", sparsity); // E3
         System.out.println("testGPSparsity:");
-        MultivectorSymbolic res = mva.geometricProduct(mvb);
+        MultivectorExpression res = mva.geometricProduct(mvb);
         // a b = T{00, 00, 00, 00, 00, 00, null, (-(b_0*a_0)), null, null, null, null, null, null, null, null, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, null, null, null, null, null, 00}
         // aus debugger stimmt überein
         // [00, 00, 00, 00, 00, 00, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 0, 0, 0, 0, 0, 00]
@@ -1137,16 +1135,16 @@ public class CGAImplTest {
     public void testGPSparsity2() {
 
         //TestExprGraphFactory fac = TestExprGraphFactory.instance();
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
          MatrixSparsity sparsity = new ColumnVectorSparsity(new double[]{0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, true); // e2+e2+e3
         System.out.println("sparsity = "+sparsity.toString());
         // mva hat generisch grade 1 sparsity also e1-e5 und nicht nur e2!!! Ursache: Cache
-        MultivectorPurelySymbolic mva = exprGraphFactory.createMultivectorPurelySymbolic("a", sparsity); 
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", sparsity); 
        
         
-        MultivectorPurelySymbolic mvb = exprGraphFactory.createMultivectorPurelySymbolic("b", sparsity); 
+        MultivectorVariable mvb = exprGraphFactory.createVariable("b", sparsity); 
         System.out.println("testGPSparsity:");
-        MultivectorSymbolic res = mva.geometricProduct(mvb);
+        MultivectorExpression res = mva.geometricProduct(mvb);
         
         System.out.println("a b = " + res.toString());
         System.out.println(res.getSparsity().toString());
@@ -1155,28 +1153,28 @@ public class CGAImplTest {
     // gradeInvolution==gradeInversion
     @Test
     public void testInvoluteRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv", 1);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariable("mv", 1);
         System.out.println("mv (sparsity): " + mv.getSparsity().toString());
         System.out.println("mv: " + mv.toString());
-        MultivectorSymbolic result = mv.gradeInversion();
+        MultivectorExpression result = mv.gradeInversion();
         System.out.println("result (sym): " + result.toString());
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector(1);
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(equals(values, involute(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
@@ -1186,28 +1184,28 @@ public class CGAImplTest {
 
     @Test
     public void testNegate14Random() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv", 1);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariable("mv", 1);
         System.out.println("mv (sparsity): " + mv.getSparsity().toString());
         System.out.println("mv: " + mv.toString());
-        MultivectorSymbolic result = mv.negate14();
+        MultivectorExpression result = mv.negate14();
         System.out.println("result (sym): " + result.toString());
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector(1);
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             System.out.println("negate14()=" + out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             double[] test = negate14(randomValues);
@@ -1264,28 +1262,28 @@ public class CGAImplTest {
 
     @Test
     public void testReverseRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariableDense("mv");
         System.out.println("reverse (sparsity): " + mv.getSparsity().toString());
         //System.out.println("mv: "+mv.toString());
-        MultivectorSymbolic result = mv.reverse();
+        MultivectorExpression result = mv.reverse();
         System.out.println("result (sym): " + result.toString());
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             System.out.println("reverse(a)=" + out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(equals(values, reverse(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
@@ -1376,29 +1374,29 @@ public class CGAImplTest {
 
     @Test
     public void testDualRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariableDense("mv");
         System.out.println("mv (sparsity für dual): " + mv.getSparsity().toString());
         System.out.println("mv: (dual) " + mv.toString());
         // dual() basiert derzeit auf dot
-        MultivectorSymbolic result = mv.dual();
+        MultivectorExpression result = mv.dual();
         System.out.println("result (dual) (sym): " + result.toString());
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             System.out.println("dual(a)=" + out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
 
@@ -1412,25 +1410,25 @@ public class CGAImplTest {
 
     @Test
     public void testNormRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
-        MultivectorSymbolic result = mv.norm();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariableDense("mv");
+        MultivectorExpression result = mv.norm();
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             System.out.println("norm(a)=" + out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             double test = norm(randomValues);
@@ -1442,25 +1440,25 @@ public class CGAImplTest {
 
     @Test
     public void testNormalizeRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolicDense("mv");
-        MultivectorSymbolic result = mv.normalize(); // normalize by squared norm
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariableDense("mv");
+        MultivectorExpression result = mv.normalize(); // normalize by squared norm
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector();
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             System.out.println("normalize(a)=" + out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             double[] test = normalize(randomValues);
@@ -1478,7 +1476,7 @@ public class CGAImplTest {
      * @return random general rotor
      */
     private static double[] createRandomRotor(){
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         return exprGraphFactory.createRandomMultivector(CGACayleyTable.getEvenIndizes());
     }
    
@@ -1486,25 +1484,24 @@ public class CGAImplTest {
     @Test
     public void testNormalizeRotorRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         
-        MultivectorPurelySymbolic mva = exprGraphFactory.
-            createMultivectorPurelySymbolic("a", CGACayleyTable.getEvenGrades());
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", CGACayleyTable.getEvenGrades());
         
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         
-        MultivectorSymbolic res = mva.normalizeRotor();
+        MultivectorExpression res = mva.normalizeRotor();
         System.out.println("normalizeRotorRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = createRandomRotor();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] test = normalizeRotor(values_A);
@@ -1516,8 +1513,8 @@ public class CGAImplTest {
         
         try {
             System.out.println("random a=" + arg_a.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("normalizeRotor(a)=" + mv.toString());
             System.out.println("test normalizeRotor(a)=" + testMatrix.toString());
             System.out.println("test2 normalize(a)="+test2Matrix.toString());
@@ -1532,25 +1529,24 @@ public class CGAImplTest {
     @Test
     public void testSqrtRotorRandom() {
 
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         
-        MultivectorPurelySymbolic mva = exprGraphFactory.
-            createMultivectorPurelySymbolic("a", CGACayleyTable.getEvenGrades());
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", CGACayleyTable.getEvenGrades());
         
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mva);
         
-        MultivectorSymbolic res = mva.sqrt();
+        MultivectorExpression res = mva.sqrt();
         System.out.println("sqrtRotorRandom: " + res.toString());
 
-        List<MultivectorSymbolic> result = new ArrayList<>();
+        List<MultivectorExpression> result = new ArrayList<>();
         result.add(res);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
 
         double[] values_A = createRandomRotor();
-        MultivectorNumeric arg_a = exprGraphFactory.createMultivectorNumeric(values_A);
+        MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
         double[] test = sqrtRotor(values_A);
@@ -1558,8 +1554,8 @@ public class CGAImplTest {
         
         try {
             System.out.println("random a=" + arg_a.toString());
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric mv = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
             System.out.println("sqrtRotor(a)=" + mv.toString());
             System.out.println("test sqrtRotor(a)=" + testMatrix.toString());
             
@@ -1615,26 +1611,26 @@ public class CGAImplTest {
     }*/
     @Test
     public void testScalarInverseRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv", 0);
-        MultivectorSymbolic result = mv.scalarInverse();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariable("mv", 0);
+        MultivectorExpression result = mv.scalarInverse();
         //System.out.println("result (sym scalarInverse): "+result.toString());
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector(0);
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             System.out.println("b=scalarInverse(a)=" + out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(values[0] == scalarInverse(randomValues));
@@ -1648,28 +1644,28 @@ public class CGAImplTest {
 
     @Test
     public void testConjugateRandom() {
-        ExprGraphFactory exprGraphFactory = TestExprGraphFactory.instance();
-        MultivectorPurelySymbolic mv = exprGraphFactory.createMultivectorPurelySymbolic("mv", 1);
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariable("mv", 1);
         System.out.println("mv (sparsity): " + mv.getSparsity().toString());
         System.out.println("mv: " + mv.toString());
-        MultivectorSymbolic result = mv.cliffordConjugate();
+        MultivectorExpression result = mv.cliffordConjugate();
         System.out.println("result (sym, conjugate): " + result.toString());
 
-        List<MultivectorPurelySymbolic> parameters = new ArrayList<>();
+        List<MultivectorVariable> parameters = new ArrayList<>();
         parameters.add(mv);
 
-        List<MultivectorSymbolic> res = new ArrayList<>();
+        List<MultivectorExpression> res = new ArrayList<>();
         res.add(result);
-        FunctionSymbolic f = exprGraphFactory.createFunctionSymbolic("f", parameters, res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
-        List<MultivectorNumeric> arguments = new ArrayList<>();
+        List<MultivectorValue> arguments = new ArrayList<>();
         double[] randomValues = exprGraphFactory.createRandomMultivector(1);
-        MultivectorNumeric arg = exprGraphFactory.createMultivectorNumeric(randomValues);
+        MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
         try {
-            List<MultivectorNumeric> result2 = f.callNumeric(arguments);
-            MultivectorNumeric out = result2.iterator().next();
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
             //System.out.println("b=reverse(a)="+out.toString());
             double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
             assertTrue(equals(values, conjugate(randomValues), ColumnVectorSparsity.instance(mv.getSparsity())));
