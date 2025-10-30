@@ -1,17 +1,16 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
-import de.orat.math.cgacasadi.CasADiUtil;
+import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import java.util.Random;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
-import de.orat.math.gacalc.spi.IGAFactory;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -65,13 +64,12 @@ public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvVal
     }
 
     @Override
-    public CgaMvVariable createVariable(
-                                String name, int grade) {
+    public CgaMvVariable createVariable(String name, int grade) {
         return CgaMvExpr.create(name, grade);
     }
 
-    public CgaMvVariable createVariable(
-                                String name, int[] grades) {
+    @Override
+    public CgaMvVariable createVariable(String name, int[] grades) {
         return CgaMvExpr.create(name, grades);
     }
 
@@ -96,53 +94,23 @@ public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvVal
     }
 
     @Override
-    public CgaMvValue createValueRandom(int grade) {
+    public CgaMvValue createValueRandom(int[] grades) {
         final int basisBladesCount = getBasisBladesCount();
         double[] result = new double[basisBladesCount];
         Random random = new Random();
-        int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grade);
+        int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grades);
         double[] values = random.doubles(-1, 1).
             limit(indizes.length).toArray();
         for (int i = 0; i < indizes.length; i++) {
             result[indizes[i]] = values[i];
         }
-        var sparsity = CGAMultivectorSparsity.fromGrades(new int[]{grade});
-        var sdm = new SparseDoubleColumnVector(sparsity, result);
-        var val = createValue(sdm);
-        return val;
-    }
-
-    @Override
-    public CgaMvValue createValueRandom(int[] blades) {
-        final int basisBladesCount = getBasisBladesCount();
-        double[] temp = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
-        double[] result = new double[basisBladesCount];
-        for (int i = 0; i < blades.length; i++) {
-            result[blades[i]] = temp[blades[i]];
-        }
-        var sparsity = CGAMultivectorSparsity.fromBlades(blades);
+        var sparsity = CGAMultivectorSparsity.fromGrades(grades);
         var sdm = new SparseDoubleColumnVector(sparsity, result);
         var val = createValue(sdm);
         return val;
     }
 
     // create numeric multivectors
-    /**
-     * Create a numeric multivector. Sparsity is created from zero values.
-     *
-     * @param values
-     * @return
-     */
-    @Override
-    public CgaMvValue createValue(double[] values) {
-        return CgaMvValue.create(values);
-    }
-
-    @Override
-    public CgaMvValue createValue(double[] nonzeros, int[] rows) {
-        return CgaMvValue.create(nonzeros, rows);
-    }
-
     @Override
     public CgaMvValue createValue(double scalar) {
         return CgaMvValue.create(scalar);

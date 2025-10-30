@@ -14,11 +14,6 @@ import util.cga.CGAMultivectorSparsity;
 import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 
-/**
- * @author Oliver Rettig (Oliver.Rettig@orat.de)
- *
- * Achtung: Es können Objekte mit und ohne sparsity erzeugt werden.
- */
 @GenerateDelegate(to = CgaMvExpr.class)
 public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSX {
 
@@ -97,16 +92,9 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
         return create(dm);
     }
 
-    public static CgaMvValue create(double[] values) {
-        if (baseCayleyTable.getBladesCount() != values.length) {
-            throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
-                + String.valueOf(values.length));
-        }
-        var dm = CasADiUtil.toDM(values, true);
-        return create(dm);
-    }
-
-    public static CgaMvValue create(double[] nonzeros, int[] rows) {
+    public static CgaMvValue create(SparseDoubleMatrix vec) {
+        double[] nonzeros = vec.nonzeros();
+        int[] rows = vec.getSparsity().getrow();
         if (baseCayleyTable.getBladesCount() < nonzeros.length) {
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(nonzeros.length));
@@ -116,10 +104,6 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
         }
         var dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
         return create(dm);
-    }
-
-    public static CgaMvValue create(SparseDoubleMatrix vec) {
-        return create(vec.nonzeros(), vec.getSparsity().getrow());
     }
 
     public static CgaMvValue create(double scalar) {
@@ -176,10 +160,6 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
         var dm = this.getDM();
         var mv = CgaMvExpr.create(dm).simplifySparsify();
         return mv;
-    }
-
-    private CgaMvExpr delegate() {
-        return super.delegate;
     }
 
     /**

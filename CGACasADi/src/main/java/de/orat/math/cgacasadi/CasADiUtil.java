@@ -20,7 +20,6 @@ import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
-import java.util.Arrays;
 import java.util.List;
 import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
@@ -235,21 +234,6 @@ public class CasADiUtil {
         Sparsity result = new Sparsity(sparsity.getn_row(), sparsity.getn_col(), colind, row);
         //result.spy();
         return result;
-    }
-
-    public static DM toDM(double[] values, boolean sparsify) {
-        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(values, sparsify);
-        //TODO
-        // Achtung: Hier gehe ich davon aus, dass einfach nur die nonzero-values zu übergeben sind
-        // das habe ich aber noch nicht verifiziert
-        StdVectorDouble nonzeros = new StdVectorDouble();
-        for (int i = 0; i < values.length; i++) {
-            if (sparsify && (values[i] == 0d)) {
-                continue;
-            }
-            nonzeros.add(values[i]);
-        }
-        return new DM(toCasADiSparsity(sparsity), nonzeros, false);
     }
 
     public static DM toDM(int n_row, double[] nonzeros, int[] rows) {
