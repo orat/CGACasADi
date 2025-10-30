@@ -11,8 +11,8 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.cgacasadi.impl.CgaMvExpr;
+import de.orat.math.cgacasadi.impl.IGetSX;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacalc.util.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -20,13 +20,11 @@ import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
+import java.util.Arrays;
 import java.util.List;
-//import util.CayleyTable;
-//import util.CayleyTable.Cell;
 import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
-import de.orat.math.cgacasadi.impl.IGetSX;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -59,18 +57,18 @@ public class CasADiUtil {
     }
 
     public static CGAMultivectorSparsity toCGAMultivectorSparsity(
-                        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
+        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
         return new CGAMultivectorSparsity(toIntArr(sxSparsity.get_row()));
     }
 
     public static SX toSX(SparseDoubleMatrix m) {
         return new SX(toCasADiSparsity(m.getSparsity()), Util.toSX(m.nonzeros()));
     }
-    
+
     public static SX createScalar() {
         return new SX(toCasADiSparsity(CGAMultivectorSparsity.scalar()));
     }
-    
+
     public static MatrixSparsity toMatrixSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
         //TODO
         // kann ich identifizieren ob es ein Row- oder Column -Vektor ist und wenn ja
@@ -84,6 +82,7 @@ public class CasADiUtil {
         return new ColumnVectorSparsity((int) sxSparsity.rows(),
             toIntArr(sxSparsity.get_row()));
     }
+
     /**
      * Create a corresponding matrix for geometric product calculation, considering of the sparsity of the
      * input multivector.
@@ -96,11 +95,11 @@ public class CasADiUtil {
 
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
 
-        System.out.println(mv.getName()+": toSXproductMatrix() input multivector sparsity = " 
-                                + mv.getSparsity().toString());
+        System.out.println(mv.getName() + ": toSXproductMatrix() input multivector sparsity = "
+            + mv.getSparsity().toString());
         MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
-        System.out.println(mv.getName()+": toSXproductMatrix() product matrix sparsity = " 
-                                + matrixSparsity.toString());
+        System.out.println(mv.getName() + ": toSXproductMatrix() product matrix sparsity = "
+            + matrixSparsity.toString());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
 
         SX result = new SX(sp);
@@ -164,7 +163,7 @@ public class CasADiUtil {
         }
 
         DenseStringMatrix logMatrix = new DenseStringMatrix(log);
-        System.out.println(mv.getName()+ ": toSXProductMatrix() matrix = " + logMatrix);
+        System.out.println(mv.getName() + ": toSXProductMatrix() matrix = " + logMatrix);
 
         return result;
     }

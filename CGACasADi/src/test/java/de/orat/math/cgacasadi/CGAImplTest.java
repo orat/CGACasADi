@@ -191,7 +191,7 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
@@ -300,11 +300,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -346,11 +346,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -392,7 +392,7 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector(0);
+        double[] values_A = createValueRandom(0);
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
@@ -434,7 +434,7 @@ public class CGAImplTest {
         List<MultivectorValue> arguments = new ArrayList<>();
 
         // input is bivector
-        double[] bivector = exprGraphFactory.createRandomMultivector(2);
+        double[] bivector = createValueRandom(2);
         MultivectorValue arg_a = exprGraphFactory.createValue(bivector);
         arguments.add(arg_a);
 
@@ -474,8 +474,7 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] normalizedRotor =normalizeRotor(exprGraphFactory.
-            createRandomMultivector(CGACayleyTable.getEvenIndizes()));
+        double[] normalizedRotor = normalizeRotor(createValueRandom(CGACayleyTable.getEvenIndizes()));
         MultivectorValue arg_a = exprGraphFactory.createValue(normalizedRotor);
         arguments.add(arg_a);
 
@@ -516,7 +515,7 @@ public class CGAImplTest {
         List<MultivectorValue> arguments = new ArrayList<>();
 
         // input is bivector
-        double[] values_A = exprGraphFactory.createRandomMultivector(2);
+        double[] values_A = createValueRandom(2);
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
@@ -542,7 +541,7 @@ public class CGAImplTest {
     public void testLogExpOfBivectorRandomArrayBased() {
         GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is bivector
-        double[] values_A = exprGraphFactory.createRandomMultivector(2);
+        double[] values_A = createValueRandom(2);
         DenseDoubleColumnVector valuesMatrix = new DenseDoubleColumnVector(values_A);
         double[] test = log(exp(values_A));
         DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
@@ -557,7 +556,7 @@ public class CGAImplTest {
     public void testExpOfBivectorRandomArrayBasedByTaylorSeries() {
         GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is bivector
-        double[] values_A = exprGraphFactory.createRandomMultivector(2);
+        double[] values_A = createValueRandom(2);
         DenseDoubleColumnVector valuesMatrix = new DenseDoubleColumnVector(values_A);
         double[] test = exp(values_A);
         double[] testTaylorSeries = expSeries(values_A);
@@ -672,11 +671,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -719,11 +718,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -767,11 +766,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -814,11 +813,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -862,11 +861,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -906,10 +905,10 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] values_A = exprGraphFactory.createRandomMultivector();
+        double[] values_A = createValueRandom();
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
-        double[] values_B = exprGraphFactory.createRandomMultivector();
+        double[] values_B = createValueRandom();
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -1033,11 +1032,11 @@ public class CGAImplTest {
 
         List<MultivectorValue> arguments = new ArrayList<>();
 
-        double[] values_A = exprGraphFactory.createRandomMultivector(1);
+        double[] values_A = createValueRandom(1);
         MultivectorValue arg_a = exprGraphFactory.createValue(values_A);
         arguments.add(arg_a);
 
-        double[] values_B = exprGraphFactory.createRandomMultivector(1);
+        double[] values_B = createValueRandom(1);
         MultivectorValue arg_b = exprGraphFactory.createValue(values_B);
         arguments.add(arg_b);
 
@@ -1168,7 +1167,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector(1);
+        double[] randomValues = createValueRandom(1);
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -1199,7 +1198,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector(1);
+        double[] randomValues = createValueRandom(1);
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -1277,7 +1276,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector();
+        double[] randomValues = createValueRandom();
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -1390,7 +1389,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector();
+        double[] randomValues = createValueRandom();
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -1422,7 +1421,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector();
+        double[] randomValues = createValueRandom();
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -1452,7 +1451,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector();
+        double[] randomValues = createValueRandom();
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -1477,7 +1476,7 @@ public class CGAImplTest {
      */
     private static double[] createRandomRotor(){
         GAFactory exprGraphFactory = TestExprGraphFactory.instance();
-        return exprGraphFactory.createRandomMultivector(CGACayleyTable.getEvenIndizes());
+        return createValueRandom(CGACayleyTable.getEvenIndizes());
     }
    
     
@@ -1624,7 +1623,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector(0);
+        double[] randomValues = createValueRandom(0);
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -1659,7 +1658,7 @@ public class CGAImplTest {
         GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
 
         List<MultivectorValue> arguments = new ArrayList<>();
-        double[] randomValues = exprGraphFactory.createRandomMultivector(1);
+        double[] randomValues = createValueRandom(1);
         MultivectorValue arg = exprGraphFactory.createValue(randomValues);
         arguments.add(arg);
 
@@ -2408,6 +2407,35 @@ public class CGAImplTest {
         double[] result = new double[32];
         //TODO scalar, eoinf konstruieren, d.h. die betreffenden blades
         // beschaffen und random werte hineinsetzen
+        return result;
+    }
+
+    public static double[] createValueRandom() {
+        final int basisBladesCount = baseCayleyTable.getBladesCount();
+        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
+        return result;
+    }
+
+    public static double[] createValueRandom(int grade) {
+        final int basisBladesCount = baseCayleyTable.getBladesCount();
+        double[] result = new double[basisBladesCount];
+        Random random = new Random();
+        int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grade);
+        double[] values = random.doubles(-1, 1).
+            limit(indizes.length).toArray();
+        for (int i = 0; i < indizes.length; i++) {
+            result[indizes[i]] = values[i];
+        }
+        return result;
+    }
+
+    public static double[] createValueRandom(int[] blades) {
+        final int basisBladesCount = baseCayleyTable.getBladesCount();
+        double[] temp = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
+        double[] result = new double[basisBladesCount];
+        for (int i = 0; i < blades.length; i++) {
+            result[blades[i]] = temp[blades[i]];
+        }
         return result;
     }
 }
