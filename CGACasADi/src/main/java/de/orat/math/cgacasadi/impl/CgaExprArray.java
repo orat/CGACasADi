@@ -4,15 +4,15 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import static de.orat.math.cgacasadi.impl.CGASymbolicFunction.transformImpl;
-import de.orat.math.gacalc.spi.iMultivectorSymbolicArray;
+import static de.orat.math.cgacasadi.impl.CgaFunction.transformImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import de.orat.math.gacalc.spi.IMultivectorExpressionArray;
 
-public class CGAArray extends ArrayList<SparseCGASymbolicMultivector> implements iMultivectorSymbolicArray<SparseCGASymbolicMultivector> {
+public class CgaExprArray extends ArrayList<CgaMvExpr> implements IMultivectorExpressionArray<CgaMvExpr> {
 
-    public CGAArray() {
+    public CgaExprArray() {
         super();
     }
 
@@ -20,7 +20,7 @@ public class CGAArray extends ArrayList<SparseCGASymbolicMultivector> implements
      *
      * @param mvs all elements must have equal sparsity.
      */
-    public CGAArray(Collection<? extends SparseCGASymbolicMultivector> mvs) {
+    public CgaExprArray(Collection<? extends CgaMvExpr> mvs) {
         super(mvs);
     }
 
@@ -33,15 +33,15 @@ public class CGAArray extends ArrayList<SparseCGASymbolicMultivector> implements
         return true;
     }
 
-    public static SX horzcat(List<? extends ISparseCGASymbolicMultivector> mvs) {
+    public static SX horzcat(List<? extends IGetSX> mvs) {
         StdVectorSX stdVec = transformImpl(mvs);
         SX sxHorzcat = SxStatic.horzcat(stdVec);
         return sxHorzcat;
     }
 
-    public static List<? extends SparseCGASymbolicMultivector> horzsplit(SX sxHorzcat) {
+    public static List<? extends CgaMvExpr> horzsplit(SX sxHorzcat) {
         StdVectorSX stdVec = SxStatic.horzsplit_n(sxHorzcat, sxHorzcat.columns());
-        var mvs = stdVec.stream().map(SparseCGASymbolicMultivector::create).toList();
+        var mvs = stdVec.stream().map(CgaMvExpr::create).toList();
         return mvs;
     }
 }

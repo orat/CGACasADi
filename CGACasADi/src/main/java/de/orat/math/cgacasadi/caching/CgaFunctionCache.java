@@ -1,10 +1,9 @@
 package de.orat.math.cgacasadi.caching;
 
-import de.orat.math.cgacasadi.impl.CGASymbolicFunction;
-import de.orat.math.cgacasadi.impl.PurelySymbolicCachedSparseCGASymbolicMultivector;
-import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
-import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
-import de.orat.math.gacalc.spi.iMultivectorSymbolic;
+import de.orat.math.cgacasadi.impl.CgaFunction;
+import de.orat.math.cgacasadi.impl.CgaMvVariable;
+import de.orat.math.cgacasadi.impl.CgaMvExpr;
+import de.orat.math.cgacasadi.impl.gen.CachedCgaMvExpr;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,10 +15,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import de.orat.math.gacalc.spi.IMultivectorExpression;
 
-public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
+public class CgaFunctionCache implements IFunctionCache {
 
-    private final Map<String, CGASymbolicFunction> functionCache
+    private final Map<String, CgaFunction> functionCache
         = new HashMap<>(1024, 0.5f);
     private final Map<String, Integer> cachedFunctionsUsage
         = new HashMap<>(1024, 0.5f);
@@ -30,36 +30,36 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
      *
      * @param name Used directly as key in the cache. Needs to be unique for combination of actual function
      * name, symbolic arguments and their sparsities, and need to take identity of the arguments into account.
-     * Use createFuncName() for this. Example usage is in CachedSparseCGASymbolicMultivector.
+     * Use createFuncName() for this. Example usage is in CachedCgaMvExpr.
      */
-    public CachedSparseCGASymbolicMultivector getOrCreateSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<? extends CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
+    public CachedCgaMvExpr getOrCreateSymbolicFunction(String name, List<CgaMvExpr> args, Function<List<? extends CachedCgaMvExpr>, CgaMvExpr> res) {
         if (NOCACHE) {
-            List<CachedSparseCGASymbolicMultivector> params = args.stream().map(CachedSparseCGASymbolicMultivector::new).toList();
-            return new CachedSparseCGASymbolicMultivector(res.apply(params));
+            List<CachedCgaMvExpr> params = args.stream().map(CachedCgaMvExpr::new).toList();
+            return new CachedCgaMvExpr(res.apply(params));
         } else {
-            CGASymbolicFunction func = functionCache.get(name);
+            CgaFunction func = functionCache.get(name);
             if (func == null) {
                 func = createSymbolicFunction(String.format("cache_func_%s", functionCache.size()), args, res);
                 functionCache.put(name, func);
                 cachedFunctionsUsage.put(name, 0);
             }
-            // Specific type: CachedSparseCGASymbolicMultivector.
-            SparseCGASymbolicMultivector retVal = func.callSymbolic(args).get(0).simplifySparsify();
+            // Specific type: CachedCgaMvExpr.
+            CgaMvExpr retVal = func.callExpr(args).get(0).simplifySparsify();
             cachedFunctionsUsage.compute(name, (k, v) -> ++v);
-            return new CachedSparseCGASymbolicMultivector(retVal);
+            return new CachedCgaMvExpr(retVal);
         }
     }
 
-    private static CGASymbolicFunction createSymbolicFunction(String name, List<SparseCGASymbolicMultivector> args, Function<List<? extends CachedSparseCGASymbolicMultivector>, SparseCGASymbolicMultivector> res) {
+    private static CgaFunction createSymbolicFunction(String name, List<CgaMvExpr> args, Function<List<? extends CachedCgaMvExpr>, CgaMvExpr> res) {
         final int size = args.size();
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> casadiFuncParams = new ArrayList<>(size);
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> symbolicMultivectorParams = new ArrayList<>(size);
+        List<CgaMvVariable> casadiFuncParams = new ArrayList<>(size);
+        List<CgaMvVariable> symbolicMultivectorParams = new ArrayList<>(size);
         List<Integer> argsFirstOccurrences = computeFirstOccurrences(args);
         // Convert to purely symbolic multivector.
         for (int i = 0; i < size; ++i) {
-            SparseCGASymbolicMultivector arg = args.get(i);
+            CgaMvExpr arg = args.get(i);
             // sparsity
-            var param = new PurelySymbolicCachedSparseCGASymbolicMultivector(getParamName(i), arg);
+            var param = new CgaMvVariable(getParamName(i), arg);
             casadiFuncParams.add(param);
 
             // Preserve identity for symbolicMultivectorParams.
@@ -69,9 +69,9 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
             var symbolicMultivectorParam = casadiFuncParams.get(firstOccurrence);
             symbolicMultivectorParams.add(symbolicMultivectorParam);
         }
-        // Specific type: CachedSparseCGASymbolicMultivector.
-        SparseCGASymbolicMultivector symbolicReturn = res.apply(symbolicMultivectorParams).simplifySparsify();
-        CGASymbolicFunction func = new CGASymbolicFunction(name, casadiFuncParams, List.of(symbolicReturn));
+        // Specific type: CachedCgaMvExpr.
+        CgaMvExpr symbolicReturn = res.apply(symbolicMultivectorParams).simplifySparsify();
+        CgaFunction func = new CgaFunction(name, casadiFuncParams, List.of(symbolicReturn));
         return func;
     }
 
@@ -152,7 +152,7 @@ public class CGASymbolicFunctionCache implements ISafePublicFunctionCache {
             // firstOccurrences used to take identity of params into account.
             sb.append(getParamName(paramsFirstOccurrences.get(paramIndex)));
             Object param = params[paramIndex];
-            if (param instanceof iMultivectorSymbolic mv) {
+            if (param instanceof IMultivectorExpression mv) {
                 // complete sparsity of the parameter
                 String colind = Arrays.stream(mv.getSparsity().getcolind())
                     .mapToObj(String::valueOf)

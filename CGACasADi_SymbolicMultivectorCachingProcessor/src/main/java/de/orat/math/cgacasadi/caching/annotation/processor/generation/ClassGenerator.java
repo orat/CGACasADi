@@ -6,7 +6,6 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_CGASymbolicFunctionCache;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_List;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_Override;
 import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_SX;
@@ -23,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
+import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_CgaFunctionCache;
 
 final class ClassGenerator {
 
@@ -36,8 +36,8 @@ final class ClassGenerator {
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
 
-        FieldSpec CACHE = FieldSpec.builder(T_CGASymbolicFunctionCache, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("new $T()", T_CGASymbolicFunctionCache)
+        FieldSpec CACHE = FieldSpec.builder(T_CgaFunctionCache, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+            .initializer("new $T()", T_CgaFunctionCache)
             .build();
 
         MethodSpec getCache = ClassGenerator.getCache();
@@ -77,7 +77,7 @@ final class ClassGenerator {
         // Signature
         methodBuilder
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-            .returns(Classes.T_ISafePublicFunctionCache);
+            .returns(Classes.T_IFunctionCache);
 
         // Body
         methodBuilder

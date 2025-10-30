@@ -4,12 +4,12 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.cgacasadi.CasADiUtil;
-import de.orat.math.gacalc.spi.iLoopService;
-import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
-import de.orat.math.gacalc.spi.iMultivectorSymbolicArray;
 import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import de.orat.math.gacalc.spi.ILoopService;
+import de.orat.math.gacalc.spi.IMultivectorExpressionArray;
+import de.orat.math.gacalc.spi.IMultivectorVariable;
 
 /**
  * <pre>
@@ -17,54 +17,54 @@ import java.util.stream.Stream;
  * https://web.casadi.org/api/html/da/da4/classcasadi_1_1Function.html
  * </pre>
  */
-public class CGASymbolicFunctionService implements iLoopService<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector, CGAArray> {
+public class CgaLoopService implements ILoopService<CgaMvExpr, CgaMvVariable, CgaExprArray> {
 
-    private CGASymbolicFunctionService() {
+    private CgaLoopService() {
 
     }
 
-    public static final CGASymbolicFunctionService instance = new CGASymbolicFunctionService();
+    public static final CgaLoopService instance = new CgaLoopService();
 
     @Override
-    public iMultivectorSymbolicArray<SparseCGASymbolicMultivector> toSymbolicArray(List<SparseCGASymbolicMultivector> from) {
-        return new CGAArray(from);
+    public IMultivectorExpressionArray<CgaMvExpr> toExprArray(List<CgaMvExpr> from) {
+        return new CgaExprArray(from);
     }
 
     @Override
-    public List<CGAArray> map(
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsSimple,
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsArray,
-        List<SparseCGASymbolicMultivector> returnsArray,
-        List<SparseCGASymbolicMultivector> argsSimple,
-        List<CGAArray> argsArray,
+    public List<CgaExprArray> map(
+        List<CgaMvVariable> paramsSimple,
+        List<CgaMvVariable> paramsArray,
+        List<CgaMvExpr> returnsArray,
+        List<CgaMvExpr> argsSimple,
+        List<CgaExprArray> argsArray,
         int iterations) {
         return mapImpl(paramsSimple, paramsArray, returnsArray, argsSimple, argsArray, iterations);
     }
 
     @Override
-    public AccumArrayListReturn<SparseCGASymbolicMultivector, CGAArray> fold(
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsAccum,
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsSimple,
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsArray,
-        List<SparseCGASymbolicMultivector> returnsAccum,
-        List<SparseCGASymbolicMultivector> returnsArray,
-        List<SparseCGASymbolicMultivector> argsAccumInitial,
-        List<SparseCGASymbolicMultivector> argsSimple,
-        List<CGAArray> argsArray,
+    public AccumArrayListReturn<CgaMvExpr, CgaExprArray> fold(
+        List<CgaMvVariable> paramsAccum,
+        List<CgaMvVariable> paramsSimple,
+        List<CgaMvVariable> paramsArray,
+        List<CgaMvExpr> returnsAccum,
+        List<CgaMvExpr> returnsArray,
+        List<CgaMvExpr> argsAccumInitial,
+        List<CgaMvExpr> argsSimple,
+        List<CgaExprArray> argsArray,
         int iterations) {
         return foldImpl(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iterations);
     }
 
     @Override
-    public AccumArrayListReturn<CGAArray, CGAArray> mapaccum(
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsAccum,
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsSimple,
-        List<PurelySymbolicCachedSparseCGASymbolicMultivector> paramsArray,
-        List<SparseCGASymbolicMultivector> returnsAccum,
-        List<SparseCGASymbolicMultivector> returnsArray,
-        List<SparseCGASymbolicMultivector> argsAccumInitial,
-        List<SparseCGASymbolicMultivector> argsSimple,
-        List<CGAArray> argsArray,
+    public AccumArrayListReturn<CgaExprArray, CgaExprArray> mapaccum(
+        List<CgaMvVariable> paramsAccum,
+        List<CgaMvVariable> paramsSimple,
+        List<CgaMvVariable> paramsArray,
+        List<CgaMvExpr> returnsAccum,
+        List<CgaMvExpr> returnsArray,
+        List<CgaMvExpr> argsAccumInitial,
+        List<CgaMvExpr> argsSimple,
+        List<CgaExprArray> argsArray,
         int iterations) {
         return mapaccumImpl(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iterations);
     }
@@ -81,12 +81,12 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
      * @param argsArray Hint: Index of element used in the computation is equal to the current iteration.
      * @return One array element for each iteration for the variables of the returnsArray parameter.
      */
-    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> List<CGAArray> mapImpl(
+    public static <MV extends IGetSX & IMultivectorVariable> List<CgaExprArray> mapImpl(
         List<MV> paramsSimple,
         List<MV> paramsArray,
-        List<? extends SparseCGASymbolicMultivector> returnsArray,
-        List<? extends SparseCGASymbolicMultivector> argsSimple,
-        List<CGAArray> argsArray,
+        List<? extends CgaMvExpr> returnsArray,
+        List<? extends CgaMvExpr> argsSimple,
+        List<CgaExprArray> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsSimple.size() == argsSimple.size();
@@ -101,17 +101,17 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
 
         var def_sym_in = new StdVectorSX(
             Stream.concat(
-                paramsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                paramsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+                paramsSimple.stream().map(IGetSX::getSX),
+                paramsArray.stream().map(IGetSX::getSX)
             ).toList()
         );
-        var def_sym_out = new StdVectorSX(returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX).toList());
+        var def_sym_out = new StdVectorSX(returnsArray.stream().map(IGetSX::getSX).toList());
         var f_sym_casadi = new Function("MapBase", def_sym_in, def_sym_out);
 
         var call_sym_in = new StdVectorSX(
             Stream.concat(
-                argsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                argsArray.stream().map(CGAArray::horzcat)
+                argsSimple.stream().map(IGetSX::getSX),
+                argsArray.stream().map(CgaExprArray::horzcat)
             ).toList()
         );
         var call_sym_out = new StdVectorSX();
@@ -120,7 +120,7 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
         // parallelization = unroll|serial|openmp
         f_sym_casadi.map("MapMap", "serial", iterations, nonRepeated, new StdVectorCasadiInt()).call(call_sym_in, call_sym_out);
 
-        var call_out = call_sym_out.stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        var call_out = call_sym_out.stream().map(CgaExprArray::horzsplit).map(CgaExprArray::new).toList();
         return call_out;
     }
 
@@ -143,15 +143,15 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
      * @return Only end results of accum Variables. One array element for each iteration for the variables of
      * the returnsArray parameter.
      */
-    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> AccumArrayListReturn<SparseCGASymbolicMultivector, CGAArray> foldImpl(
+    public static <MV extends IGetSX & IMultivectorVariable> AccumArrayListReturn<CgaMvExpr, CgaExprArray> foldImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
-        List<? extends SparseCGASymbolicMultivector> returnsAccum,
-        List<? extends SparseCGASymbolicMultivector> returnsArray,
-        List<? extends SparseCGASymbolicMultivector> argsAccumInitial,
-        List<? extends SparseCGASymbolicMultivector> argsSimple,
-        List<CGAArray> argsArray,
+        List<? extends CgaMvExpr> returnsAccum,
+        List<? extends CgaMvExpr> returnsArray,
+        List<? extends CgaMvExpr> argsAccumInitial,
+        List<? extends CgaMvExpr> argsSimple,
+        List<CgaExprArray> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsAccum.size() >= 1;
@@ -171,34 +171,34 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
 
         var def_sym_in = new StdVectorSX(
             StreamConcat(
-                Stream.of(CGAArray.horzcat(paramsAccum)),
-                paramsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                paramsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+                Stream.of(CgaExprArray.horzcat(paramsAccum)),
+                paramsSimple.stream().map(IGetSX::getSX),
+                paramsArray.stream().map(IGetSX::getSX)
             ).toList()
         );
         var def_sym_out = new StdVectorSX(
             Stream.concat(
-                Stream.of(CGAArray.horzcat(returnsAccum)),
-                returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+                Stream.of(CgaExprArray.horzcat(returnsAccum)),
+                returnsArray.stream().map(IGetSX::getSX)
             ).toList()
         );
         var f_sym_casadi = new Function("foldBase", def_sym_in, def_sym_out);
 
         var call_sym_in = new StdVectorSX(
             StreamConcat(
-                Stream.of(CGAArray.horzcat(argsAccumInitial)),
+                Stream.of(CgaExprArray.horzcat(argsAccumInitial)),
                 // CasADi treats a SX as an arbitrary long List of SxStatic.
                 // No need to use repmat.
-                argsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                argsArray.stream().map(CGAArray::horzcat)
+                argsSimple.stream().map(IGetSX::getSX),
+                argsArray.stream().map(CgaExprArray::horzcat)
             ).toList()
         );
         var call_sym_out = new StdVectorSX();
         f_sym_casadi.fold(iterations).call(call_sym_in, call_sym_out);
 
         var call_out_all = call_sym_out.stream().toList();
-        var call_out_accum = CGAArray.horzsplit(call_out_all.get(0)).stream().map(SparseCGASymbolicMultivector::create).toList();
-        var call_out_array = call_out_all.subList(1, call_out_all.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        var call_out_accum = CgaExprArray.horzsplit(call_out_all.get(0)).stream().map(CgaMvExpr::create).toList();
+        var call_out_array = call_out_all.subList(1, call_out_all.size()).stream().map(CgaExprArray::horzsplit).map(CgaExprArray::new).toList();
         var call_out = new AccumArrayListReturn(call_out_accum, call_out_array);
         return call_out;
     }
@@ -218,15 +218,15 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
      * @return Results of all iterations of accum Variables. One array element for each iteration for the
      * variables of the returnsArray parameter.
      */
-    public static <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> AccumArrayListReturn<CGAArray, CGAArray> mapaccumImpl(
+    public static <MV extends IGetSX & IMultivectorVariable> AccumArrayListReturn<CgaExprArray, CgaExprArray> mapaccumImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
-        List<? extends SparseCGASymbolicMultivector> returnsAccum,
-        List<? extends SparseCGASymbolicMultivector> returnsArray,
-        List<? extends SparseCGASymbolicMultivector> argsAccumInitial,
-        List<? extends SparseCGASymbolicMultivector> argsSimple,
-        List<CGAArray> argsArray,
+        List<? extends CgaMvExpr> returnsAccum,
+        List<? extends CgaMvExpr> returnsArray,
+        List<? extends CgaMvExpr> argsAccumInitial,
+        List<? extends CgaMvExpr> argsSimple,
+        List<CgaExprArray> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsAccum.size() >= 1;
@@ -246,26 +246,26 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
 
         var def_sym_in = new StdVectorSX(
             StreamConcat(
-                paramsAccum.stream().map(ISparseCGASymbolicMultivector::getSX),
-                paramsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                paramsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+                paramsAccum.stream().map(IGetSX::getSX),
+                paramsSimple.stream().map(IGetSX::getSX),
+                paramsArray.stream().map(IGetSX::getSX)
             ).toList()
         );
         var def_sym_out = new StdVectorSX(
             Stream.concat(
-                returnsAccum.stream().map(ISparseCGASymbolicMultivector::getSX),
-                returnsArray.stream().map(ISparseCGASymbolicMultivector::getSX)
+                returnsAccum.stream().map(IGetSX::getSX),
+                returnsArray.stream().map(IGetSX::getSX)
             ).toList()
         );
         var f_sym_casadi = new Function("MapaccumBase", def_sym_in, def_sym_out);
 
         var call_sym_in = new StdVectorSX(
             StreamConcat(
-                argsAccumInitial.stream().map(ISparseCGASymbolicMultivector::getSX),
+                argsAccumInitial.stream().map(IGetSX::getSX),
                 // CasADi treats a SX as an arbitrary long List of SxStatic.
                 // No need to use repmat.
-                argsSimple.stream().map(ISparseCGASymbolicMultivector::getSX),
-                argsArray.stream().map(CGAArray::horzcat)
+                argsSimple.stream().map(IGetSX::getSX),
+                argsArray.stream().map(CgaExprArray::horzcat)
             ).toList()
         );
         var call_sym_out = new StdVectorSX();
@@ -274,8 +274,8 @@ public class CGASymbolicFunctionService implements iLoopService<SparseCGASymboli
         f_sym_casadi.mapaccum("MapaccumMapaccum", iterations, accumVars, accumVars).call(call_sym_in, call_sym_out);
 
         var call_out_all = call_sym_out.stream().toList();
-        var call_out_accum = call_out_all.subList(0, returnsAccum.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
-        var call_out_array = call_out_all.subList(returnsAccum.size(), call_out_all.size()).stream().map(CGAArray::horzsplit).map(CGAArray::new).toList();
+        var call_out_accum = call_out_all.subList(0, returnsAccum.size()).stream().map(CgaExprArray::horzsplit).map(CgaExprArray::new).toList();
+        var call_out_array = call_out_all.subList(returnsAccum.size(), call_out_all.size()).stream().map(CgaExprArray::horzsplit).map(CgaExprArray::new).toList();
         var call_out = new AccumArrayListReturn(call_out_accum, call_out_array);
         return call_out;
     }

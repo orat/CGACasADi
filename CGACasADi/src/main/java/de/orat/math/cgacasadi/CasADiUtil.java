@@ -12,8 +12,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import de.orat.math.cgacasadi.impl.ISparseCGASymbolicMultivector;
-import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.CgaMvExpr;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacalc.util.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -27,17 +26,18 @@ import java.util.List;
 import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
+import de.orat.math.cgacasadi.impl.IGetSX;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class CasADiUtil {
 
-    public static List<Sparsity> toSparsities(List<? extends ISparseCGASymbolicMultivector> mvs) {
-        return mvs.stream().map(ISparseCGASymbolicMultivector::getSX).map(SX::sparsity).toList();
+    public static List<Sparsity> toSparsities(List<? extends IGetSX> mvs) {
+        return mvs.stream().map(IGetSX::getSX).map(SX::sparsity).toList();
     }
 
-    public static boolean areMVSparsitiesSupersetsOfSubsets(List<? extends ISparseCGASymbolicMultivector> supersets, List<? extends ISparseCGASymbolicMultivector> subsets) {
+    public static boolean areMVSparsitiesSupersetsOfSubsets(List<? extends IGetSX> supersets, List<? extends IGetSX> subsets) {
         var supersetsSparsities = toSparsities(supersets);
         var subsetSparsities = toSparsities(subsets);
         return areSparsitiesSupersetsOfSubsets(supersetsSparsities, subsetSparsities);
@@ -92,7 +92,7 @@ public class CasADiUtil {
      * @param cgaCayleyTable Cayley-table representing the specific product
      *
      */
-    public static SX toSXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable) {
+    public static SX toSXProductMatrix(CgaMvExpr mv, CGACayleyTable cgaCayleyTable) {
 
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
 
@@ -177,7 +177,7 @@ public class CasADiUtil {
      * @param mv sparse multivector
      * @return sparsity of the matrix representation of the given multivector for the given cayley table
      */
-    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, SparseCGASymbolicMultivector mv) {
+    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, CgaMvExpr mv) {
         double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
         ColumnVectorSparsity sparsity = mv.getSparsity();
         for (int i = 0; i < cayleyTable.getRows(); i++) {

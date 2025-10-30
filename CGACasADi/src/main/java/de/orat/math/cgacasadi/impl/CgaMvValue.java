@@ -5,22 +5,22 @@ import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
-import de.orat.math.cgacasadi.impl.gen.DelegatingSparseCGANumericMultivector;
+import de.orat.math.cgacasadi.impl.gen.DelegatingCgaMvValue;
 import de.orat.math.gacalc.api.MultivectorNumeric;
-import de.orat.math.gacalc.spi.iConstantsFactory;
-import de.orat.math.gacalc.spi.iMultivectorNumeric;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
+import de.orat.math.gacalc.spi.IConstants;
+import de.orat.math.gacalc.spi.IMultivectorValue;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  *
  * Achtung: Es können Objekte mit und ohne sparsity erzeugt werden.
  */
-@GenerateDelegate(to = SparseCGASymbolicMultivector.class)
-public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMultivector implements iMultivectorNumeric<SparseCGANumericMultivector, SparseCGASymbolicMultivector>, ISparseCGASymbolicMultivector {
+@GenerateDelegate(to = CgaMvExpr.class)
+public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSX {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
@@ -31,42 +31,42 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         this.callback = callback;
     }
 
-    private final ComposableImmutableBinaryTree<SparseCGANumericMultivector> inputs;
+    private final ComposableImmutableBinaryTree<CgaMvValue> inputs;
 
     /**
-     * Only to be used by non-static create Method for DelegatingSparseCGANumericMultivector.
+     * Only to be used by non-static create Method for DelegatingCgaMvValue.
      */
     @Deprecated
-    private SparseCGANumericMultivector(SparseCGASymbolicMultivector sym, ComposableImmutableBinaryTree<SparseCGANumericMultivector> inputs) {
+    private CgaMvValue(CgaMvExpr sym, ComposableImmutableBinaryTree<CgaMvValue> inputs) {
         super(sym);
         this.inputs = inputs;
     }
 
     /**
-     * Only to be used from DelegatingSparseCGANumericMultivector! Otherwise will lead to inconsistencies!
+     * Only to be used from DelegatingCgaMvValue! Otherwise will lead to inconsistencies!
      */
     @Deprecated
     @Override
-    protected SparseCGANumericMultivector create(SparseCGASymbolicMultivector sym) {
+    protected CgaMvValue create(CgaMvExpr sym) {
         // Call permitted here.
-        return new SparseCGANumericMultivector(sym, this.inputs);
+        return new CgaMvValue(sym, this.inputs);
     }
 
     /**
-     * Only to be used from DelegatingSparseCGANumericMultivector! Otherwise will lead to inconsistencies!
+     * Only to be used from DelegatingCgaMvValue! Otherwise will lead to inconsistencies!
      */
     @Deprecated
     @Override
-    protected SparseCGANumericMultivector create(SparseCGASymbolicMultivector sym, SparseCGANumericMultivector other) {
+    protected CgaMvValue create(CgaMvExpr sym, CgaMvValue other) {
         var combinedInputs = this.inputs.append(other.inputs);
         // Call permitted here.
-        return new SparseCGANumericMultivector(sym, combinedInputs);
+        return new CgaMvValue(sym, combinedInputs);
     }
 
     /**
      * Creates a leaf. Only to be used by static create Method with DM input.
      */
-    private SparseCGANumericMultivector(DM dm) {
+    private CgaMvValue(DM dm) {
         super(dmToPureSym(dm));
         this.lazyDM = dm;
         // Not "leaking this", because the passed "this" will not be used before fully constructed.
@@ -76,18 +76,18 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
 
     private static int num = 0;
 
-    private static PurelySymbolicCachedSparseCGASymbolicMultivector dmToPureSym(DM dm) {
+    private static CgaMvVariable dmToPureSym(DM dm) {
         var nameSym = String.format("x%s", String.valueOf(num));
         ++num;
-        var pureSym = new PurelySymbolicCachedSparseCGASymbolicMultivector(nameSym, dm.sparsity());
+        var pureSym = new CgaMvVariable(nameSym, dm.sparsity());
         return pureSym;
     }
 
-    public static SparseCGANumericMultivector create(DM dm) {
-        return new SparseCGANumericMultivector(dm);
+    public static CgaMvValue create(DM dm) {
+        return new CgaMvValue(dm);
     }
 
-    public static SparseCGANumericMultivector createFrom(SparseCGASymbolicMultivector sym) {
+    public static CgaMvValue createFrom(CgaMvExpr sym) {
         /*
          * https://github.com/casadi/casadi/wiki/L_rf
          * Evaluates the expression numerically.
@@ -97,7 +97,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         return create(dm);
     }
 
-    public static SparseCGANumericMultivector create(double[] values) {
+    public static CgaMvValue create(double[] values) {
         if (baseCayleyTable.getBladesCount() != values.length) {
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(values.length));
@@ -106,7 +106,7 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         return create(dm);
     }
 
-    public static SparseCGANumericMultivector create(double[] nonzeros, int[] rows) {
+    public static CgaMvValue create(double[] nonzeros, int[] rows) {
         if (baseCayleyTable.getBladesCount() < nonzeros.length) {
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(nonzeros.length));
@@ -118,11 +118,11 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
         return create(dm);
     }
 
-    public static SparseCGANumericMultivector create(SparseDoubleMatrix vec) {
+    public static CgaMvValue create(SparseDoubleMatrix vec) {
         return create(vec.nonzeros(), vec.getSparsity().getrow());
     }
 
-    public static SparseCGANumericMultivector create(double scalar) {
+    public static CgaMvValue create(double scalar) {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
         SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
         return create(sdm);
@@ -140,9 +140,9 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
     public DM getDM() {
         if (this.lazyDM == null) {
             var allInputs = this.inputs.computeUniqueLeafs().stream().toList();
-            var allInputsParams = allInputs.stream().map(SparseCGANumericMultivector::delegatePurelySym).toList();
-            var func = new CGASymbolicFunction("getDM", allInputsParams, List.of(this.delegate));
-            var evalMV = func.callNumeric(allInputs).get(0);
+            var allInputsParams = allInputs.stream().map(CgaMvValue::delegatePurelySym).toList();
+            var func = new CgaFunction("getDM", allInputsParams, List.of(this.delegate));
+            var evalMV = func.callValue(allInputs).get(0);
             // lazyDM is set for all leafs.
             this.lazyDM = evalMV.lazyDM;
         }
@@ -172,26 +172,26 @@ public class SparseCGANumericMultivector extends DelegatingSparseCGANumericMulti
      * Can be expensive.
      */
     @Override
-    public SparseCGASymbolicMultivector toSymbolic() {
+    public CgaMvExpr toExpr() {
         var dm = this.getDM();
-        var mv = SparseCGASymbolicMultivector.create(dm).simplifySparsify();
+        var mv = CgaMvExpr.create(dm).simplifySparsify();
         return mv;
     }
 
-    private SparseCGASymbolicMultivector delegate() {
+    private CgaMvExpr delegate() {
         return super.delegate;
     }
 
     /**
      * Only works on MVnum which were constructed from a DM.
      */
-    private PurelySymbolicCachedSparseCGASymbolicMultivector delegatePurelySym() {
-        return (PurelySymbolicCachedSparseCGASymbolicMultivector) super.delegate;
+    private CgaMvVariable delegatePurelySym() {
+        return (CgaMvVariable) super.delegate;
     }
 
     @Override
-    public iConstantsFactory<SparseCGANumericMultivector> constants() {
-        return CGAExprGraphFactory.instance.constantsNumeric();
+    public IConstants<CgaMvValue> constants() {
+        return CgaFactory.instance.constantsValue();
     }
 
     @Override

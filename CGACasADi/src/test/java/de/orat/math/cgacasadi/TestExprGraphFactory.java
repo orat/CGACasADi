@@ -1,9 +1,9 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
+import de.orat.math.cgacasadi.impl.CgaFactory;
 import de.orat.math.gacalc.api.ExprGraphFactory;
-import de.orat.math.gacalc.spi.iExprGraphFactory;
 import java.util.Random;
+import de.orat.math.gacalc.spi.IGAFactory;
 
 /**
  *
@@ -11,13 +11,13 @@ import java.util.Random;
  */
 public class TestExprGraphFactory extends ExprGraphFactory {
 
-    public static CGAExprGraphFactory impl_ = CGAExprGraphFactory.instance;
+    public static CgaFactory impl_ = CgaFactory.instance;
 
     public static ExprGraphFactory instance() {
         return get(impl_);
     }
 
-    protected TestExprGraphFactory(iExprGraphFactory impl) {
+    protected TestExprGraphFactory(IGAFactory impl) {
         super(impl);
     }
 

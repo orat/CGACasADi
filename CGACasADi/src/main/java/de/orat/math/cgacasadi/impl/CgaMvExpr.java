@@ -13,9 +13,8 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.cgacasadi.caching.annotation.api.Uncached;
-import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.gen.CachedCgaMvExpr;
 import de.orat.math.gacalc.api.MultivectorSymbolic;
-import de.orat.math.gacalc.spi.iMultivectorSymbolic;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -27,6 +26,7 @@ import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperations;
 import util.cga.CGAOperatorMatrixUtils;
+import de.orat.math.gacalc.spi.IMultivectorExpression;
 
 /**
  * <pre>
@@ -36,7 +36,7 @@ import util.cga.CGAOperatorMatrixUtils;
  * </pre>
  */
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
-public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbolic<SparseCGASymbolicMultivector>, ISparseCGASymbolicMultivector {
+public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IGetSX {
 
     private MultivectorSymbolic.Callback callback;
     private final String name;
@@ -46,7 +46,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     private final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils
         = new CGAOperatorMatrixUtils(baseCayleyTable);
 
-    private final static CGAExprGraphFactory fac = CGAExprGraphFactory.instance;
+    private final static CgaFactory fac = CgaFactory.instance;
 
     // a multivector is represented by a sparse column vector
     private final SX sx;
@@ -60,7 +60,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * Constructors must only used within subclasses.
      */
     @Deprecated
-    protected SparseCGASymbolicMultivector(SparseCGASymbolicMultivector other) {
+    protected CgaMvExpr(CgaMvExpr other) {
         this.name = other.getName();
         this.sx = other.getSX();
     }
@@ -69,7 +69,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * Constructors must only used within subclasses.
      */
     @Deprecated
-    protected SparseCGASymbolicMultivector(String name, SX sx) {
+    protected CgaMvExpr(String name, SX sx) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(sx);
         this.name = name;
@@ -82,19 +82,19 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         }
     }
 
-    public static SparseCGASymbolicMultivector create(SparseCGASymbolicMultivector other) {
-        return new CachedSparseCGASymbolicMultivector(other);
+    public static CgaMvExpr create(CgaMvExpr other) {
+        return new CachedCgaMvExpr(other);
     }
 
-    public static SparseCGASymbolicMultivector create(String name, SparseDoubleMatrix vector) {
+    public static CgaMvExpr create(String name, SparseDoubleMatrix vector) {
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
         SX sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
             new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
-        return new CachedSparseCGASymbolicMultivector(name, sx);
+        return new CachedCgaMvExpr(name, sx);
     }
 
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name, int[] grades) {
-        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, grades);
+    public static CgaMvVariable create(String name, int[] grades) {
+        return new CgaMvVariable(name, grades);
     }
 
     /**
@@ -105,37 +105,37 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @param name
      * @param grade
      */
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name, int grade) {
-        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, grade);
+    public static CgaMvVariable create(String name, int grade) {
+        return new CgaMvVariable(name, grade);
     }
 
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector create(String name, ColumnVectorSparsity sparsity) {
-        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, sparsity);
+    public static CgaMvVariable create(String name, ColumnVectorSparsity sparsity) {
+        return new CgaMvVariable(name, sparsity);
     }
 
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector createDense(String name) {
-        return PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name);
+    public static CgaMvVariable createDense(String name) {
+        return CgaMvVariable.createDense(name);
     }
 
-    public static PurelySymbolicCachedSparseCGASymbolicMultivector createSparse(String name) {
-        return PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name);
+    public static CgaMvVariable createSparse(String name) {
+        return CgaMvVariable.createSparse(name);
     }
 
-    public static SparseCGASymbolicMultivector create(DM dm) {
+    public static CgaMvExpr create(DM dm) {
         var nonZeros = new StdVectorVectorDouble(1, dm.nonzeros());
         var sx = new SX(dm.sparsity(), new SX(nonZeros));
-        return new CachedSparseCGASymbolicMultivector("", sx);
+        return new CachedCgaMvExpr("", sx);
     }
 
-    public static SparseCGASymbolicMultivector create(SX sx) {
-        return new CachedSparseCGASymbolicMultivector("", sx);
+    public static CgaMvExpr create(SX sx) {
+        return new CachedCgaMvExpr("", sx);
     }
 
-    public static SparseCGASymbolicMultivector create(String name, SX sx) {
-        return new CachedSparseCGASymbolicMultivector(name, sx);
+    public static CgaMvExpr create(String name, SX sx) {
+        return new CachedCgaMvExpr(name, sx);
     }
 
-    public static SparseCGASymbolicMultivector createFromScalar(SX sx) {
+    public static CgaMvExpr createFromScalar(SX sx) {
         // 1x1
         if (!sx.sparsity().is_scalar()) {
             throw new IllegalArgumentException("This is no scalar!");
@@ -184,7 +184,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     @Uncached
-    public SparseCGASymbolicMultivector simplifySparsify() {
+    public CgaMvExpr simplifySparsify() {
         SX simple = SxStatic.simplify(this.sx);
         SX sparse = SxStatic.sparsify(simple);
         return create(sparse);
@@ -231,22 +231,22 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
         return (grade() == 2);
     }
 
-    private static final CGAConstantsSymbolic CONSTANTS = CGAConstantsSymbolic.instance;
+    private static final CgaConstantsExpr CONSTANTS = CgaConstantsExpr.instance;
 
     @Override
-    public CGAConstantsSymbolic constants() {
+    public CgaConstantsExpr constants() {
         return CONSTANTS;
     }
 
-    public CGAExprGraphFactory fac() {
-        return CGAExprGraphFactory.instance;
+    public CgaFactory fac() {
+        return CgaFactory.instance;
     }
 
     //======================================================
     // Operators
     //======================================================
     @Override
-    public SparseCGASymbolicMultivector gradeSelection(int grade) {
+    public CgaMvExpr gradeSelection(int grade) {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
         SX gradeSelectionMatrix = CasADiUtil.toSX(m); // bestimmt sparsity
         return create(SxStatic.mtimes(gradeSelectionMatrix, sx));
@@ -258,14 +258,14 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return reverse of a multivector
      */
     @Override
-    public SparseCGASymbolicMultivector reverse() {
+    public CgaMvExpr reverse() {
         SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
         SX result = SxStatic.mtimes(CasADiUtil.toSX(revm), sx);
         return create(result);
     }
 
     @Override
-    public SparseCGASymbolicMultivector up(){
+    public CgaMvExpr up(){
         if (!isEuclidian()){
             throw new IllegalArgumentException("Up projection with an argument which is no euclidian vector is not allowed: "+toString());
         }
@@ -280,11 +280,11 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return ((vec/(vec⋅εᵢ))∧E₀)/E₀
      */
     @Override
-    public SparseCGASymbolicMultivector down(){
+    public CgaMvExpr down(){
         // normalize: vec/(vec.εᵢ)
         // Achtung: negate() ist anders als in der Doku der Clifford-lib. Das liegt daran, dass die Clifford-lib
         // die Metrik anders definiert
-        SparseCGASymbolicMultivector result 
+        CgaMvExpr result 
             = negate().div(this.dot(CONSTANTS.getBaseVectorInfinity()));
         // rejection from the minkowski plane E0
         result = result.op(CONSTANTS.getMinkovskiBiVector()).div(CONSTANTS.getMinkovskiBiVector());
@@ -294,7 +294,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
     
     @Override
-    public SparseCGASymbolicMultivector gp(SparseCGASymbolicMultivector b) {
+    public CgaMvExpr gp(CgaMvExpr b) {
         System.out.println("---gp()---");
         System.out.println(getName()+": input multivector sparsity = " 
                                 + getSparsity().toString());
@@ -335,7 +335,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      */
     @Override
     @Uncached
-    public SparseCGASymbolicMultivector gpWithScalar(double s) {
+    public CgaMvExpr gpWithScalar(double s) {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
         SX result = SxStatic.mtimes(CasADiUtil.toSX(m), sx);
         return create(result);
@@ -351,7 +351,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return involution/grade inversion
      */
     @Override
-    public SparseCGASymbolicMultivector gradeInversion() {
+    public CgaMvExpr gradeInversion() {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createInvolutionOperatorMatrix(baseCayleyTable);
         return create(SxStatic.mtimes(CasADiUtil.toSX(m), sx));
     }
@@ -392,7 +392,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return undual function
      */
     @Override
-    public SparseCGASymbolicMultivector undual() {
+    public CgaMvExpr undual() {
         //return gp(exprGraphFac.createPseudoscalar()).gpWithScalar(-1d); // -1 wird gebraucht
         return dual().gpWithScalar(-1d);
     }
@@ -406,7 +406,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return a.Conjugate()
      */
     @Override
-    public SparseCGASymbolicMultivector conjugate() {
+    public CgaMvExpr conjugate() {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
         SX result = SxStatic.mtimes(CasADiUtil.toSX(m), sx);
         return create(result);
@@ -431,7 +431,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return scalar product of this with a 'rhs'
      */
     @Override
-    public SparseCGASymbolicMultivector scp(SparseCGASymbolicMultivector rhs) {
+    public CgaMvExpr scp(CgaMvExpr rhs) {
         // eventuell sollte ich ip() explizit implementieren und hier verwenden,
         // damit scp() unabhängig von der Reihenfolge der Argumente wird
         // return ip(x, LEFT_CONTRACTION).scalarPart();
@@ -451,7 +451,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return a + b
      */
     @Override
-    public SparseCGASymbolicMultivector add(SparseCGASymbolicMultivector b) {
+    public CgaMvExpr add(CgaMvExpr b) {
         //System.out.println("sparsity(a)="+sx.sparsity().toString(true));
         //System.out.println("sparsity(b)="+( b).getSX().sparsity().toString(true));
         SX result = SxStatic.plus(sx, b.getSX());
@@ -461,7 +461,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 
     // ist nicht CGA-spezifisch
     @Override
-    public SparseCGASymbolicMultivector map(SparseCGASymbolicMultivector b) {
+    public CgaMvExpr map(CgaMvExpr b) {
         // element-wise mulitplication (linear mapping)
         SX result = SxStatic.times(sx, b.getSX());
         return create(result);
@@ -476,7 +476,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return a - b
      */
     @Override
-    public SparseCGASymbolicMultivector sub(SparseCGASymbolicMultivector b) {
+    public CgaMvExpr sub(CgaMvExpr b) {
         SX result = SxStatic.minus(sx, b.getSX());
         return create(result);
     }
@@ -487,13 +487,13 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * @return multivector with changed signs for vector and 4-vector parts
      */
     @Override
-    public SparseCGASymbolicMultivector negate14() {
+    public CgaMvExpr negate14() {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createNegate14MultiplicationMatrix(baseCayleyTable);
         return create(SxStatic.mtimes(CasADiUtil.toSX(m), sx));
     }
 
     @Override
-    public SparseCGASymbolicMultivector scalarAbs() {
+    public CgaMvExpr scalarAbs() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
@@ -501,7 +501,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     @Override
-    public SparseCGASymbolicMultivector scalarAtan2(SparseCGASymbolicMultivector y) {
+    public CgaMvExpr scalarAtan2(CgaMvExpr y) {
         if (!isScalar()) {
             throw new IllegalArgumentException("The argument x of atan2(y,x) is no scalar!");
         }
@@ -513,7 +513,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     }
 
     @Override
-    public SparseCGASymbolicMultivector scalarSqrt() {
+    public CgaMvExpr scalarSqrt() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
@@ -523,43 +523,43 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     
     // new scalar functions
     
-    public SparseCGASymbolicMultivector scalarSign() {
+    public CgaMvExpr scalarSign() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return createFromScalar(SxStatic.sign(sx.at(0)));
     }
-    public SparseCGASymbolicMultivector scalarSin() {
+    public CgaMvExpr scalarSin() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return createFromScalar(SxStatic.sin(sx.at(0)));
     }
-    public SparseCGASymbolicMultivector scalarCos() {
+    public CgaMvExpr scalarCos() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return createFromScalar(SxStatic.cos(sx.at(0)));
     }
-    public SparseCGASymbolicMultivector scalarTan() {
+    public CgaMvExpr scalarTan() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return createFromScalar(SxStatic.tan(sx.at(0)));
     }
-    public SparseCGASymbolicMultivector scalarAtan() {
+    public CgaMvExpr scalarAtan() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return createFromScalar(SxStatic.atan(sx.at(0)));
     }
-    public SparseCGASymbolicMultivector scalarAsin() {
+    public CgaMvExpr scalarAsin() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return createFromScalar(SxStatic.asin(sx.at(0)));
     }
-    public SparseCGASymbolicMultivector scalarAcos() {
+    public CgaMvExpr scalarAcos() {
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
@@ -573,7 +573,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector or a scalar for CGA (R41)
     @Override
-    public SparseCGASymbolicMultivector exp() {
+    public CgaMvExpr exp() {
         if (isScalar()){
             SX result = SxStatic.exp(sx.at(0));
             return createFromScalar(result);
@@ -716,7 +716,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
      * Geometric Algebras of Less than 6D<br>
      * S. de. Keninck, M. Roelfs, 2022
      */
-    public SparseCGASymbolicMultivector normalizeRotor() {
+    public CgaMvExpr normalizeRotor() {
         if (!isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
@@ -833,7 +833,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     @Override
-    public SparseCGASymbolicMultivector sqrt() {
+    public CgaMvExpr sqrt() {
         if (isEven()) {
             if (this.isScalar()){
                 return scalarSqrt();
@@ -847,7 +847,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // log of a normalized rotor, result is a bivector
     @Override
-    public SparseCGASymbolicMultivector log() {
+    public CgaMvExpr log() {
       
         if (!isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
@@ -968,11 +968,11 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return result;
     }
     
-    public SparseCGASymbolicMultivector meet(SparseCGASymbolicMultivector b) {
+    public CgaMvExpr meet(CgaMvExpr b) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public SparseCGASymbolicMultivector join(SparseCGASymbolicMultivector b) {
+    public CgaMvExpr join(CgaMvExpr b) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -993,7 +993,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * https://math.stackexchange.com/questions/1128844/about-the-definition-of-norm-in-clifford-algebra?rq=1
      */
     @Override
-    public SparseCGASymbolicMultivector norm() {
+    public CgaMvExpr norm() {
         SX sx1 = (gp(conjugate()).gradeSelection(0)).getSX();
         return create(SxStatic.sqrt(SxStatic.abs(sx1)));
     }
@@ -1004,7 +1004,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * standard euclidean vector space norm
      */
     @Override
-    public SparseCGASymbolicMultivector inorm() {
+    public CgaMvExpr inorm() {
         return dual().norm();
         //return unop_Dual(this).norm();
     }
@@ -1021,7 +1021,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * @return a normalized (Euclidean) element.
      */
     @Override
-    public SparseCGASymbolicMultivector normalizeBySquaredNorm() {
+    public CgaMvExpr normalizeBySquaredNorm() {
         //return binop_muls(this, 1d / norm());
         return divs(norm());
     }
@@ -1044,7 +1044,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * @return
      */
     @Override
-    public SparseCGASymbolicMultivector generalInverse() {
+    public CgaMvExpr generalInverse() {
         return CGAOperations.generalInverse(this);
     }
 
@@ -1055,7 +1055,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * @return scalar inverse
      */
     @Override
-    public SparseCGASymbolicMultivector scalarInverse() {
+    public CgaMvExpr scalarInverse() {
         // Throws exception for an empty sparse multivector, too.
         if (!isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
@@ -1085,8 +1085,8 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     // negative sign. E.g., in the conformal model the sign of the reverse norm squared of
     // a sphere indicates whether the sphere is real or imaginary. Hence we will (ab-)use
     // the term “norm” for it throughout this thesis.
-    public SparseCGASymbolicMultivector reverseNorm() {
-        SparseCGASymbolicMultivector squaredReverseNorm = gp(reverse()).gradeSelection(0);
+    public CgaMvExpr reverseNorm() {
+        CgaMvExpr squaredReverseNorm = gp(reverse()).gradeSelection(0);
         SX scalar = (squaredReverseNorm).sx;
         SX sign = SxStatic.sign(scalar);
         SX sqrt = SxStatic.sqrt(SxStatic.abs(scalar));
@@ -1113,7 +1113,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * @throws IllegalArgumentException if the argument is no structural scalar
      * @return a multivector for which each component of the given multivector is divided by the given scalar
      */
-    private SparseCGASymbolicMultivector divs(SparseCGASymbolicMultivector s) {
+    private CgaMvExpr divs(CgaMvExpr s) {
         // test allowed because it is a test against structural beeing a scalar
         // test against structural 0 not useful
         // runtime can fail if scalar == 0
@@ -1125,13 +1125,13 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     }
 
     // strict positive?
-    private static SparseCGASymbolicMultivector norm_e(SparseCGASymbolicMultivector a) {
+    private static CgaMvExpr norm_e(CgaMvExpr a) {
         SX norme = SxStatic.sqrt(norm_e2(a).getSX().at(0));
         return createFromScalar(norme);
     }
 
-    private static SparseCGASymbolicMultivector norm_e2(SparseCGASymbolicMultivector a) {
-        SparseCGASymbolicMultivector s = a.scp(a.reverse());
+    private static CgaMvExpr norm_e2(CgaMvExpr a) {
+        CgaMvExpr s = a.scp(a.reverse());
         SX norme2 = SxStatic.times(SxStatic.gt(s.getSX().at(0), new SX(0d)),
             s.getSX().at(0));
         //double s = scp(reverse());
@@ -1142,7 +1142,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     
     //-------- voraussichtlich deprecated
     
-    private SparseCGASymbolicMultivector expSeries(SparseCGASymbolicMultivector mv, int order) {
+    private CgaMvExpr expSeries(CgaMvExpr mv, int order) {
 
         long scale = 1;
         //TODO
@@ -1156,7 +1156,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
             }
         }*/
 
-        SparseCGASymbolicMultivector scaled = mv.gpWithScalar(1.0 / scale);
+        CgaMvExpr scaled = mv.gpWithScalar(1.0 / scale);
 
         //TODO
         return null;

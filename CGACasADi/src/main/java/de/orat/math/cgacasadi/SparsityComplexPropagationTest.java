@@ -3,24 +3,24 @@ package de.orat.math.cgacasadi;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
-import de.orat.math.cgacasadi.impl.CGASymbolicFunction;
-import de.orat.math.cgacasadi.impl.gen.CachedSparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.CgaFactory;
+import de.orat.math.cgacasadi.impl.CgaFunction;
+import de.orat.math.cgacasadi.impl.gen.CachedCgaMvExpr;
 import java.util.List;
 import util.cga.SparseCGAColumnVector;
 
 public class SparsityComplexPropagationTest {
 
     public static void main(String[] args) {
-        var fac = CGAExprGraphFactory.instance;
-        var a = fac.createMultivectorPurelySymbolic("a", 0);
-        var b = fac.createMultivectorPurelySymbolic("b", 0);
+        var fac = CgaFactory.instance;
+        var a = fac.createVariable("a", 0);
+        var b = fac.createVariable("b", 0);
 
         SX withScalar = a.add(a.gpWithScalar(-2)).add(a).getSX();
         System.out.println(withScalar); // Strukturelle Null.
 
-        var yy = fac.createMultivectorNumeric(3);
-        var zz = fac.createMultivectorNumeric(3);
+        var yy = fac.createValue(3);
+        var zz = fac.createValue(3);
 
         var yyOut = yy.add(yy.gpWithScalar(-2)).add(yy);
         System.out.println(yyOut); // Strukturelle Null
@@ -52,13 +52,13 @@ public class SparsityComplexPropagationTest {
 
         ////////////
 
-        String caching = CachedSparseCGASymbolicMultivector.getCache().cachedFunctionUsageToString();
+        String caching = CachedCgaMvExpr.getCache().cachedFunctionUsageToString();
         System.out.println(caching);
 
         ////////////
 
-        var aa1 = fac.createMultivectorPurelySymbolic("a", 0);
-        var aa2 = fac.createMultivectorPurelySymbolic("a", 0);
+        var aa1 = fac.createVariable("a", 0);
+        var aa2 = fac.createVariable("a", 0);
         var bb = aa1.add(aa2).simplifySparsify();
         System.out.println(bb);
         //new CGASymbolicFunction("ffff", List.of(aa1), List.of(bb));

@@ -3,7 +3,6 @@ package de.orat.math.cgacasadi.caching.annotation.processor.representation;
 import de.orat.math.cgacasadi.caching.annotation.processor.GenerateCachedProcessor.Utils;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.ErrorException;
 import de.orat.math.cgacasadi.caching.annotation.processor.common.FailedToCacheException;
-import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_iMultivectorSymbolic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import static de.orat.math.cgacasadi.caching.annotation.processor.generation.Classes.T_IMultivectorExpression;
 
 public class Clazz {
 
@@ -60,9 +60,9 @@ public class Clazz {
         Set<String> iMultivectorSymbolic = correspondingElement.getInterfaces().stream()
             .map(i -> ((TypeElement) ((DeclaredType) i).asElement()).getQualifiedName().toString())
             .collect(Collectors.toSet());
-        if (!iMultivectorSymbolic.contains(T_iMultivectorSymbolic.canonicalName())) {
+        if (!iMultivectorSymbolic.contains(T_IMultivectorExpression.canonicalName())) {
             throw ErrorException.create(correspondingElement,
-                "Needs to implement \"%s\", but does not.", T_iMultivectorSymbolic.canonicalName());
+                "Needs to implement \"%s\", but does not.", T_IMultivectorExpression.canonicalName());
         }
 
         this.methods = Collections.unmodifiableList(Clazz.computeMethods(correspondingElement, this.qualifiedName, utils));

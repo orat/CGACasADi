@@ -8,14 +8,14 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.gacalc.api.FunctionSymbolic;
-import de.orat.math.gacalc.spi.iFunctionSymbolic;
-import de.orat.math.gacalc.spi.iMultivectorPurelySymbolic;
 import java.util.List;
+import de.orat.math.gacalc.spi.IGAFunction;
+import de.orat.math.gacalc.spi.IMultivectorVariable;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicMultivector, SparseCGANumericMultivector> {
+public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
 
     private final String name;
     private final int arity;
@@ -35,9 +35,9 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
      * @param name A valid CasADi function name starts with a letter followed by letters, numbers or
      * non-consecutive underscores.
      */
-    public <MV extends ISparseCGASymbolicMultivector & iMultivectorPurelySymbolic> CGASymbolicFunction(String name, List<MV> parameters, List<? extends SparseCGASymbolicMultivector> returns) {
+    public <MV extends IGetSX & IMultivectorVariable> CgaFunction(String name, List<MV> parameters, List<? extends CgaMvExpr> returns) {
         try {
-            this.paramsSparsities = parameters.stream().map(ISparseCGASymbolicMultivector::getSX).map(SX::sparsity).toList();
+            this.paramsSparsities = parameters.stream().map(IGetSX::getSX).map(SX::sparsity).toList();
             var def_sym_in = transformImpl(parameters);
             var def_sym_out = transformImpl(returns);
             this.name = name;
@@ -49,13 +49,13 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
         }
     }
 
-    protected static StdVectorSX transformImpl(List<? extends ISparseCGASymbolicMultivector> mvs) {
-        List<SX> sxs = mvs.stream().map(ISparseCGASymbolicMultivector::getSX).toList();
+    protected static StdVectorSX transformImpl(List<? extends IGetSX> mvs) {
+        List<SX> sxs = mvs.stream().map(IGetSX::getSX).toList();
         return new StdVectorSX(sxs);
     }
 
     @Override
-    public List<SparseCGASymbolicMultivector> callSymbolic(List<? extends SparseCGASymbolicMultivector> arguments) {
+    public List<CgaMvExpr> callExpr(List<? extends CgaMvExpr> arguments) {
         try {
             if (arguments.size() != this.arity) {
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
@@ -66,14 +66,14 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
             var call_sym_in = transformImpl(arguments);
             var call_sym_out = new StdVectorSX();
             this.f_sym_casadi.call(call_sym_in, call_sym_out);
-            return call_sym_out.stream().map(SparseCGASymbolicMultivector::create).toList();
+            return call_sym_out.stream().map(CgaMvExpr::create).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
     }
 
     @Override
-    public List<SparseCGANumericMultivector> callNumeric(List<? extends SparseCGANumericMultivector> arguments) {
+    public List<CgaMvValue> callValue(List<? extends CgaMvValue> arguments) {
         try {
             if (arguments.size() != this.arity) {
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
@@ -81,10 +81,10 @@ public class CGASymbolicFunction implements iFunctionSymbolic<SparseCGASymbolicM
             }
             assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
 
-            var call_num_in = new StdVectorDM(arguments.stream().map(SparseCGANumericMultivector::getDM).toList());
+            var call_num_in = new StdVectorDM(arguments.stream().map(CgaMvValue::getDM).toList());
             var call_num_out = new StdVectorDM();
             this.f_sym_casadi.call(call_num_in, call_num_out);
-            return call_num_out.stream().map(SparseCGANumericMultivector::create).toList();
+            return call_num_out.stream().map(CgaMvValue::create).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }

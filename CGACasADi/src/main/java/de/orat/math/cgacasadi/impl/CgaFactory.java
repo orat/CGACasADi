@@ -1,7 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
-import de.orat.math.gacalc.spi.iExprGraphFactory;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -10,11 +9,12 @@ import java.util.Random;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
+import de.orat.math.gacalc.spi.IGAFactory;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicMultivector, PurelySymbolicCachedSparseCGASymbolicMultivector, SparseCGANumericMultivector> {
+public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> {
 
     static {
         // Init JCasADi eagerly to improve profiling.
@@ -23,12 +23,12 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
-    public final static CGAExprGraphFactory instance = new CGAExprGraphFactory();
+    public final static CgaFactory instance = new CgaFactory();
 
     /**
      * Needs to be public in order to make ServiceLoader work.
      */
-    public CGAExprGraphFactory() {
+    public CgaFactory() {
 
     }
 
@@ -37,50 +37,50 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     }
     
     @Override
-    public CGAConstantsSymbolic constantsSymbolic() {
-        return CGAConstantsSymbolic.instance;
+    public CgaConstantsExpr constantsExpr() {
+        return CgaConstantsExpr.instance;
     }
 
     @Override
-    public CGAConstantsNumeric constantsNumeric() {
-        return CGAConstantsNumeric.instance;
+    public CgaConstantsValue constantsValue() {
+        return CgaConstantsValue.instance;
     }
 
     @Override
-    public CGASymbolicFunctionService getLoopService() {
-        return CGASymbolicFunctionService.instance;
+    public CgaLoopService getLoopService() {
+        return CgaLoopService.instance;
     }
 
     // create symbolic multivectors
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicFrom(String name, SparseCGASymbolicMultivector from) {
-        return new PurelySymbolicCachedSparseCGASymbolicMultivector(name, from);
+    public CgaMvVariable createVariable(String name, CgaMvExpr from) {
+        return new CgaMvVariable(name, from);
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(String name, MatrixSparsity sparsity) {
-        return SparseCGASymbolicMultivector.create(name, ColumnVectorSparsity.instance(sparsity));
+    public CgaMvVariable createVariable(String name, MatrixSparsity sparsity) {
+        return CgaMvExpr.create(name, ColumnVectorSparsity.instance(sparsity));
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(
+    public CgaMvVariable createVariable(
                                 String name, int grade) {
-        return SparseCGASymbolicMultivector.create(name, grade);
+        return CgaMvExpr.create(name, grade);
     }
 
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolic(
+    public CgaMvVariable createVariable(
                                 String name, int[] grades) {
-        return SparseCGASymbolicMultivector.create(name, grades);
+        return CgaMvExpr.create(name, grades);
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicSparse(String name) {
-        return PurelySymbolicCachedSparseCGASymbolicMultivector.createSparse(name);
+    public CgaMvVariable createVariableSparse(String name) {
+        return CgaMvVariable.createSparse(name);
     }
 
     @Override
-    public PurelySymbolicCachedSparseCGASymbolicMultivector createMultivectorPurelySymbolicDense(String name) {
-        return PurelySymbolicCachedSparseCGASymbolicMultivector.createDense(name);
+    public CgaMvVariable createVariableDense(String name) {
+        return CgaMvVariable.createDense(name);
     }
 
     // helper methods
@@ -109,36 +109,36 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
      * @return
      */
     @Override
-    public SparseCGANumericMultivector createMultivectorNumeric(double[] values) {
-        return SparseCGANumericMultivector.create(values);
+    public CgaMvValue createValue(double[] values) {
+        return CgaMvValue.create(values);
     }
 
     @Override
-    public SparseCGANumericMultivector createMultivectorNumeric(double[] nonzeros, int[] rows) {
-        return SparseCGANumericMultivector.create(nonzeros, rows);
+    public CgaMvValue createValue(double[] nonzeros, int[] rows) {
+        return CgaMvValue.create(nonzeros, rows);
     }
 
     @Override
-    public SparseCGANumericMultivector createMultivectorNumeric(double scalar) {
-        return SparseCGANumericMultivector.create(scalar);
+    public CgaMvValue createValue(double scalar) {
+        return CgaMvValue.create(scalar);
     }
 
     @Override
-    public SparseCGANumericMultivector createRandomMultivectorNumeric() {
-        return createMultivectorNumeric(createRandomKVector(baseCayleyTable.getBladesCount()));
+    public CgaMvValue createRandomValue() {
+        return createValue(createRandomKVector(baseCayleyTable.getBladesCount()));
     }
 
     @Override
-    public SparseCGANumericMultivector createMultivectorNumeric(SparseDoubleMatrix vec) {
-        return SparseCGANumericMultivector.create(vec);
+    public CgaMvValue createValue(SparseDoubleMatrix vec) {
+        return CgaMvValue.create(vec);
     }
 
     // create function
     @Override
-    public CGASymbolicFunction createFunctionSymbolic(String name, 
-        List<? extends PurelySymbolicCachedSparseCGASymbolicMultivector> parameters,
-        List<? extends SparseCGASymbolicMultivector> returns) {
-        return new CGASymbolicFunction(name, parameters, returns);
+    public CgaFunction createFunction(String name, 
+        List<? extends CgaMvVariable> parameters,
+        List<? extends CgaMvExpr> returns) {
+        return new CgaFunction(name, parameters, returns);
     }
 
     // methods to describe the functionality of the implementation
@@ -229,7 +229,7 @@ public class CGAExprGraphFactory implements iExprGraphFactory<SparseCGASymbolicM
     // geht nur für CGA?
     @Override
     public SparseDoubleMatrix createInversePseudoscalar() {
-        return this.constantsNumeric().getPseudoscalar().reverse().elements();
+        return this.constantsValue().getPseudoscalar().reverse().elements();
     }
 
     /**

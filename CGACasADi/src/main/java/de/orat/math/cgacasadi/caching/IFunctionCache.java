@@ -3,7 +3,7 @@ package de.orat.math.cgacasadi.caching;
 import java.util.Map;
 import java.util.SortedMap;
 
-public interface ISafePublicFunctionCache {
+public interface IFunctionCache {
 
     void clearCache();
 
