@@ -12,6 +12,8 @@ import util.cga.CGAMultivectorSparsity;
 
 public class CgaMvVariable extends CachedCgaMvExpr implements IMultivectorVariable<CgaMvExpr> {
 
+    private final String name;
+
     private static final ColumnVectorSparsity SPARSE = ColumnVectorSparsity.empty(CGACayleyTableGeometricProduct.instance().getBladesCount());
 
     public static CgaMvVariable createSparse(String name) {
@@ -25,13 +27,15 @@ public class CgaMvVariable extends CachedCgaMvExpr implements IMultivectorVariab
     }
 
     public CgaMvVariable(String name, ColumnVectorSparsity sparsity) {
-        super(name, SxStatic.sym(name, CasADiUtil.toCasADiSparsity(sparsity)));
+        super(SxStatic.sym(name, CasADiUtil.toCasADiSparsity(sparsity)));
         assert super.getSX().is_valid_input();
+        this.name = name;
     }
 
     public CgaMvVariable(String name, Sparsity sparsity) {
-        super(name, SxStatic.sym(name, sparsity));
+        super(SxStatic.sym(name, sparsity));
         assert super.getSX().is_valid_input();
+        this.name = name;
     }
 
     public CgaMvVariable(String name, CgaMvExpr from) {
@@ -44,5 +48,10 @@ public class CgaMvVariable extends CachedCgaMvExpr implements IMultivectorVariab
 
     public CgaMvVariable(String name, int[] grades) {
         this(name, CGAMultivectorSparsity.fromGrades(grades));
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

@@ -24,13 +24,13 @@ public class LoopsExample {
         var returnsAccum = List.of(xi1, ai1);
         var returnsArray = List.<MultivectorExpression>of(c);
 
-        var x0 = fac.createExpr("x0", 3.0);
-        var a0 = fac.createExpr("a0", 5.0);
-        var argb1 = fac.createExpr("b1", 7.0);
-        var argb2 = fac.createExpr("b2", 11.0);
+        var x0 = fac.createExpr(3.0);
+        var a0 = fac.createExpr(5.0);
+        var argb1 = fac.createExpr(7.0);
+        var argb2 = fac.createExpr(11.0);
         var arga = new MultivectorExpressionArray(List.of(argb1, argb2));
 
-        var harg = fac.createExpr("h", 2.7);
+        var harg = fac.createExpr(2.7);
 
         var argsAccumInitial = List.of(x0, a0);
         var argsSimple = List.of(harg);
@@ -67,13 +67,13 @@ public class LoopsExample {
         var returnsAccum = List.of(xi1, ai1);
         var returnsArray = List.<MultivectorExpression>of(c);
 
-        var x0 = fac.createExpr("x0", 3.0);
-        var a0 = fac.createExpr("a0", 5.0);
-        var argb1 = fac.createExpr("b1", 7.0);
-        var argb2 = fac.createExpr("b2", 11.0);
+        var x0 = fac.createExpr(3.0);
+        var a0 = fac.createExpr(5.0);
+        var argb1 = fac.createExpr(7.0);
+        var argb2 = fac.createExpr(11.0);
         var arga = new MultivectorExpressionArray(List.of(argb1, argb2));
 
-        var harg = fac.createExpr("h", 2.7);
+        var harg = fac.createExpr(2.7);
 
         var argsAccumInitial = List.of(x0, a0);
         var argsSimple = List.of(harg);
@@ -101,11 +101,11 @@ public class LoopsExample {
         var paramsArray = List.of(bi);
         var returnsArray = List.of(xi, yi);
 
-        var argb1 = fac.createExpr("b1", 7.0);
-        var argb2 = fac.createExpr("b2", 11.0);
+        var argb1 = fac.createExpr(7.0);
+        var argb2 = fac.createExpr(11.0);
         var argb = new MultivectorExpressionArray(List.of(argb1, argb2));
 
-        var argh = fac.createExpr("h", 2.7);
+        var argh = fac.createExpr(2.7);
 
         var argsSimple = List.of(argh);
         var argsArray = List.of(argb);

@@ -40,7 +40,7 @@ public class CgaConstantsExpr implements IConstantsExpression<CgaMvExpr> {
         var value = this.cache.get(name);
         if (value == null) {
             var sparseDoubleMatrix = creator.get();
-            value = CgaMvExpr.create(name, sparseDoubleMatrix);
+            value = CgaMvExpr.create(sparseDoubleMatrix);
             this.cache.putIfAbsent(name, value);
         }
         return value;

@@ -39,7 +39,6 @@ import de.orat.math.gacalc.spi.IMultivectorExpression;
 public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IGetSX {
 
     private MultivectorExpression.Callback callback;
-    private final String name;
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable
         = CGACayleyTableGeometricProduct.instance();
@@ -61,7 +60,6 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
      */
     @Deprecated
     protected CgaMvExpr(CgaMvExpr other) {
-        this.name = other.getName();
         this.sx = other.getSX();
     }
 
@@ -69,10 +67,8 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
      * Constructors must only used within subclasses.
      */
     @Deprecated
-    protected CgaMvExpr(String name, SX sx) {
-        Objects.requireNonNull(name);
+    protected CgaMvExpr(SX sx) {
         Objects.requireNonNull(sx);
-        this.name = name;
         this.sx = sx;
         if (sx.rows() != baseCayleyTable.getBladesCount()) {
             throw new IllegalArgumentException(String.format("Invalid row count: %s", sx.rows()));
@@ -86,11 +82,11 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
         return new CachedCgaMvExpr(other);
     }
 
-    public static CgaMvExpr create(String name, SparseDoubleMatrix vector) {
+    public static CgaMvExpr create(SparseDoubleMatrix vector) {
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
         SX sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
             new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
-        return new CachedCgaMvExpr(name, sx);
+        return new CachedCgaMvExpr(sx);
     }
 
     public static CgaMvVariable create(String name, int[] grades) {
@@ -124,15 +120,11 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
     public static CgaMvExpr create(DM dm) {
         var nonZeros = new StdVectorVectorDouble(1, dm.nonzeros());
         var sx = new SX(dm.sparsity(), new SX(nonZeros));
-        return new CachedCgaMvExpr("", sx);
+        return new CachedCgaMvExpr(sx);
     }
 
     public static CgaMvExpr create(SX sx) {
-        return new CachedCgaMvExpr("", sx);
-    }
-
-    public static CgaMvExpr create(String name, SX sx) {
-        return new CachedCgaMvExpr(name, sx);
+        return new CachedCgaMvExpr(sx);
     }
 
     public static CgaMvExpr createFromScalar(SX sx) {
@@ -174,11 +166,21 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
         return stringMatrix.toString(true);
     }
 
+    /**
+     * Retrofit
+     */
+    @Deprecated
+    public String getName() {
+        // Value will be different if this instanceof CgaMvVariable.
+        return "(CgaMvExpr)";
+    }
+
     @Override
     public CGAMultivectorSparsity getSparsity() {
         return CasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
     }
 
+    @Override
     public SX getSX() {
         return this.sx;
     }
@@ -209,11 +211,6 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
             return sx.at(row, 0);
         }
         return null;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     public int getBladesCount() {

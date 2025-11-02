@@ -107,12 +107,11 @@ final class ClassGenerator {
         // Signature
         constructorBuilder
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(T_String, "name")
             .addParameter(T_SX, "sx");
 
         // Body
         constructorBuilder
-            .addStatement("super(name, sx)");
+            .addStatement("super(sx)");
 
         return constructorBuilder.build();
     }

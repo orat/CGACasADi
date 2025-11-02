@@ -10,12 +10,12 @@ public class LoopsExample1To1 {
         var fac = GAServiceLoader.getGAFactoryThrowing("cga", "cgacasadisx");
 
         // Lokale Variablen vor dem Loop.
-        var aSim = fac.createExpr("aSim", 5);
-        var aArr0 = fac.createExpr("aArr0", 7);
-        var aArr1 = fac.createExpr("aArr1", 11);
+        var aSim = fac.createExpr(5);
+        var aArr0 = fac.createExpr(7);
+        var aArr1 = fac.createExpr(11);
         var aArr = new MultivectorExpressionArray(List.of(aArr0, aArr1));
         var arAcc = new MultivectorExpressionArray();
-        var arAcc0 = fac.createExpr("arAcc0", 3);
+        var arAcc0 = fac.createExpr(3);
         arAcc.ensureSize(1, fac.constantsExpr().getSparseEmptyInstance());
         arAcc.set(0, arAcc0);
         var rArr = new MultivectorExpressionArray();
@@ -28,7 +28,7 @@ public class LoopsExample1To1 {
 
         // Loop: Definition der "inneren Funktion".
         var arAcc_i1 = sym_arAcc.addition(sym_aArr);
-        var rArr_i = sym_arAcc.addition(sym_aSim).addition(fac.createExpr("2", 2));
+        var rArr_i = sym_arAcc.addition(sym_aSim).addition(fac.createExpr(2));
 
         // Loop: Erzeugung der Argumente für den Aufruf der Loop API.
         var paramsAccum = List.of(sym_arAcc);
