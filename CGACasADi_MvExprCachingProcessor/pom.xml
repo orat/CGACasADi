@@ -7,12 +7,12 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<groupId>de.orat.math.cgacasadi</groupId>
-	<artifactId>CGACasADi_SymbolicMultivectorCachingProcessor</artifactId>
+	<artifactId>CGACasADi_MvExprCachingProcessor</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.release>21</maven.compiler.release>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -33,7 +33,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.2.5</version>
+				<version>3.5.2</version>
 				<configuration>
 					<skipTests>true</skipTests>
 					<testFailureIgnore>false</testFailureIgnore>
@@ -42,10 +42,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.12.1</version>
+				<version>3.13.0</version>
 				<configuration>
 					<!-- annotation processing of auto-service -->
-					<!--compilerArgs>-proc:full</compilerArgs-->
+					<compilerArgs>-proc:full</compilerArgs>
 				</configuration>
 			</plugin>
 		</plugins>
