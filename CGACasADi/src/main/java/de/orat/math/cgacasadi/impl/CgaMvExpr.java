@@ -137,6 +137,21 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
         return create(result);
     }
 
+    public SX asScalar() {
+        if (!this.isScalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        return this.getSX().at(0);
+    }
+
+    @Uncached
+    public CgaMvExpr computeScalar(java.util.function.Function<SX, SX> computer) {
+        SX inputScalar = this.asScalar();
+        SX outputScalar = computer.apply(inputScalar);
+        CgaMvExpr mv = createFromScalar(outputScalar);
+        return mv;
+    }
+
     //======================================================
     // Other methods
     //======================================================
@@ -491,10 +506,7 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
 
     @Override
     public CgaMvExpr scalarAbs() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.abs(sx.at(0)));
+        return computeScalar(SxStatic::abs);
     }
 
     @Override
@@ -505,62 +517,38 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
         if (!y.isScalar()) {
             throw new IllegalArgumentException("The argument y of atan2(y,x) is no scalar!");
         }
-        SX result = SxStatic.atan2(y.getSX().at(0), sx.at(0));
+        SX result = SxStatic.atan2(y.asScalar(), this.asScalar());
         return createFromScalar(result);
     }
 
     @Override
     public CgaMvExpr scalarSqrt() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.sqrt(sx.at(0)));
+        return computeScalar(SxStatic::sqrt);
     }
 
     
     // new scalar functions
     
     public CgaMvExpr scalarSign() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.sign(sx.at(0)));
+        return computeScalar(SxStatic::sign);
     }
     public CgaMvExpr scalarSin() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.sin(sx.at(0)));
+        return computeScalar(SxStatic::sin);
     }
     public CgaMvExpr scalarCos() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.cos(sx.at(0)));
+        return computeScalar(SxStatic::cos);
     }
     public CgaMvExpr scalarTan() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.tan(sx.at(0)));
+        return computeScalar(SxStatic::tan);
     }
     public CgaMvExpr scalarAtan() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.atan(sx.at(0)));
+        return computeScalar(SxStatic::atan);
     }
     public CgaMvExpr scalarAsin() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.asin(sx.at(0)));
+        return computeScalar(SxStatic::asin);
     }
     public CgaMvExpr scalarAcos() {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return createFromScalar(SxStatic.acos(sx.at(0)));
+        return computeScalar(SxStatic::acos);
     }
     
     // non linear operators/functions
@@ -571,10 +559,9 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
     // exponential of a bivector or a scalar for CGA (R41)
     @Override
     public CgaMvExpr exp() {
-        if (isScalar()){
-            SX result = SxStatic.exp(sx.at(0));
-            return createFromScalar(result);
-        } else if (!isBivector()){
+        if (isScalar()) {
+            return computeScalar(SxStatic::exp);
+        } else if (!isBivector()) {
             throw new IllegalArgumentException("exp() defined for bivectors and scalars only ("+this.toString()+")!");
         }
         
@@ -1054,13 +1041,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     @Override
     public CgaMvExpr scalarInverse() {
         // Throws exception for an empty sparse multivector, too.
-        if (!isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-
-        SX sxres = SxStatic.inv(sx.at(0));
-
-        return createFromScalar(sxres);
+        return computeScalar(SxStatic::inv);
     }
 
     //======================================================
@@ -1117,7 +1098,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         if (!s.isScalar()) {
             throw new IllegalArgumentException("The argument of divs() must be a scalar!");
         }
-        SX svec = SxStatic.repmat(s.getSX().at(0), sx.sparsity().rows(), 1);
+        SX svec = SxStatic.repmat(s.asScalar(), sx.sparsity().rows(), 1);
         return create(SxStatic.rdivide(sx, svec));
     }
 
