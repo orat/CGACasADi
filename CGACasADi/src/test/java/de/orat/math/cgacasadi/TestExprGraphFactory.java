@@ -3,10 +3,8 @@ package de.orat.math.cgacasadi;
 import de.orat.math.cgacasadi.impl.CGAExprGraphFactory;
 import de.orat.math.gacalc.api.ExprGraphFactory;
 import de.orat.math.gacalc.spi.iExprGraphFactory;
-import java.util.Random;
 
 /**
- *
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class TestExprGraphFactory extends ExprGraphFactory {
