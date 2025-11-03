@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi;
 
+import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.Util;
 import static de.dhbw.rahmlab.casadi.api.Util.toIntArr;
 import static de.dhbw.rahmlab.casadi.api.Util.toLongArr;
@@ -10,9 +11,8 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import de.orat.math.cgacasadi.impl.ISparseCGASymbolicMultivector;
-import de.orat.math.cgacasadi.impl.SparseCGASymbolicMultivector;
+import de.orat.math.cgacasadi.impl.CgaMvExpr;
+import de.orat.math.cgacasadi.impl.IGetSX;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacalc.util.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -21,8 +21,6 @@ import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.List;
-//import util.CayleyTable;
-//import util.CayleyTable.Cell;
 import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
@@ -32,11 +30,11 @@ import util.cga.DenseCGAColumnVector;
  */
 public class CasADiUtil {
 
-    public static List<Sparsity> toSparsities(List<? extends ISparseCGASymbolicMultivector> mvs) {
-        return mvs.stream().map(ISparseCGASymbolicMultivector::getSX).map(SX::sparsity).toList();
+    public static List<Sparsity> toSparsities(List<? extends IGetSX> mvs) {
+        return mvs.stream().map(IGetSX::getSX).map(SX::sparsity).toList();
     }
 
-    public static boolean areMVSparsitiesSupersetsOfSubsets(List<? extends ISparseCGASymbolicMultivector> supersets, List<? extends ISparseCGASymbolicMultivector> subsets) {
+    public static boolean areMVSparsitiesSupersetsOfSubsets(List<? extends IGetSX> supersets, List<? extends IGetSX> subsets) {
         var supersetsSparsities = toSparsities(supersets);
         var subsetSparsities = toSparsities(subsets);
         return areSparsitiesSupersetsOfSubsets(supersetsSparsities, subsetSparsities);
@@ -58,18 +56,18 @@ public class CasADiUtil {
     }
 
     public static CGAMultivectorSparsity toCGAMultivectorSparsity(
-                        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
+        de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
         return new CGAMultivectorSparsity(toIntArr(sxSparsity.get_row()));
     }
 
     public static SX toSX(SparseDoubleMatrix m) {
         return new SX(toCasADiSparsity(m.getSparsity()), Util.toSX(m.nonzeros()));
     }
-    
+
     public static SX createScalar() {
         return new SX(toCasADiSparsity(CGAMultivectorSparsity.scalar()));
     }
-    
+
     public static MatrixSparsity toMatrixSparsity(de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sxSparsity) {
         //TODO
         // kann ich identifizieren ob es ein Row- oder Column -Vektor ist und wenn ja
@@ -83,6 +81,7 @@ public class CasADiUtil {
         return new ColumnVectorSparsity((int) sxSparsity.rows(),
             toIntArr(sxSparsity.get_row()));
     }
+
     /**
      * Create a corresponding matrix for geometric product calculation, considering of the sparsity of the
      * input multivector.
@@ -91,15 +90,15 @@ public class CasADiUtil {
      * @param cgaCayleyTable Cayley-table representing the specific product
      *
      */
-    public static SX toSXProductMatrix(SparseCGASymbolicMultivector mv, CGACayleyTable cgaCayleyTable) {
+    public static SX toSXProductMatrix(CgaMvExpr mv, CGACayleyTable cgaCayleyTable) {
 
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
 
-        System.out.println(mv.getName()+": toSXproductMatrix() input multivector sparsity = " 
-                                + mv.getSparsity().toString());
+        System.out.println(mv.getName() + ": toSXproductMatrix() input multivector sparsity = "
+            + mv.getSparsity().toString());
         MatrixSparsity matrixSparsity = createSparsity(cgaCayleyTable, mv);
-        System.out.println(mv.getName()+": toSXproductMatrix() product matrix sparsity = " 
-                                + matrixSparsity.toString());
+        System.out.println(mv.getName() + ": toSXproductMatrix() product matrix sparsity = "
+            + matrixSparsity.toString());
         de.dhbw.rahmlab.casadi.impl.casadi.Sparsity sp = CasADiUtil.toCasADiSparsity(matrixSparsity);
 
         SX result = new SX(sp);
@@ -141,12 +140,12 @@ public class CasADiUtil {
                             // Zelle der Cayleytable steht. Dieser muss multipliziert werden
                             // mit dem Wert der Zelle des korrespondierenden Multivektors. Das
                             // Zell-Objekt enthält dazu den index im Column-Vector.
-                            result.at(i, j).assign(SX.mtimes(new SX(cell.Value()),
+                            result.at(i, j).assign(SxStatic.mtimes(new SX(cell.Value()),
                                 mv.getSX().at(cell.bladeIndex(), 0)));
                             //System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
-                            //      SX.times(new SX(cell.Value()), 
+                            //      SxStatic.times(new SX(cell.Value()), 
                             //      new SX(mv.getSX().at(cell.bladeIndex(),0)) ).toString());
-                            log[i][j] = SX.mtimes(new SX(cell.Value()),
+                            log[i][j] = SxStatic.mtimes(new SX(cell.Value()),
                                 new SX(mv.getSX().at(cell.bladeIndex(), 0))).toString();
                         }
                         // wegen sparsity 0 muss kein Wert gesetzt werden
@@ -163,7 +162,7 @@ public class CasADiUtil {
         }
 
         DenseStringMatrix logMatrix = new DenseStringMatrix(log);
-        System.out.println(mv.getName()+ ": toSXProductMatrix() matrix = " + logMatrix);
+        System.out.println(mv.getName() + ": toSXProductMatrix() matrix = " + logMatrix);
 
         return result;
     }
@@ -176,7 +175,7 @@ public class CasADiUtil {
      * @param mv sparse multivector
      * @return sparsity of the matrix representation of the given multivector for the given cayley table
      */
-    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, SparseCGASymbolicMultivector mv) {
+    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, CgaMvExpr mv) {
         double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
         ColumnVectorSparsity sparsity = mv.getSparsity();
         for (int i = 0; i < cayleyTable.getRows(); i++) {
@@ -190,7 +189,7 @@ public class CasADiUtil {
                 }
             }
         }
-        return new MatrixSparsity(values);
+        return new MatrixSparsity(values, true);
     }
 
     public static double[] nonzeros(DM dm) {
@@ -226,7 +225,7 @@ public class CasADiUtil {
                 stringArr[i][j] = cell.toString();
             }
         }
-        return new SparseStringMatrix(stringArr);
+        return new SparseStringMatrix(toCGAMultivectorSparsity(m.sparsity()), stringArr);
     }
 
     public static Sparsity toCasADiSparsity(de.orat.math.sparsematrix.MatrixSparsity sparsity) {
@@ -237,20 +236,6 @@ public class CasADiUtil {
         return result;
     }
 
-    public static DM toDM(double[] values) {
-        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(values);
-        //TODO
-        // Achtung: Hier gehe ich davon aus, dass einfach nur die nonzero-values zu übergeben sind
-        // das habe ich aber noch nicht verifiziert
-        StdVectorDouble nonzeros = new StdVectorDouble();
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] != 0) {
-                nonzeros.add(values[i]);
-            }
-        }
-        return new DM(toCasADiSparsity(sparsity), nonzeros, false);
-    }
-
     public static DM toDM(int n_row, double[] nonzeros, int[] rows) {
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(n_row, rows);
         return new DM(toCasADiSparsity(sparsity), toStdVectorDouble(nonzeros), false);
@@ -258,17 +243,11 @@ public class CasADiUtil {
 
     /**
      * @param sparsity
-     * @param values only nonzeros
+     * @param nonzeros only nonzeros
      * @return
      */
-    public static DM toDM(ColumnVectorSparsity sparsity, double[] values) {
-        //TODO
-        // Achtung: Hier gehe ich davon aus, dass einfach nur die non-values zu übergeben sind
-        // das habe ich aber noch nicht verifiziert
-        StdVectorDouble stdVectorDoubles = new StdVectorDouble();
-        for (int i = 0; i < values.length; i++) {
-            stdVectorDoubles.add(values[i]);
-        }
-        return new DM(toCasADiSparsity(sparsity), stdVectorDoubles, false);
+    public static DM toDM(ColumnVectorSparsity sparsity, double[] nonzeros) {
+        StdVectorDouble nonzeroVec = new StdVectorDouble(nonzeros);
+        return new DM(toCasADiSparsity(sparsity), nonzeroVec, false);
     }
 }

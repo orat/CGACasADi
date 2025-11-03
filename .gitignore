@@ -1,4 +1,5 @@
 *.log
+nbproject
 
 #Ignore temporary files
 **/.*.kate-swp

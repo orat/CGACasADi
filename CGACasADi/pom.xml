@@ -20,19 +20,19 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.10.2</version>
+			<version>5.14.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
-			<version>5.10.2</version>
+			<version>5.14.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.10.2</version>
+			<version>5.14.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -52,15 +52,14 @@
 		</dependency>
 		<dependency>
 			<groupId>de.orat.math.cgacasadi</groupId>
-			<artifactId>CGACasADi_SymbolicMultivectorCachingProcessor</artifactId>
+			<artifactId>CGACasADi_MvExprCachingProcessor</artifactId>
 			<version>1.0-SNAPSHOT</version>
 			<!-- Supress transitivity -->
 			<optional>true</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>de.orat.math.cgacasadi</groupId>
-			<artifactId>CGACasADi_NumericMultivectorDelegatingProcessor</artifactId>
+			<artifactId>CGACasADi_MvValueDelegatingProcessor</artifactId>
 			<version>1.0-SNAPSHOT</version>
 			<!-- Supress transitivity -->
 			<optional>true</optional>
@@ -71,7 +70,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.2.5</version>
+				<version>3.5.2</version>
 				<configuration>
 					<skipTests>false</skipTests>
 					<testFailureIgnore>true</testFailureIgnore>
@@ -80,19 +79,19 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.12.1</version>
+				<version>3.13.0</version>
 				<configuration>
 					<generatedSourcesDirectory>${generatedSourcesDirectory}</generatedSourcesDirectory>
 					<generatedTestSourcesDirectory>${generatedTestSourcesDirectory}</generatedTestSourcesDirectory>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>de.orat.math.cgacasadi</groupId>
-							<artifactId>CGACasADi_SymbolicMultivectorCachingProcessor</artifactId>
+							<artifactId>CGACasADi_MvExprCachingProcessor</artifactId>
 							<version>1.0-SNAPSHOT</version>
 						</path>
 						<path>
 							<groupId>de.orat.math.cgacasadi</groupId>
-							<artifactId>CGACasADi_NumericMultivectorDelegatingProcessor</artifactId>
+							<artifactId>CGACasADi_MvValueDelegatingProcessor</artifactId>
 							<version>1.0-SNAPSHOT</version>
 						</path>
 					</annotationProcessorPaths>
@@ -100,12 +99,12 @@
 				<dependencies>
 					<dependency>
 						<groupId>de.orat.math.cgacasadi</groupId>
-						<artifactId>CGACasADi_SymbolicMultivectorCachingProcessor</artifactId>
+						<artifactId>CGACasADi_MvExprCachingProcessor</artifactId>
 						<version>1.0-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>de.orat.math.cgacasadi</groupId>
-						<artifactId>CGACasADi_NumericMultivectorDelegatingProcessor</artifactId>
+						<artifactId>CGACasADi_MvValueDelegatingProcessor</artifactId>
 						<version>1.0-SNAPSHOT</version>
 					</dependency>
 				</dependencies>

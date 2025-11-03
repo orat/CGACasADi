@@ -1,6 +1,6 @@
 package de.orat.math.cgacasadi;
 
-import de.orat.math.cgacasadi.impl.SparseCGANumericMultivector;
+import de.orat.math.cgacasadi.impl.CgaMvValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.GeometricObject.Sign;
 import de.orat.math.gacalc.util.Tuple;
@@ -26,7 +26,7 @@ public class CGADecomposeTest {
                                                squaredWeight, Sign.POSITIVE, 1);
         System.out.println(obj.toString());
         // SPHERE_IPNS{REAL, location=(1.0, 2.0, 3.0), squaredSize=4.0, squaredWeight=1.0,  grade=1}
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         
         test(obj, mv);
         // SPHERE_IPNS{REAL, location=(1.0, 2.0, 3.0), squaredSize=4.0, squaredWeight=-1.0,  grade=1}
@@ -43,7 +43,7 @@ public class CGADecomposeTest {
                                                squaredWeight, Sign.POSITIVE, 2);
         System.out.println(obj.toString());
         // CIRCLE{REAL, attitude=(0.0, 0.0, 1.0), location=(1.0, 2.0, 3.0), squaredSize=4.0, squaredWeight=1.0,  grade=2}
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         test(obj, mv);
         //<CIRCLE_IPNS{REAL,      attitude=(0.0, 0.0, 1.0), location=(1.0, 2.0, 3.0), squaredSize=4.0, squaredWeight=1.0,  grade=2}>
         //<CIRCLE_IPNS{IMAGINARY, attitude=(0.0, 0.0, 1.0), location=(1.0, 2.0, 0.0), squaredSize=-5.0, squaredWeight=1.0,  grade=2}>
@@ -59,7 +59,7 @@ public class CGADecomposeTest {
         GeometricObject obj = GeometricObject.createOrientedPoint(isIPNS, true, position,  
                                  direction, squaredWeight, Sign.POSITIVE, 2);
         System.out.println(obj.toString());
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         test(obj, mv);
     }
     
@@ -71,7 +71,7 @@ public class CGADecomposeTest {
         boolean isIPNS = true;
         GeometricObject obj = GeometricObject.createLine(position,  direction, isIPNS,
                                                squaredWeight, Sign.POSITIVE, 2);
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         test(obj, mv);
     }
     
@@ -84,7 +84,7 @@ public class CGADecomposeTest {
         GeometricObject obj = GeometricObject.createPlane(isIPNS,  direction, position, 
                                                squaredWeight, Sign.POSITIVE, 1);
         System.out.println(obj.toString());
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         //System.out.println("testIPNSPlane: mv="+mv.toString());
         test(obj, mv);
     }
@@ -97,7 +97,7 @@ public class CGADecomposeTest {
         GeometricObject obj = GeometricObject.createRoundPoint(position, isIPNS,
                                                squaredWeight, Sign.POSITIVE, 1);
         System.out.println(obj.toString());
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         test(obj, mv);
     } 
     
@@ -111,7 +111,7 @@ public class CGADecomposeTest {
         GeometricObject obj = GeometricObject.createFlatPoint(isIPNS, position,  direction, 
                                                squaredWeight, Sign.POSITIVE, 3);
         System.out.println(obj.toString());
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         // <FLAT_POINT_IPNS{REAL, attitude=(0.0, 0.0, 1.0), location=(1.0, 2.0, 3.0), squaredSize=0.0, squaredWeight=1.0,  grade=3}> 
         // but was: 
         // <FLAT_POINT_IPNS{REAL, attitude=(0.0, 0.0, 0.0), location=(1.0, 2.0, 3.0), squaredSize=0.0, squaredWeight=1.0,  grade=3}>
@@ -131,7 +131,7 @@ public class CGADecomposeTest {
                                                squaredWeight,  Sign.POSITIVE, 3);
         
         System.out.println(obj.toString());
-        SparseCGANumericMultivector mv = SparseCGANumericMultivector.compose(obj);
+        CgaMvValue mv = CgaMvValue.compose(obj);
         System.out.println("mv="+mv.toString());
         // mv=[00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, nan, nan, nan, nan, -0.57735, nan, nan, 1.1547, -0.57735, 00, 00, 00, 00, 00, 00]
         //FIXME Warum stehen hier NaNs drin
@@ -142,7 +142,7 @@ public class CGADecomposeTest {
     }
        
     
-    private void test(GeometricObject obj, SparseCGANumericMultivector mv){
+    private void test(GeometricObject obj, CgaMvValue mv){
         GeometricObject obj2 = mv.decompose(obj.isIPNS());
         System.out.println(obj2.toString());
         assertEquals(obj, obj2);
