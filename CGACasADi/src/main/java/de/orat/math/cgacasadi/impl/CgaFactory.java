@@ -95,17 +95,11 @@ public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvVal
 
     @Override
     public CgaMvValue createValueRandom(int[] grades) {
-        final int basisBladesCount = getBasisBladesCount();
-        double[] result = new double[basisBladesCount];
         Random random = new Random();
         int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grades);
-        double[] values = random.doubles(-1, 1).
-            limit(indizes.length).toArray();
-        for (int i = 0; i < indizes.length; i++) {
-            result[indizes[i]] = values[i];
-        }
-        var sparsity = CGAMultivectorSparsity.fromGrades(grades);
-        var sdm = new SparseDoubleColumnVector(sparsity, result);
+        double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
+        var sparsity = new CGAMultivectorSparsity(indizes);
+        var sdm = new SparseDoubleColumnVector(sparsity, values);
         var val = createValue(sdm);
         return val;
     }
