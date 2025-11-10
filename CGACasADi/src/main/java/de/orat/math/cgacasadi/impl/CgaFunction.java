@@ -80,7 +80,7 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
             }
             assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
 
-            // For unknown reasons under certain circumstances, calling with DM produces NaN, while calling with SX produces the right value.
+            // For unknown reasons under certain circumstances, calling with DM produces NaN, while calling with SX produces the correct value.
             StdVectorSX call_num_in = new StdVectorSX(arguments.stream()
                 .map(CgaMvValue::getDM)
                 .map(CasADiUtil::toSX)
