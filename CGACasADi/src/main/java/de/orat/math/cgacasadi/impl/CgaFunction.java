@@ -3,7 +3,6 @@ package de.orat.math.cgacasadi.impl;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.cgacasadi.CasADiUtil;
@@ -38,8 +37,8 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
     public <MV extends IGetSX & IMultivectorVariable> CgaFunction(String name, List<MV> parameters, List<? extends CgaMvExpr> returns) {
         try {
             this.paramsSparsities = parameters.stream().map(IGetSX::getSX).map(SX::sparsity).toList();
-            var def_sym_in = transformImpl(parameters);
-            var def_sym_out = transformImpl(returns);
+            StdVectorSX def_sym_in = transformImpl(parameters);
+            StdVectorSX def_sym_out = transformImpl(returns);
             this.name = name;
             arity = parameters.size();
             resultCount = returns.size();
@@ -63,8 +62,8 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
             }
             assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
 
-            var call_sym_in = transformImpl(arguments);
-            var call_sym_out = new StdVectorSX();
+            StdVectorSX call_sym_in = transformImpl(arguments);
+            StdVectorSX call_sym_out = new StdVectorSX();
             this.f_sym_casadi.call(call_sym_in, call_sym_out);
             return call_sym_out.stream().map(CgaMvExpr::create).toList();
         } finally {
@@ -81,10 +80,18 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
             }
             assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
 
-            var call_num_in = new StdVectorDM(arguments.stream().map(CgaMvValue::getDM).toList());
-            var call_num_out = new StdVectorDM();
+            // For unknown reasons under certain circumstances, calling with DM produces NaN, while calling with SX produces the right value.
+            StdVectorSX call_num_in = new StdVectorSX(arguments.stream()
+                .map(CgaMvValue::getDM)
+                .map(CasADiUtil::toSX)
+                .toList()
+            );
+            StdVectorSX call_num_out = new StdVectorSX();
             this.f_sym_casadi.call(call_num_in, call_num_out);
-            return call_num_out.stream().map(CgaMvValue::create).toList();
+            return call_num_out.stream()
+                .map(CasADiUtil::toDM)
+                .map(CgaMvValue::create)
+                .toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }

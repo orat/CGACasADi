@@ -118,8 +118,7 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
     }
 
     public static CgaMvExpr create(DM dm) {
-        var nonZeros = new StdVectorVectorDouble(1, dm.nonzeros());
-        var sx = new SX(dm.sparsity(), new SX(nonZeros));
+        var sx = CasADiUtil.toSX(dm);
         return new CachedCgaMvExpr(sx);
     }
 

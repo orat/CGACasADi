@@ -11,6 +11,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.cgacasadi.impl.CgaMvExpr;
 import de.orat.math.cgacasadi.impl.IGetSX;
 import de.orat.math.gacalc.util.CayleyTable;
@@ -62,6 +63,12 @@ public class CasADiUtil {
 
     public static SX toSX(SparseDoubleMatrix m) {
         return new SX(toCasADiSparsity(m.getSparsity()), Util.toSX(m.nonzeros()));
+    }
+
+    public static SX toSX(DM dm) {
+        var nonZeros = new StdVectorVectorDouble(1, dm.nonzeros());
+        var sx = new SX(dm.sparsity(), new SX(nonZeros));
+        return sx;
     }
 
     public static SX createScalar() {
@@ -249,5 +256,13 @@ public class CasADiUtil {
     public static DM toDM(ColumnVectorSparsity sparsity, double[] nonzeros) {
         StdVectorDouble nonzeroVec = new StdVectorDouble(nonzeros);
         return new DM(toCasADiSparsity(sparsity), nonzeroVec, false);
+    }
+
+    /**
+     * https://github.com/casadi/casadi/wiki/L_rf Evaluates the expression numerically. An error is raised
+     * when the expression contains symbols.
+     */
+    public static DM toDM(SX sx) {
+        return SxStatic.evalf(sx);
     }
 }

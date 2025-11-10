@@ -1,5 +1,6 @@
 package de.orat.math.cgacasadi.impl;
 
+import de.dhbw.rahmlab.casadi.DmStatic;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
@@ -135,7 +136,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
             var allInputsParams = allInputs.stream().map(CgaMvValue::delegatePurelySym).toList();
             var func = new CgaFunction("getDM", allInputsParams, List.of(this.delegate));
             var evalMV = func.callValue(allInputs).get(0);
-            // lazyDM is set for all leafs.
+            // lazyDM is non-null for all leafs.
             this.lazyDM = evalMV.lazyDM;
         }
         return lazyDM;
@@ -166,8 +167,12 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
     @Override
     public CgaMvExpr toExpr() {
         var dm = this.getDM();
-        var mv = CgaMvExpr.create(dm).simplifySparsify();
+        var mv = CgaMvExpr.create(dm);
         return mv;
+    }
+
+    public CgaMvExpr getDelegate() {
+        return super.delegate;
     }
 
     /**
@@ -178,17 +183,17 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
     }
 
     @Override
+    public SX getSX() {
+        return super.delegate.getSX();
+    }
+
+    @Override
     public IConstants<CgaMvValue> constants() {
         return CgaFactory.instance.constantsValue();
     }
 
     public static IConstants<CgaMvValue> constants2() {
         return CgaFactory.instance.constantsValue();
-    }
-    
-    @Override
-    public SX getSX() {
-        return super.delegate.getSX();
     }
     
     // compose multivectors corresponding to specific geometric objets to test the decomposition methods
