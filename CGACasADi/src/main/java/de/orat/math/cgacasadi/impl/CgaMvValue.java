@@ -1,30 +1,29 @@
 package de.orat.math.cgacasadi.impl;
 
-import de.dhbw.rahmlab.casadi.DmStatic;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.dhbw.rahmlab.casadi.impl.casadi.SX;
+import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.orat.math.cgacasadi.CasADiUtil;
 import de.orat.math.cgacasadi.delegating.annotation.api.GenerateDelegate;
 import static de.orat.math.cgacasadi.impl.CgaMvValue.create;
 import de.orat.math.cgacasadi.impl.gen.DelegatingCgaMvValue;
 import de.orat.math.gacalc.api.MultivectorValue;
-import de.orat.math.sparsematrix.SparseDoubleMatrix;
-import java.util.List;
-import util.cga.CGACayleyTableGeometricProduct;
-import util.cga.CGAMultivectorSparsity;
 import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import static de.orat.math.gacalc.util.GeometricObject.Type.REAL;
 import de.orat.math.gacalc.util.Tuple;
+import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import java.util.List;
 import org.apache.commons.math3.util.Precision;
 import util.cga.CGACayleyTable;
+import util.cga.CGACayleyTableGeometricProduct;
+import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
 
 @GenerateDelegate(to = CgaMvExpr.class)
-public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSX {
+public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
@@ -171,6 +170,11 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
         return mv;
     }
 
+    @Override
+    public Sparsity getSparsityCasadi() {
+        return super.delegate.getSparsityCasadi();
+    }
+
     public CgaMvExpr getDelegate() {
         return super.delegate;
     }
@@ -180,11 +184,6 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValu
      */
     private CgaMvVariable delegatePurelySym() {
         return (CgaMvVariable) super.delegate;
-    }
-
-    @Override
-    public SX getSX() {
-        return super.delegate.getSX();
     }
 
     @Override

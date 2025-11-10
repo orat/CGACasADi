@@ -81,7 +81,7 @@ public class CgaLoopService implements ILoopService<CgaMvExpr, CgaMvVariable, Cg
      * @param argsArray Hint: Index of element used in the computation is equal to the current iteration.
      * @return One array element for each iteration for the variables of the returnsArray parameter.
      */
-    public static <MV extends IGetSX & IMultivectorVariable> List<CgaExprArray> mapImpl(
+    public static <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> List<CgaExprArray> mapImpl(
         List<MV> paramsSimple,
         List<MV> paramsArray,
         List<? extends CgaMvExpr> returnsArray,
@@ -143,7 +143,7 @@ public class CgaLoopService implements ILoopService<CgaMvExpr, CgaMvVariable, Cg
      * @return Only end results of accum Variables. One array element for each iteration for the variables of
      * the returnsArray parameter.
      */
-    public static <MV extends IGetSX & IMultivectorVariable> AccumArrayListReturn<CgaMvExpr, CgaExprArray> foldImpl(
+    public static <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<CgaMvExpr, CgaExprArray> foldImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
@@ -218,7 +218,7 @@ public class CgaLoopService implements ILoopService<CgaMvExpr, CgaMvVariable, Cg
      * @return Results of all iterations of accum Variables. One array element for each iteration for the
      * variables of the returnsArray parameter.
      */
-    public static <MV extends IGetSX & IMultivectorVariable> AccumArrayListReturn<CgaExprArray, CgaExprArray> mapaccumImpl(
+    public static <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<CgaExprArray, CgaExprArray> mapaccumImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,

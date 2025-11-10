@@ -4,10 +4,13 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.cgacasadi.impl.CgaFactory;
+import de.orat.math.cgacasadi.impl.CgaFunction;
 import de.orat.math.cgacasadi.impl.CgaMvExpr;
 import de.orat.math.cgacasadi.impl.CgaMvValue;
+import de.orat.math.cgacasadi.impl.CgaMvVariable;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.Arrays;
+import java.util.List;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
@@ -52,11 +55,8 @@ public class ExpNanTest {
         CgaMvExpr vec = d6.gp(ae.getDelegate());
         CgaMvExpr expInput = fac.createExpr(-0.5).gp(vec).gp(fac.constantsExpr().getBaseVectorInfinity());
         CgaMvExpr exp = expInput.exp();
-        // Implementierung Sichtbarkeit wieder zurück setzen.
-        //CgaMvValue result = ae.create(exp, ae);
-        //CgaMvValue expInputValue = ae.create(expInput, ae);
-        //System.out.println(expInputValue); // [00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, -0.0498, -0.0498, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
-        System.out.println(exp);
-        //System.out.println(result);
+        CgaMvValue expNum = (new CgaFunction("bla", List.of((CgaMvVariable) ae.getDelegate()), List.of(exp))).callValue(List.of(ae)).get(0);
+        System.out.println(expNum);
+        // [1, 00, 00, 00, 00, 00, 00, 00, 0, 0, 00, -0.0498, -0.0498, 0, 0, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 0, 0, 0, 00]
     }
 }

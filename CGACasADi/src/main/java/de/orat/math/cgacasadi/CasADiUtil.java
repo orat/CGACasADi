@@ -14,6 +14,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.cgacasadi.impl.CgaMvExpr;
 import de.orat.math.cgacasadi.impl.IGetSX;
+import de.orat.math.cgacasadi.impl.IGetSparsityCasadi;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacalc.util.CayleyTable.Cell;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
@@ -31,11 +32,11 @@ import util.cga.DenseCGAColumnVector;
  */
 public class CasADiUtil {
 
-    public static List<Sparsity> toSparsities(List<? extends IGetSX> mvs) {
-        return mvs.stream().map(IGetSX::getSX).map(SX::sparsity).toList();
+    public static List<Sparsity> toSparsities(List<? extends IGetSparsityCasadi> mvs) {
+        return mvs.stream().map(IGetSparsityCasadi::getSparsityCasadi).toList();
     }
 
-    public static boolean areMVSparsitiesSupersetsOfSubsets(List<? extends IGetSX> supersets, List<? extends IGetSX> subsets) {
+    public static boolean areMVSparsitiesSupersetsOfSubsets(List<? extends IGetSparsityCasadi> supersets, List<? extends IGetSparsityCasadi> subsets) {
         var supersetsSparsities = toSparsities(supersets);
         var subsetSparsities = toSparsities(subsets);
         return areSparsitiesSupersetsOfSubsets(supersetsSparsities, subsetSparsities);

@@ -7,6 +7,7 @@ import de.dhbw.rahmlab.casadi.api.Util;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
+import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
@@ -36,7 +37,7 @@ import de.orat.math.gacalc.spi.IMultivectorExpression;
  * </pre>
  */
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
-public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IGetSX {
+public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IGetSX, IGetSparsityCasadi {
 
     private MultivectorExpression.Callback callback;
 
@@ -192,6 +193,11 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
     @Override
     public CGAMultivectorSparsity getSparsity() {
         return CasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
+    }
+
+    @Override
+    public Sparsity getSparsityCasadi() {
+        return this.sx.sparsity();
     }
 
     @Override
