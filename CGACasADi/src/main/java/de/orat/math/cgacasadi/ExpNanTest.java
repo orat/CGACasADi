@@ -91,6 +91,54 @@ public class ExpNanTest {
         SX div = SxStatic.rdivide(t1.getDelegate().getSX(), t2.getDelegate().getSX());
         CgaMvExpr expr = CgaMvExpr.create(div).simplifySparsify();
         CgaMvValue nanEval = evalPoint(List.of(t1, t2), expr);
-        System.out.println(nanEval); // Das gibt NaN. Also liegt es wo anders.
+        // Das gibt NaN. Also liegt es wo anders.
+        // Wenn ich nur mit t1 mache, gibt es 1.
+        System.out.println(nanEval);
+    }
+
+    private static DM callDM(List<SX> params, List<DM> args, SX expr) {
+        StdVectorSX def_sym_in = new StdVectorSX(params.toArray(SX[]::new));
+        StdVectorSX def_sym_out = new StdVectorSX(new SX[]{expr});
+        var func = new Function("callDM", def_sym_in, def_sym_out);
+        StdVectorDM call_num_in = new StdVectorDM(args.toArray(DM[]::new));
+        StdVectorDM call_num_out = new StdVectorDM();
+        func.call(call_num_in, call_num_out);
+        DM result = call_num_out.get(0);
+        return result;
+    }
+
+    private static SX callSX(List<SX> params, List<SX> args, SX expr) {
+        StdVectorSX def_sym_in = new StdVectorSX(params.toArray(SX[]::new));
+        StdVectorSX def_sym_out = new StdVectorSX(new SX[]{expr});
+        var func = new Function("callSX", def_sym_in, def_sym_out);
+        StdVectorSX call_num_in = new StdVectorSX(args.toArray(SX[]::new));
+        StdVectorSX call_num_out = new StdVectorSX();
+        func.call(call_num_in, call_num_out);
+        SX result = call_num_out.get(0);
+        return result;
+    }
+
+    public static void main2(String[] args) {
+        SX a = SxStatic.sym("a", 1, 1);
+        SX b = SxStatic.sym("b", 1, 1);
+        SX div = SxStatic.rdivide(a, b);
+        System.out.println(div);
+        DM cDM = new DM(0);
+        DM outDM = callDM(List.of(a, b), List.of(cDM, cDM), div);
+        System.out.println(outDM);
+
+        //SxStatic.sym("c", 1, 1); // Variable: 1
+        //new SX(new Sparsity(1, 1)); //Symbolische null gleich wie numerische: NaN
+        SX cSX = SxStatic.sym("c", 1, 1);
+        SX outSX = callSX(List.of(a, b), List.of(cSX, cSX), div);
+        System.out.println(outSX);
     }
 }
+/*
+[11.11.2025]
+Es ist durchaus so, dass in CasADi# gilt: a/a=1 und 0/0=NaN.
+Sodass es eine Rolle spielt, ob man erst symbolisch minimiert oder erst numerisch evaluiert.
+Allerdings ist das Ergebnis bei DM und SX gleich, wenn da eine 0 (oder 00) drin steckt.
+Das erklärt also noch nicht, warum es für die Evaluierung von exp für bestimmte Eingaben notwendig ist, in CgaCasADi::CgaFunction::callNumeric den internen Call mit numerischem SX anstatt numerischem DM zu machen, um NaN zu vermeiden.
+→ CgaCasADi::ExpNanTest
+ */
