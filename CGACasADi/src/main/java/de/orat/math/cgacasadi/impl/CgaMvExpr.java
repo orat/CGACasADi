@@ -478,7 +478,7 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
 
     // ist nicht CGA-spezifisch
     @Override
-    public CgaMvExpr times(CgaMvExpr b) {
+    public CgaMvExpr hadamard(CgaMvExpr b) {
         // element-wise mulitplication (linear mapping)
         SX result = SxStatic.times(sx, b.getSX());
         return create(result);
@@ -1086,7 +1086,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         if (s.getSX().is_scalar_()) {
             throw new IllegalArgumentException("The argument of muls() must be a scalar!");
         }
-        return create(SxStatic.times(sx, s.getSX()));
+        return create(SxStatic.hadamard(sx, s.getSX()));
     }*/
 
     /**
