@@ -478,7 +478,7 @@ public abstract class CgaMvExpr implements IMultivectorExpression<CgaMvExpr>, IG
 
     // ist nicht CGA-spezifisch
     @Override
-    public CgaMvExpr map(CgaMvExpr b) {
+    public CgaMvExpr times(CgaMvExpr b) {
         // element-wise mulitplication (linear mapping)
         SX result = SxStatic.times(sx, b.getSX());
         return create(result);
