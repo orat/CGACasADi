@@ -151,7 +151,7 @@ public class CasADiUtil {
                             result.at(i, j).assign(SxStatic.mtimes(new SX(cell.Value()),
                                 mv.getSX().at(cell.bladeIndex(), 0)));
                             //System.out.println("to(num)["+String.valueOf(i)+"]["+String.valueOf(j)+"]="+
-                            //      SxStatic.hadamard(new SX(cell.Value()), 
+                            //      SxStatic.times(new SX(cell.Value()),
                             //      new SX(mv.getSX().at(cell.bladeIndex(),0)) ).toString());
                             log[i][j] = SxStatic.mtimes(new SX(cell.Value()),
                                 new SX(mv.getSX().at(cell.bladeIndex(), 0))).toString();

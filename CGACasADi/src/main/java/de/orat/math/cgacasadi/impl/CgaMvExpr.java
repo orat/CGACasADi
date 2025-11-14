@@ -1086,7 +1086,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         if (s.getSX().is_scalar_()) {
             throw new IllegalArgumentException("The argument of muls() must be a scalar!");
         }
-        return create(SxStatic.hadamard(sx, s.getSX()));
+        return create(SxStatic.times(sx, s.getSX()));
     }*/
 
     /**
